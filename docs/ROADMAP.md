@@ -145,7 +145,8 @@ Goal: a hand-written plan runs against Kota Express in real Chromium. No LLM yet
 
 - [x] Domain in `src/core/domain`: `Locator`, `PlanStep`, `Scenario`, `TestPlan`, `StepResult`, `Healing`, `Finding`, `BugReport`, `TestRun`, `RunEvent` (Zod schemas plus `z.infer` types, `create()` factories that guard invariants). Unit tests.
   - Domain types are plain data (Zod schema plus `z.infer`) with a same-named companion object holding `create()`, so they serialise over SSE unchanged. Text and rand-amount matching lives in `textMatching.ts`. Added an `llm.called` event so the UI can show LLM calls used.
-- [ ] Ports in `src/core/ports` (CLAUDE.md section 3) and the error hierarchy in `src/core/errors`.
+- [x] Ports in `src/core/ports` (CLAUDE.md section 3) and the error hierarchy in `src/core/errors`.
+  - Added `IBrowser` (one per run) between `IBrowserFactory` and `IBrowserSession` (one per scenario). `IReportExporter` lands with the exporters in Phase 3, once the run view type exists.
 - [ ] Actions: `IStepAction`, one class per action (CLAUDE.md section 6), `ActionRegistry`, `StepFactory`. Unit tests with `FakeBrowserSession`, including `assertText` whitespace and rand-amount matching.
 - [ ] `TargetUrlGuard` implementing `ITargetPolicy`. Tests must reject: `file:`, `javascript:` and `data:` schemes, credentials in the URL, loopback, private, link-local and cloud-metadata addresses in public mode, IPv4-mapped IPv6, hosts outside the allowlist in allowlist mode, and a redirect to a blocked host.
 - [ ] Playwright adapter: `PlaywrightBrowserFactory` (one browser per run, fresh context per scenario), `PlaywrightBrowserSession` (open, ariaSnapshot, act, screenshot, current URL, findings from console errors and failed responses, `page.route()` guard that also blocks TestPilot's own `/api/*`), `LocatorResolver` (Locator to `getBy*`, including `within`). Unit-test the resolver mapping.
