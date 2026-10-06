@@ -157,6 +157,11 @@ Planned, not built yet: a command-line runner (`npm run agent`) for CI pipelines
 The first prototype (tag `v0-prototype`) was a single-file dashboard that sketched the product with simulated results. This version runs every test in a real browser.
 
 <!-- Team: add names and roles before submitting -->
+Tokollo Software Dev
+
+Phathutshedzo Project Manager
+
+Gundo Business Analysis
 
 ## Licence
 
