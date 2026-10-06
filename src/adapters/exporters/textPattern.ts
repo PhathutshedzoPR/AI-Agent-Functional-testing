@@ -29,7 +29,8 @@ export function textPattern(expected: string): string {
     last = match.index + whole.length;
   }
   source += escapeRegex(canonical.slice(last));
-  return source.replace(/ /g, String.raw`\s+`);
+  // Playwright reads textContent, where adjacent elements touch ("TotalR 70,00"), so allow none.
+  return source.replace(/ /g, String.raw`\s*`);
 }
 
 /** A regex source matching a URL that contains `fragment` literally. */

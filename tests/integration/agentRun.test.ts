@@ -1,5 +1,7 @@
-import { readFile } from 'node:fs/promises';
-import { join } from 'node:path';
+import { spawnSync } from 'node:child_process';
+import { mkdir, readFile, writeFile } from 'node:fs/promises';
+import { createRequire } from 'node:module';
+import { join, resolve } from 'node:path';
 import { describe, expect, inject, it, vi } from 'vitest';
 import { TestRun, projectRun, type RunView } from '@/core/domain';
 import type { LlmRequest } from '@/core/ports';
@@ -10,6 +12,7 @@ import { createLogger } from '@/server/logger';
 import { FakeLanguageModel } from '../fakes/FakeLanguageModel';
 
 const baseUrl = inject('baseUrl');
+const require = createRequire(import.meta.url);
 
 type Step = PlanOutput['scenarios'][number]['steps'][number];
 const role = (r: 'button' | 'link' | 'heading', value: string, hasText?: string) => ({
@@ -202,5 +205,31 @@ describe('the agent end to end: real app, real Chromium, scripted plan', () => {
       ['llm', 'Confirm order'],
     ]);
     expect(healings[0]?.reason).toContain('on a page the explorer never saw');
+  });
+
+  it('exports a Playwright spec that passes when the team runs it', async () => {
+    const run = await runs.start({ targetUrl: `${baseUrl}/demo-shop/stable` });
+    await runToEnd(runs, run.id);
+    const spec = await runs.export(run.id, 'spec');
+    const dir = resolve('.data', 'export-check', run.id);
+    await mkdir(dir, { recursive: true });
+    await writeFile(join(dir, 'order.spec.ts'), spec.body);
+    await writeFile(
+      join(dir, 'playwright.config.mjs'),
+      "export default { testDir: '.', reporter: 'line', workers: 1, use: { headless: true } };",
+    );
+
+    const cli = require.resolve('@playwright/test/cli');
+    const result = spawnSync(
+      process.execPath,
+      [cli, 'test', '--config', join(dir, 'playwright.config.mjs')],
+      {
+        encoding: 'utf8',
+        timeout: 120_000,
+      },
+    );
+
+    expect(result.stdout).toContain('1 passed');
+    expect(result.status).toBe(0);
   });
 });
