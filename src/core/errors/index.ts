@@ -1,4 +1,5 @@
 export { AppError } from './AppError';
+export { AssertionFailedError } from './AssertionFailedError';
 export { BrowserError, type BrowserFailure } from './BrowserError';
 export { DomainError } from './DomainError';
 export { LlmError } from './LlmError';
