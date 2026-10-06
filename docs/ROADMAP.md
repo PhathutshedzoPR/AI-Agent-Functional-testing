@@ -218,7 +218,8 @@ Goal: the redesign release passes by healing, and every run produces artefacts a
 - [x] Batched wording call for bug titles and summaries, with the template fallback.
   - The prompt uses positional ids (bug-1, bug-2), not UUIDs, so its replay key is stable. `plan.ready` now carries the criteria list (from the story, or proposed by the planner) for traceability.
 - [ ] **HUMAN plus Claude:** re-run `npm run replays:record` (heal and wording calls are new) and commit the fixtures.
-- [ ] Exporters behind `IReportExporter` plus `ExporterRegistry`: JSON, JUnit XML, Markdown (one GitHub-issue-ready section per bug) and Playwright spec. Wire up `/api/runs/[runId]/export/[format]`.
+- [x] Exporters behind `IReportExporter` plus `ExporterRegistry`: JSON, JUnit XML, Markdown (one GitHub-issue-ready section per bug) and Playwright spec. Wire up `/api/runs/[runId]/export/[format]`.
+  - The spec exporter reuses `toLocatorCalls`, so exported tests use the same locator chain the agent ran, with healed locators where a step healed. Text checks become case-insensitive regexes that accept any whitespace and any rand format, matching the agent's own rules. Strings go through `JSON.stringify`; comments are stripped of every JS line terminator, including U+2028 and U+2029.
 - [ ] Test that proves the exported spec is real: export a passing `stable` run, run it with `npx playwright test` (add `@playwright/test` as a dev dependency) and expect it to pass.
 - [ ] Traceability: parse criteria from the story (bullets, numbered lines, Given/When/Then), keep criterion, scenarios and result together in the run view.
 - [ ] Agent scorecard: `tests/integration/scorecard.test.ts` runs the suggestion stories on all three releases and asserts: no failures on `stable`; passes with at least one heal on `redesign`; every seeded bug found on `buggy`, with no other failures. Print a Markdown table and paste the real numbers into the README.

@@ -6,4 +6,5 @@ export type { IEventBus, RunEventListener, Unsubscribe } from './IEventBus';
 export type { IIdGenerator } from './IIdGenerator';
 export type { ILanguageModel, LlmPurpose, LlmRequest } from './ILanguageModel';
 export type { IRunRepository } from './IRunRepository';
+export type { ExportedReport, IReportExporter } from './IReportExporter';
 export type { ITargetPolicy } from './ITargetPolicy';

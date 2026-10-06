@@ -1,5 +1,6 @@
 import { describe, expect, it, vi } from 'vitest';
 import { InMemoryEventBus } from '@/adapters/events';
+import { createDefaultExporters } from '@/adapters/exporters';
 import { InMemoryRunRepository } from '@/adapters/storage';
 import { TestRun, projectRun, type RunEvent } from '@/core/domain';
 import {
@@ -48,6 +49,7 @@ function service(
     agent: harness.agent,
     llm: overrides.llm ?? harness.llm,
     policy: allowLocalShop,
+    exporters: createDefaultExporters(),
     clock: harness.clock,
     ids: uuids,
     runTimeoutMs: overrides.runTimeoutMs ?? 60_000,
@@ -278,5 +280,18 @@ describe('RunEmitter', () => {
     await emitter.emit({ type: 'run.cancelled' });
 
     expect((await repository.events('00000000-0000-4000-8000-000000000001'))[0]?.seq).toBe(8);
+  });
+});
+
+describe('RunService.export', () => {
+  it('builds a report from the stored events, and refuses unknown formats', async () => {
+    const { runs } = service();
+    const run = await runs.start(START);
+    await finished(runs, run.id);
+
+    const report = await runs.export(run.id, 'junit');
+
+    expect(report.body).toContain('<testsuites name="TestPilot" tests="1" failures="0"');
+    await expect(runs.export(run.id, 'pdf' as never)).rejects.toBeInstanceOf(NotFoundError);
   });
 });

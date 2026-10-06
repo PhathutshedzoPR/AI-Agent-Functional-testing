@@ -1,5 +1,6 @@
 import { PlaywrightBrowserFactory } from '@/adapters/browser';
 import { InMemoryEventBus } from '@/adapters/events';
+import { createDefaultExporters } from '@/adapters/exporters';
 import { createLanguageModel } from '@/adapters/llm';
 import { TargetUrlGuard, resolveHostWithDns } from '@/adapters/security';
 import { FileArtifactStore, InMemoryRunRepository } from '@/adapters/storage';
@@ -65,6 +66,7 @@ export function createContainer(
     agent: buildAgent(env, policy, shared),
     llm: overrides.llm ?? buildLanguageModel(env),
     policy,
+    exporters: createDefaultExporters(),
     runTimeoutMs: env.AGENT_RUN_TIMEOUT_MS,
     logError,
   });

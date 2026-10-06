@@ -1,13 +1,22 @@
 import { rebasePlan } from '../agent/rebasePlan';
 import type { TestAgent } from '../agent/TestAgent';
-import { TestRun, type RunEvent, type RunStatus, type TestPlan } from '../domain';
+import {
+  TestRun,
+  projectRun,
+  type ExportFormat,
+  type RunEvent,
+  type RunStatus,
+  type TestPlan,
+} from '../domain';
 import { AppError, NotFoundError, RunCancelledError, ValidationError } from '../errors';
 import type {
   IArtifactStore,
   IClock,
+  ExportedReport,
   IEventBus,
   IIdGenerator,
   ILanguageModel,
+  IReportExporter,
   IRunRepository,
   ITargetPolicy,
   RunEventListener,
@@ -34,6 +43,7 @@ export type RunServiceDependencies = Readonly<{
   policy: ITargetPolicy;
   clock: IClock;
   ids: IIdGenerator;
+  exporters: readonly IReportExporter[];
   runTimeoutMs: number;
   logError: (message: string, error: unknown) => void;
 }>;
@@ -96,6 +106,14 @@ export class RunService {
       return this.transition(runId, 'cancelled');
     }
     return run;
+  }
+
+  /** A report of the run in , built from its events like the dashboard. */
+  async export(runId: string, format: ExportFormat): Promise<ExportedReport> {
+    const exporter = this.deps.exporters.find((candidate) => candidate.format === format);
+    if (!exporter) throw new NotFoundError(`The ${format} export`);
+    const { events } = await this.get(runId);
+    return exporter.export(projectRun(events));
   }
 
   async screenshot(runId: string, stepId: string): Promise<Uint8Array> {

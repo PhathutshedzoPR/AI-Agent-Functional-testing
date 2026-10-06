@@ -156,3 +156,6 @@ export const RUN_STATUS_LABELS = {
   error: 'Run failed',
   cancelled: 'Stopped',
 } as const;
+
+export const EXPORT_FORMATS = ['json', 'junit', 'markdown', 'spec'] as const;
+export type ExportFormat = (typeof EXPORT_FORMATS)[number];
