@@ -24,7 +24,7 @@ export function requireValue(step: PlanStep): string {
  */
 export function describeActualText(actual: string, expected: string): string {
   if (findRandAmounts(expected).length > 0) {
-    const amounts = findRandAmounts(actual).map((cents) => RAND.format(cents / 100));
+    const amounts = [...new Set(findRandAmounts(actual))].map((cents) => RAND.format(cents / 100));
     return amounts.length > 0
       ? `the amounts shown were ${amounts.join(', ')}`
       : 'no rand amount was shown';

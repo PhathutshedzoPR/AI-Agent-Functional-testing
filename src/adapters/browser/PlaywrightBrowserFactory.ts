@@ -14,6 +14,10 @@ export class PlaywrightBrowserFactory implements IBrowserFactory {
     const browser = await chromium.launch({
       headless: options.headless,
       slowMo: options.slowMoMs,
+      // PlaywrightRequestGuard fulfils every page itself, so Chrome sees no IP for the document
+      // and its Local Network Access check then blocks the page's WebSockets before our guard
+      // can check them. Every HTTP request and WebSocket is still checked against the policy.
+      args: ['--disable-features=LocalNetworkAccessChecks'],
     });
     return new PlaywrightBrowser(browser, this.policy, this.resolver, options);
   }

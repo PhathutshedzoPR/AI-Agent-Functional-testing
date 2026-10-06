@@ -156,7 +156,8 @@ Goal: a hand-written plan runs against Kota Express in real Chromium. No LLM yet
 - [x] `src/adapters/system`: `SystemClock`, `CryptoIdGenerator`.
 - [x] Kota Express at `/demo-shop/[release]` with `stable`, `redesign` and `buggy` exactly as in CLAUDE.md section 8. Same components for every release; differences only in `_config/releases.ts`.
   - Cart and order live in sessionStorage (fresh per scenario context). Buttons stay disabled until hydration so early clicks are never lost. Line items show "2 × R 35,00" and only the total shows the sum, so a whole-page total check is unambiguous. Bugs: cart total ignores quantity, cellphone check is length-only, confirmation shows the express fee (R 45) instead of the R 30 charged, Specials page calls `notFound()`. All shop colour pairs pass AA.
-- [ ] Integration test: a hand-written plan ("add two Quarter kotas, check the cart total, check out with valid details, see the confirmation") passes on `stable` and fails on `buggy` at the cart total, with real screenshots written to `.data/artifacts`.
+- [x] Integration test: a hand-written plan ("add two Quarter kotas, check the cart total, check out with valid details, see the confirmation") passes on `stable` and fails on `buggy` at the cart total, with real screenshots written to `.data/artifacts`.
+  - Passes against both `npm run dev` and a production build. Chromium runs with `--disable-features=LocalNetworkAccessChecks`: the guard fulfils every page, so Chrome otherwise blocks the page's WebSockets (and Turbopack dev never hydrates) before our own WebSocket check runs. `FileArtifactStore` landed early for the screenshots.
 
 Done when: that integration test passes locally.
 
