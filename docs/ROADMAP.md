@@ -14,9 +14,10 @@ Rules for this plan:
 
 Goal: an empty but production-shaped repo, green CI, SonarQube Cloud connected.
 
-- [ ] Tag the old prototype so it stays recoverable: `git tag v0-prototype && git push origin v0-prototype`. Then delete `TestPilot AI.html`, `app.js` and `style.css` from `main`.
-- [ ] Scaffold Next.js 16 (TypeScript, ESLint, Tailwind, App Router, `src/` directory, import alias `@/*`) in a temporary folder with `npx create-next-app@latest`, then move its files into the repo root. Keep our `CLAUDE.md`, `README.md` and `docs/`. (create-next-app refuses to scaffold into a folder that already has these files.)
-- [ ] Install runtime packages: `playwright ai @ai-sdk/google @ai-sdk/anthropic @ai-sdk/openai zod ipaddr.js server-only class-variance-authority clsx tailwind-merge lucide-react motion`. Dev packages: `vitest @vitest/coverage-v8 typescript-eslint eslint-plugin-sonarjs prettier tsx`. Then `npx shadcn@latest init` and `npx playwright install chromium`.
+- [x] Tag the old prototype so it stays recoverable: `git tag v0-prototype && git push origin v0-prototype`. Then delete `TestPilot AI.html`, `app.js` and `style.css` from `main`.
+- [x] Scaffold Next.js 16 (TypeScript, ESLint, Tailwind, App Router, `src/` directory, import alias `@/*`) in a temporary folder with `npx create-next-app@latest`, then move its files into the repo root. Keep our `CLAUDE.md`, `README.md` and `docs/`. (create-next-app refuses to scaffold into a folder that already has these files.)
+- [x] Install runtime packages: `playwright ai @ai-sdk/google @ai-sdk/anthropic @ai-sdk/openai zod ipaddr.js server-only class-variance-authority clsx tailwind-merge lucide-react motion`. Dev packages: `vitest @vitest/coverage-v8 typescript-eslint eslint-plugin-sonarjs prettier tsx`. Then `npx shadcn@latest init` and `npx playwright install chromium`.
+  - shadcn init added an unvetted `cn` npm package; we use our own `src/lib/cn.ts` (clsx plus tailwind-merge) instead. Next 16 already treats `playwright` as a server external package.
 - [ ] `tsconfig.json`: `strict`, `noUncheckedIndexedAccess`, `noImplicitOverride`.
 - [ ] `eslint.config.mjs`: Next config, `typescript-eslint` type-checked rules, `eslint-plugin-sonarjs` recommended, `no-floating-promises`, `no-explicit-any`, and `no-restricted-imports` boundaries (CLAUDE.md section 3) for `src/core/**`, `src/components/**` and `src/hooks/**`.
 - [ ] Prettier config and the scripts from CLAUDE.md section 11 (`check` must exist from day one).
