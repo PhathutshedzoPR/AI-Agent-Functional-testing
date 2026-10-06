@@ -47,3 +47,17 @@ export {
   urlContains,
   valueEquals,
 } from './textMatching';
+export { narrateEvent } from './narrateEvent';
+export { applyRunEvent, projectRun } from './projectRun';
+export {
+  EMPTY_RUN_VIEW,
+  EMPTY_STATS,
+  type FeedItem,
+  type FeedTone,
+  type RunStats,
+  type RunView,
+  type ScenarioState,
+  type ScenarioView,
+  type StepState,
+  type StepView,
+} from './RunView';

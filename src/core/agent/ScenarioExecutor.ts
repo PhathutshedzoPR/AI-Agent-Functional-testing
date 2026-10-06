@@ -149,16 +149,14 @@ export class ScenarioExecutor {
     session: IBrowserSession,
     context: RunContext,
   ): Promise<Finding[]> {
-    const findings = session
-      .drainFindings()
-      .map((raw) =>
-        Finding.create({
-          ...raw,
-          id: this.deps.ids.next(),
-          scenarioId: scenario.id,
-          stepId: step.id,
-        }),
-      );
+    const findings = session.drainFindings().map((raw) =>
+      Finding.create({
+        ...raw,
+        id: this.deps.ids.next(),
+        scenarioId: scenario.id,
+        stepId: step.id,
+      }),
+    );
     for (const finding of findings) {
       await context.emit({ type: 'finding', finding });
     }
