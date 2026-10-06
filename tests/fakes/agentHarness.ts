@@ -1,5 +1,6 @@
 import {
   BugReporter,
+  BugWordsmith,
   ScenarioExecutor,
   SiteExplorer,
   StepFactory,
@@ -77,6 +78,7 @@ export function agentHarness(pageText = 'Total R 35,00', plan: PlanOutput = ORDE
       repairer: null,
     }),
     reporter: new BugReporter(ids),
+    wordsmith: new BugWordsmith(),
     clock,
     ids,
     settings: SETTINGS,

@@ -10,6 +10,8 @@ export type PlannerLimits = Readonly<{ maxScenarios: number; maxSteps: number }>
 export type PlannedTests = Readonly<{
   plan: TestPlan;
   warnings: readonly string[];
+  /** The acceptance criteria scenarios map to: from the story, or proposed by the planner. */
+  criteria: readonly string[];
   /** True when the story had no acceptance criteria and the planner proposed its own. */
   criteriaInferred: boolean;
 }>;
@@ -46,10 +48,17 @@ export class TestPlanner {
       schema: PlanOutputSchema,
       temperature: PLAN_TEMPERATURE,
     });
-    return this.accept(output, input.start, criteria.length === 0);
+    const inferred = criteria.length === 0;
+    const accepted = this.accept(output, input.start, inferred);
+    const proposed = output.criteria.map((c) => c.trim()).filter((c) => c.length > 0);
+    return { ...accepted, criteria: inferred ? [...new Set(proposed)].slice(0, 10) : criteria };
   }
 
-  private accept(output: PlanOutput, start: URL, criteriaInferred: boolean): PlannedTests {
+  private accept(
+    output: PlanOutput,
+    start: URL,
+    criteriaInferred: boolean,
+  ): Omit<PlannedTests, 'criteria'> {
     const warnings: string[] = [];
     if (output.scenarios.length > this.limits.maxScenarios) {
       warnings.push(

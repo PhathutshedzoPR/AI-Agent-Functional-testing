@@ -54,6 +54,7 @@ const HANDLERS: { [T in RunEventType]: Handler<T> } = {
     ...view,
     summary: e.plan.summary,
     warnings: e.warnings,
+    criteria: e.criteria,
     criteriaInferred: e.criteriaInferred,
     scenarios: e.plan.scenarios.map((scenario) => ({
       ...scenario,

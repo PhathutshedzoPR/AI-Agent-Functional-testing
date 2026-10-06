@@ -11,6 +11,7 @@ describe('RunEventSchema', () => {
       type: 'plan.ready',
       plan: aPlan(),
       warnings: [],
+      criteria: [],
       criteriaInferred: true,
     });
     const stepFinished = RunEventSchema.parse({

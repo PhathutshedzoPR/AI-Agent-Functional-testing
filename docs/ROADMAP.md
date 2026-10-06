@@ -215,7 +215,8 @@ Goal: the redesign release passes by healing, and every run produces artefacts a
   - Rules need a name similarity of at least 0.5 (word overlap, or one name containing the other), so "Add to order" heals to "Add to bag" by rule, while "Checkout" and "Place order" go to the LLM. Rules never cross roles, so "Remove one" can never stand in for "Add one more".
 - [x] Integration test: `redesign` passes with healed steps and no failures.
   - The plan comes from the stable run (`reusePlanFrom`); the test scripts the model's two heal suggestions, and finding exactly one element and retrying run in real Chromium.
-- [ ] Batched wording call for bug titles and summaries, with the template fallback.
+- [x] Batched wording call for bug titles and summaries, with the template fallback.
+  - The prompt uses positional ids (bug-1, bug-2), not UUIDs, so its replay key is stable. `plan.ready` now carries the criteria list (from the story, or proposed by the planner) for traceability.
 - [ ] **HUMAN plus Claude:** re-run `npm run replays:record` (heal and wording calls are new) and commit the fixtures.
 - [ ] Exporters behind `IReportExporter` plus `ExporterRegistry`: JSON, JUnit XML, Markdown (one GitHub-issue-ready section per bug) and Playwright spec. Wire up `/api/runs/[runId]/export/[format]`.
 - [ ] Test that proves the exported spec is real: export a passing `stable` run, run it with `npx playwright test` (add `@playwright/test` as a dev dependency) and expect it to pass.

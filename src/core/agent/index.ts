@@ -1,6 +1,7 @@
 export * from './actions';
 export { BudgetedLanguageModel } from './BudgetedLanguageModel';
 export { BugReporter } from './BugReporter';
+export { BugWordsmith } from './BugWordsmith';
 export { parseCriteria } from './parseCriteria';
 export { rebasePlan } from './rebasePlan';
 export * from './healing';

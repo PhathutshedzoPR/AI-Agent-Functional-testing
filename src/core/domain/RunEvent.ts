@@ -39,6 +39,7 @@ export const RunEventSchema = z.discriminatedUnion('type', [
   eventSchema('plan.ready', {
     plan: TestPlanSchema,
     warnings: z.array(z.string()),
+    criteria: z.array(z.string()),
     criteriaInferred: z.boolean(),
   }),
   eventSchema('llm.called', {

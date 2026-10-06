@@ -49,7 +49,13 @@ const fullRun: RunEventPayload[] = [
   started,
   { type: 'explore.page', url: 'http://localhost:3000/demo-shop/buggy/cart', title: 'Cart' },
   { type: 'llm.called', purpose: 'plan', used: 1, max: 12 },
-  { type: 'plan.ready', plan, warnings: ['Dropped one'], criteriaInferred: true },
+  {
+    type: 'plan.ready',
+    plan,
+    warnings: ['Dropped one'],
+    criteria: ['Total is right'],
+    criteriaInferred: true,
+  },
   { type: 'scenario.started', scenarioId: 'sc1' },
   { type: 'step.started', scenarioId: 'sc1', stepId: 'a' },
   { type: 'step.finished', result: aStepResult({ scenarioId: 'sc1', stepId: 'a' }) },
@@ -128,6 +134,7 @@ describe('projectRun', () => {
     expect(view.summary).toBe('Order flow');
     expect(view.warnings).toEqual(['Dropped one']);
     expect(view.criteriaInferred).toBe(true);
+    expect(view.criteria).toEqual(['Total is right']);
     expect(first?.state).toBe('failed');
     expect(first?.steps.map((s) => s.state)).toEqual(['passed', 'healed', 'failed']);
     expect(first?.steps[1]?.result?.healing).toEqual(healing);

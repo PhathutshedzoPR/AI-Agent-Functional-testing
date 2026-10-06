@@ -41,6 +41,7 @@ export type RunView = Readonly<{
   pages: readonly Readonly<{ url: string; title: string }>[];
   summary: string | null;
   warnings: readonly string[];
+  criteria: readonly string[];
   criteriaInferred: boolean;
   scenarios: readonly ScenarioView[];
   findings: readonly Finding[];
@@ -69,6 +70,7 @@ export const EMPTY_RUN_VIEW: RunView = {
   pages: [],
   summary: null,
   warnings: [],
+  criteria: [],
   criteriaInferred: false,
   scenarios: [],
   findings: [],

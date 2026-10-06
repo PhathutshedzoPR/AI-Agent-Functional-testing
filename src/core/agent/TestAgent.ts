@@ -9,6 +9,7 @@ import type {
 } from '../ports';
 import { BudgetedLanguageModel } from './BudgetedLanguageModel';
 import type { BugReporter } from './BugReporter';
+import type { BugWordsmith } from './BugWordsmith';
 import type { ExecutionContext, RunContext } from './RunContext';
 import type { ScenarioExecutor, ScenarioOutcome } from './ScenarioExecutor';
 import type { SiteExplorer } from './SiteExplorer';
@@ -31,6 +32,7 @@ export type AgentDependencies = Readonly<{
   planner: TestPlanner;
   executor: ScenarioExecutor;
   reporter: BugReporter;
+  wordsmith: BugWordsmith;
   clock: IClock;
   ids: IIdGenerator;
   settings: AgentSettings;
@@ -75,7 +77,7 @@ export class TestAgent {
         ? { plan: await this.announce(request.savedPlan, context), explored: new Set<string>() }
         : await this.planFresh(browser, budgeted, request, context);
       const outcomes = await this.execute(browser, plan, { ...context, llm: budgeted, explored });
-      await this.report(outcomes, context);
+      await this.report(outcomes, plan, budgeted, context);
       const status = outcomes.some((outcome) => outcome.status === 'failed') ? 'failed' : 'passed';
       const durationMs = Math.round(this.deps.clock.monotonicMs() - started);
       await context.emit({ type: 'run.finished', status, durationMs });
@@ -102,6 +104,7 @@ export class TestAgent {
       type: 'plan.ready',
       plan: planned.plan,
       warnings: [...planned.warnings],
+      criteria: [...planned.criteria],
       criteriaInferred: planned.criteriaInferred,
     });
     return { plan: planned.plan, explored: new Set(pages.map((page) => page.url)) };
@@ -109,7 +112,16 @@ export class TestAgent {
 
   /** A saved plan skips exploring and planning; the run still shows it before executing. */
   private async announce(plan: TestPlan, context: RunContext): Promise<TestPlan> {
-    await context.emit({ type: 'plan.ready', plan, warnings: [], criteriaInferred: false });
+    const criteria = [
+      ...new Set(plan.scenarios.flatMap((s) => (s.criterion ? [s.criterion] : []))),
+    ];
+    await context.emit({
+      type: 'plan.ready',
+      plan,
+      warnings: [],
+      criteria,
+      criteriaInferred: false,
+    });
     return plan;
   }
 
@@ -151,10 +163,16 @@ export class TestAgent {
     return outcomes;
   }
 
-  private async report(outcomes: readonly ScenarioOutcome[], context: RunContext): Promise<void> {
-    const bugs = outcomes
+  private async report(
+    outcomes: readonly ScenarioOutcome[],
+    plan: TestPlan,
+    llm: ILanguageModel,
+    context: RunContext,
+  ): Promise<void> {
+    const drafts = outcomes
       .map((outcome) => this.deps.reporter.report(outcome))
       .filter((bug): bug is BugReport => bug !== null);
+    const bugs = await this.deps.wordsmith.reword(drafts, plan.scenarios, llm);
     for (const bug of bugs) {
       await context.emit({ type: 'bug.reported', bug });
     }

@@ -6,6 +6,7 @@ import { FileArtifactStore, InMemoryRunRepository } from '@/adapters/storage';
 import { CryptoIdGenerator, SystemClock } from '@/adapters/system';
 import {
   BugReporter,
+  BugWordsmith,
   ScenarioExecutor,
   SelfHealer,
   SiteExplorer,
@@ -110,6 +111,7 @@ function buildAgent(env: Env, policy: ITargetPolicy, { clock, ids, artifacts }: 
       }),
     }),
     reporter: new BugReporter(ids),
+    wordsmith: new BugWordsmith(),
     clock,
     ids,
     settings: {

@@ -66,6 +66,7 @@ describe('TestPlanner', () => {
 
     expect(warnings).toEqual([]);
     expect(criteriaInferred).toBe(true);
+    expect(llm.requests[0]?.prompt).toContain('Propose up to four');
     expect(plan.scenarios).toHaveLength(1);
     expect(plan.scenarios[0]?.steps.map((s) => s.action)).toEqual([
       'navigate',
@@ -203,5 +204,33 @@ describe('parseCriteria', () => {
     expect(parseCriteria('Order two kotas and check out')).toEqual([]);
     expect(parseCriteria('- Same\n- Same')).toEqual(['Same']);
     expect(parseCriteria('When I pay\nThen it works')).toEqual(['When I pay Then it works']);
+  });
+});
+
+describe('TestPlanner criteria', () => {
+  const output: PlanOutput = {
+    summary: 's',
+    criteria: [' Total is right ', 'Total is right', ''],
+    scenarios: [scenario('One', [step({}), assertTotal])],
+  };
+
+  it('uses the story criteria when the story has them', async () => {
+    const result = await planner().plan(modelAnswering(output), {
+      start: START,
+      story: '- Fee is shown',
+      pages: PAGES,
+    });
+
+    expect(result.criteria).toEqual(['Fee is shown']);
+  });
+
+  it('otherwise keeps the planner’s proposed criteria, cleaned up', async () => {
+    const result = await planner().plan(modelAnswering(output), {
+      start: START,
+      story: null,
+      pages: PAGES,
+    });
+
+    expect(result.criteria).toEqual(['Total is right']);
   });
 });
