@@ -56,3 +56,18 @@ describe('error hierarchy', () => {
     expect(new BrowserError('blocked', 'x').isLocatorProblem).toBe(false);
   });
 });
+
+describe('AppError.is', () => {
+  it('recognises app errors made by another copy of the class (another bundle)', () => {
+    const foreign = Object.assign(new Error('from another bundle'), {
+      code: 'TARGET_BLOCKED',
+      [Symbol.for('testpilot.AppError')]: true,
+    });
+
+    expect(AppError.is(new NotFoundError('Run'))).toBe(true);
+    expect(AppError.is(foreign)).toBe(true);
+    expect(AppError.is(new Error('plain'))).toBe(false);
+    expect(AppError.is(null)).toBe(false);
+    expect(AppError.is('TARGET_BLOCKED')).toBe(false);
+  });
+});

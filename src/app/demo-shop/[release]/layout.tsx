@@ -4,7 +4,7 @@ import { RELEASE_IDS } from '../_config/releases';
 import { resolveRelease } from '../_config/resolveRelease';
 
 export const metadata: Metadata = {
-  title: { default: 'Kota Express', template: '%s | Kota Express' },
+  title: { absolute: 'Kota Express', template: '%s | Kota Express' },
   description: 'Kotas delivered across Johannesburg.',
 };
 
