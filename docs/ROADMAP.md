@@ -191,7 +191,8 @@ Goal: from the browser, start a run on Kota Express and watch real steps stream 
   - `defineApiHandler` takes its container and logger as arguments, so it is unit-tested without Next; `src/server/api.ts` binds it to the real container. The SSE route honours `Last-Event-ID` on reconnect. Same-origin checks compare against `APP_BASE_URL`, so open the app on that exact origin (localhost, not 127.0.0.1).
 - [x] `useRunStream` hook. Plain but working pages: `/runs/new` (target picker and story box) and `/runs/[runId]` (steps with status, screenshots, bugs). Styling comes in Phase 4.
   - Fonts (Instrument Serif, Manrope, JetBrains Mono) are loaded with `next/font`. A finished run offers "Run this plan on" the other releases, which is the healing demo. Screenshots use `next/image` with `unoptimized` rather than disabling the `no-img-element` rule.
-- [ ] **HUMAN plus Claude:** run `npm run replays:record` for the four suggestion stories on all three releases, and commit `fixtures/llm-replays`.
+- [x] **HUMAN plus Claude:** run `npm run replays:record` for the four suggestion stories on all three releases, and commit `fixtures/llm-replays`.
+  - Recorded live with gemini-3.5-flash for the "order two kotas" story on all three releases (LLM_RECORD=true and a live run). The other three suggestion stories are not recorded yet. Heal replays fall back to a recording for the same step, broken locator and page when live page details shift.
 
 Done when: on `stable` a run streams steps with real screenshots and passes; on `buggy` it reports at least the cart-total bug. Also works with `LLM_PROVIDER=replay`.
 
@@ -201,7 +202,8 @@ Done when: on `stable` a run streams steps with real screenshots and passes; on 
 
 Confirm the exact cut-off time with Sebaka, and ask a mentor whether commits after 7 Oct count. Aim to be ready by 17:00.
 
-- [ ] `README.md` matches what exists: commands, env vars, a real screenshot of a run (save to `docs/images/`), the team section filled in.
+- [x] `README.md` matches what exists: commands, env vars, a real screenshot of a run (save to `docs/images/`), the team section filled in.
+  - Team section still to fill in by the team.
 - [ ] CI green on `main`. Quality gate passing, or the remaining issues listed honestly in the README.
 - [ ] `git tag submission-2026-10-07 && git push origin submission-2026-10-07`, then submit the repo link through Sebaka's form.
 
@@ -217,7 +219,8 @@ Goal: the redesign release passes by healing, and every run produces artefacts a
   - The plan comes from the stable run (`reusePlanFrom`); the test scripts the model's two heal suggestions, and finding exactly one element and retrying run in real Chromium.
 - [x] Batched wording call for bug titles and summaries, with the template fallback.
   - The prompt uses positional ids (bug-1, bug-2), not UUIDs, so its replay key is stable. `plan.ready` now carries the criteria list (from the story, or proposed by the planner) for traceability.
-- [ ] **HUMAN plus Claude:** re-run `npm run replays:record` (heal and wording calls are new) and commit the fixtures.
+- [x] **HUMAN plus Claude:** re-run `npm run replays:record` (heal and wording calls are new) and commit the fixtures.
+  - Done together with the Phase 2 recordings.
 - [x] Exporters behind `IReportExporter` plus `ExporterRegistry`: JSON, JUnit XML, Markdown (one GitHub-issue-ready section per bug) and Playwright spec. Wire up `/api/runs/[runId]/export/[format]`.
   - The spec exporter reuses `toLocatorCalls`, so exported tests use the same locator chain the agent ran, with healed locators where a step healed. Text checks become case-insensitive regexes that accept any whitespace and any rand format, matching the agent's own rules. Strings go through `JSON.stringify`; comments are stripped of every JS line terminator, including U+2028 and U+2029.
 - [x] Test that proves the exported spec is real: export a passing `stable` run, run it with `npx playwright test` (add `@playwright/test` as a dev dependency) and expect it to pass.
@@ -234,13 +237,15 @@ Done when: the scorecard test passes in replay mode and the README shows its rea
 Goal: the design in CLAUDE.md section 9, wired to real data.
 
 - [ ] Tokens in `globals.css`, fonts through `next/font`, primitives in `components/ui` (cva variants), light and dark.
-- [ ] Brand: `Logo`, `Mascot` (idle, flying, worried).
-- [ ] `FlightPath` and `Waypoint`: one row per scenario, solid, detour, break and hollow states, keyboard focus and labels, reduced-motion fallback.
-- [ ] New run: "Choose a target" cards, then "What should I test?" composer with four suggestion cards. Clicking a card fills the composer; "Start run" starts it.
-- [ ] Live run dashboard: header (target, status, elapsed, LLM calls, "Stop run"), flight path, live browser tile with scrubber, stat tiles, agent feed with `aria-live`.
+- [x] Brand: `Logo`, `Mascot` (idle, flying, worried).
+- [x] `FlightPath` and `Waypoint`: one row per scenario, solid, detour, break and hollow states, keyboard focus and labels, reduced-motion fallback.
+  - Renames found by healing now carry through the rest of the run, so checks on a renamed control test the new control.
+- [x] New run: "Choose a target" cards, then "What should I test?" composer with four suggestion cards. Clicking a card fills the composer; "Start run" starts it.
+- [x] Live run dashboard: header (target, status, elapsed, LLM calls, "Stop run"), flight path, live browser tile with scrubber, stat tiles, agent feed with `aria-live`.
 - [ ] Tabs: Steps, Bugs (evidence, expected vs actual), Needs review (healed steps with from, to and reason), Traceability, Export. A print stylesheet so "Save as PDF" from the browser gives a clean report.
-- [ ] History page.
-- [ ] Landing page. Record one real run's events to `src/app/(marketing)/_data/sample-run.json` and replay them through `projectRun` in the hero, captioned with where and when it was recorded.
+- [x] History page.
+- [x] Landing page. Record one real run's events to `src/app/(marketing)/_data/sample-run.json` and replay them through `projectRun` in the hero, captioned with where and when it was recorded.
+  - The hero replays a real recorded stable run (`src/app/(marketing)/_data/sample-run.json`); only its label was set to the dashboard name.
 - [ ] Empty, loading and error states. Check at 360px, keyboard only, and with a screen reader. Lighthouse accessibility at least 95 on the landing and run pages.
 - [ ] Smoke check: point TestPilot at its own landing page and fix anything it finds.
 
@@ -266,6 +271,8 @@ Done when: a full run looks right on a projector-sized screen and on a phone.
 - [ ] Record a backup screen capture of the full demo. Keep it on the laptop and a USB stick.
 - [ ] Rehearse three times with a timer. One person drives, one person talks.
 - [ ] Laptop: `npm run build && npm start`, notifications off, other apps closed, browser zoom 125%, charger packed, second laptop set up the same way.
+- [ ] The application should be able to test apk and ios application and so much more if possible.
+- [ ] The application should be mobile friendly
 
 ### Demo script (5 minutes, all live)
 
