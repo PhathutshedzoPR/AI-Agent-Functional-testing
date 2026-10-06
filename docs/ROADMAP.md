@@ -167,8 +167,10 @@ Done when: that integration test passes locally.
 
 Goal: from the browser, start a run on Kota Express and watch real steps stream in.
 
-- [ ] `createLanguageModel(env)` and `AiSdkLanguageModel` (`generateText` with `Output.object`, error mapping, one retry on 429/5xx). Unit tests with the AI SDK's mock model from `ai/test`.
-- [ ] `RecordingLanguageModel` (Decorator) and `ReplayLanguageModel`. Unit tests.
+- [x] `createLanguageModel(env)` and `AiSdkLanguageModel` (`generateText` with `Output.object`, error mapping, one retry on 429/5xx). Unit tests with the AI SDK's mock model from `ai/test`.
+  - AI SDK v7 names the system prompt `instructions` and retries 429/5xx itself, so `maxRetries: 1` gives the single backoff retry. Unit tests use `MockLanguageModelV4` from `ai/test`.
+- [x] `RecordingLanguageModel` (Decorator) and `ReplayLanguageModel`. Unit tests.
+  - Replay keys hash purpose, system prompt and prompt (not just purpose and prompt), so a changed system prompt also forces a re-record. Fixtures store the full prompt for review.
 - [ ] Prompt builders in `src/core/prompts` for plan, heal and report wording, each with its Zod output schema. Snapshot-test the built prompts so changes show up in review.
 - [ ] `SiteExplorer`: same-origin crawl under the start URL's path, up to `AGENT_MAX_PAGES`, aria snapshot per page, failed links recorded as findings.
 - [ ] `TestPlanner`: story optional. With acceptance criteria, map each scenario to one (`criterion`). Without, propose criteria and label them "inferred". Invalid steps become warnings.
