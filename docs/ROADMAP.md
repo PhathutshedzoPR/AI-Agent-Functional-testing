@@ -182,7 +182,8 @@ Goal: from the browser, start a run on Kota Express and watch real steps stream 
 - [x] `BugReporter` with template wording.
   - Steps to reproduce come from `describeStep` in the domain, which the UI reuses for captions.
 - [ ] `TestAgent` (Template Method), `RunService` and `RunQueue`: one run at a time, every per-run limit from env, cancel through an `AbortController`, browser closed in `finally`.
-- [ ] `InMemoryRunRepository`, `FileArtifactStore`, `InMemoryEventBus`.
+- [x] `InMemoryRunRepository`, `FileArtifactStore`, `InMemoryEventBus`.
+  - The repository keeps at most 100 runs and evicts the oldest finished ones first. The bus drops a subscriber that throws (a closed stream) and keeps delivering to the rest.
 - [x] `projectRun` reducer (events to view state) with thorough unit tests. The UI depends on it.
   - One handler per event type keeps the reducer flat. It also derives the agent feed (`narrateEvent`) from events, so narration never invents numbers. Events at or below the last seen `seq` are ignored, which makes SSE reconnects safe.
 - [ ] `src/contracts` schemas, `withApiHandler`, `assertSameOrigin`, `RateLimiter`, `sseResponse`, and every route in CLAUDE.md section 3. Unit-test `withApiHandler` and the limiter.
