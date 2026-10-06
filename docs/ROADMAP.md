@@ -211,8 +211,10 @@ Confirm the exact cut-off time with Sebaka, and ask a mentor whether commits aft
 
 Goal: the redesign release passes by healing, and every run produces artefacts a QA team would keep.
 
-- [ ] Healing strategies in `src/core/agent/healing` (same role with similar name, then label, placeholder, text), then the LLM heal, confidence threshold, single retry, `Healing` record, "Needs review" list. Unit tests per strategy.
-- [ ] Integration test: `redesign` passes with healed steps and no failures.
+- [x] Healing strategies in `src/core/agent/healing` (same role with similar name, then label, placeholder, text), then the LLM heal, confidence threshold, single retry, `Healing` record, "Needs review" list. Unit tests per strategy.
+  - Rules need a name similarity of at least 0.5 (word overlap, or one name containing the other), so "Add to order" heals to "Add to bag" by rule, while "Checkout" and "Place order" go to the LLM. Rules never cross roles, so "Remove one" can never stand in for "Add one more".
+- [x] Integration test: `redesign` passes with healed steps and no failures.
+  - The plan comes from the stable run (`reusePlanFrom`); the test scripts the model's two heal suggestions, and finding exactly one element and retrying run in real Chromium.
 - [ ] Batched wording call for bug titles and summaries, with the template fallback.
 - [ ] **HUMAN plus Claude:** re-run `npm run replays:record` (heal and wording calls are new) and commit the fixtures.
 - [ ] Exporters behind `IReportExporter` plus `ExporterRegistry`: JSON, JUnit XML, Markdown (one GitHub-issue-ready section per bug) and Playwright spec. Wire up `/api/runs/[runId]/export/[format]`.

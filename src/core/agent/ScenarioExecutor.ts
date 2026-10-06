@@ -9,7 +9,7 @@ import {
 import { AppError, AssertionFailedError, RunCancelledError } from '../errors';
 import type { IArtifactStore, IBrowserSession, IClock, IIdGenerator } from '../ports';
 import type { ActionRegistry } from './actions';
-import type { RunContext } from './RunContext';
+import type { ExecutionContext } from './RunContext';
 
 export type StepFailure = Readonly<{ step: PlanStep; expected: string; actual: string }>;
 
@@ -27,7 +27,7 @@ export interface IStepRepairer {
     step: PlanStep,
     error: AppError,
     session: IBrowserSession,
-    context: RunContext,
+    context: ExecutionContext,
   ): Promise<Healing | null>;
 }
 
@@ -50,7 +50,7 @@ export class ScenarioExecutor {
   async run(
     scenario: Scenario,
     session: IBrowserSession,
-    context: RunContext,
+    context: ExecutionContext,
   ): Promise<ScenarioOutcome> {
     await context.emit({ type: 'scenario.started', scenarioId: scenario.id });
     const results: StepResult[] = [];
@@ -80,7 +80,7 @@ export class ScenarioExecutor {
     scenario: Scenario,
     step: PlanStep,
     session: IBrowserSession,
-    context: RunContext,
+    context: ExecutionContext,
   ): Promise<{ result: StepResult; error: AppError | null }> {
     await context.emit({ type: 'step.started', scenarioId: scenario.id, stepId: step.id });
     const started = this.deps.clock.monotonicMs();
@@ -113,7 +113,7 @@ export class ScenarioExecutor {
   private async execute(
     step: PlanStep,
     session: IBrowserSession,
-    context: RunContext,
+    context: ExecutionContext,
   ): Promise<Healing | null> {
     const action = this.deps.registry.get(step.action);
     const stepContext = { session, baseUrl: context.start };
@@ -147,7 +147,7 @@ export class ScenarioExecutor {
     scenario: Scenario,
     step: PlanStep,
     session: IBrowserSession,
-    context: RunContext,
+    context: ExecutionContext,
   ): Promise<Finding[]> {
     const findings = session.drainFindings().map((raw) =>
       Finding.create({

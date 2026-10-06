@@ -7,11 +7,13 @@ import { CryptoIdGenerator, SystemClock } from '@/adapters/system';
 import {
   BugReporter,
   ScenarioExecutor,
+  SelfHealer,
   SiteExplorer,
   StepFactory,
   TestAgent,
   TestPlanner,
   createDefaultActionRegistry,
+  createDefaultHealingStrategies,
 } from '@/core/agent';
 import { INPUT_LIMITS } from '@/core/domain';
 import type {
@@ -97,7 +99,16 @@ function buildAgent(env: Env, policy: ITargetPolicy, { clock, ids, artifacts }: 
       maxScenarios: env.AGENT_MAX_SCENARIOS,
       maxSteps: env.AGENT_MAX_STEPS,
     }),
-    executor: new ScenarioExecutor({ registry, artifacts, clock, ids, repairer: null }),
+    executor: new ScenarioExecutor({
+      registry,
+      artifacts,
+      clock,
+      ids,
+      repairer: new SelfHealer(createDefaultHealingStrategies(), {
+        minConfidence: env.AGENT_HEAL_MIN_CONFIDENCE,
+        snapshotMaxChars: env.AGENT_SNAPSHOT_MAX_CHARS,
+      }),
+    }),
     reporter: new BugReporter(ids),
     clock,
     ids,

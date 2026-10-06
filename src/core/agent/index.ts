@@ -3,7 +3,9 @@ export { BudgetedLanguageModel } from './BudgetedLanguageModel';
 export { BugReporter } from './BugReporter';
 export { parseCriteria } from './parseCriteria';
 export { rebasePlan } from './rebasePlan';
-export type { EmitEvent, RunContext } from './RunContext';
+export * from './healing';
+export type { EmitEvent, ExecutionContext, RunContext } from './RunContext';
+export { SelfHealer, type SelfHealerOptions } from './SelfHealer';
 export {
   ScenarioExecutor,
   type ExecutorDependencies,

@@ -9,7 +9,7 @@ import type {
 } from '../ports';
 import { BudgetedLanguageModel } from './BudgetedLanguageModel';
 import type { BugReporter } from './BugReporter';
-import type { RunContext } from './RunContext';
+import type { ExecutionContext, RunContext } from './RunContext';
 import type { ScenarioExecutor, ScenarioOutcome } from './ScenarioExecutor';
 import type { SiteExplorer } from './SiteExplorer';
 import type { TestPlanner } from './TestPlanner';
@@ -71,10 +71,10 @@ export class TestAgent {
     };
     context.signal.addEventListener('abort', stop, { once: true });
     try {
-      const plan = request.savedPlan
-        ? await this.announce(request.savedPlan, context)
+      const { plan, explored } = request.savedPlan
+        ? { plan: await this.announce(request.savedPlan, context), explored: new Set<string>() }
         : await this.planFresh(browser, budgeted, request, context);
-      const outcomes = await this.execute(browser, plan, context);
+      const outcomes = await this.execute(browser, plan, { ...context, llm: budgeted, explored });
       await this.report(outcomes, context);
       const status = outcomes.some((outcome) => outcome.status === 'failed') ? 'failed' : 'passed';
       const durationMs = Math.round(this.deps.clock.monotonicMs() - started);
@@ -91,7 +91,7 @@ export class TestAgent {
     llm: ILanguageModel,
     request: AgentRequest,
     context: RunContext,
-  ): Promise<TestPlan> {
+  ): Promise<{ plan: TestPlan; explored: ReadonlySet<string> }> {
     const pages = await this.explore(browser, context);
     const planned = await this.deps.planner.plan(llm, {
       start: context.start,
@@ -104,7 +104,7 @@ export class TestAgent {
       warnings: [...planned.warnings],
       criteriaInferred: planned.criteriaInferred,
     });
-    return planned.plan;
+    return { plan: planned.plan, explored: new Set(pages.map((page) => page.url)) };
   }
 
   /** A saved plan skips exploring and planning; the run still shows it before executing. */
@@ -137,7 +137,7 @@ export class TestAgent {
   private async execute(
     browser: IBrowser,
     plan: TestPlan,
-    context: RunContext,
+    context: ExecutionContext,
   ): Promise<ScenarioOutcome[]> {
     const outcomes: ScenarioOutcome[] = [];
     for (const scenario of plan.scenarios) {

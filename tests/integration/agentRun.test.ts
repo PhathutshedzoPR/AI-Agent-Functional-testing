@@ -89,6 +89,20 @@ function orderPlan(start: string): PlanOutput {
   };
 }
 
+/** What a model would suggest for the redesign's renamed controls that no rule can match. */
+const RENAMED: Readonly<Record<string, ReturnType<typeof role>>> = {
+  Checkout: role('link', 'Proceed to payment'),
+  'Place order': role('button', 'Confirm order'),
+};
+
+function healFor(request: LlmRequest<never>) {
+  const broken = /"value":"([^"]+)"/.exec(request.prompt)?.[1] ?? '';
+  const locator = RENAMED[broken];
+  return locator
+    ? { locator, confidence: 0.9, reason: `"${broken}" is now "${locator.value}".` }
+    : { locator: role('button', broken), confidence: 0.1, reason: 'No idea.' };
+}
+
 const startPathOf = (request: LlmRequest<never>): string =>
   /^Start page: (\S+)$/m.exec(request.prompt)?.[1] ?? '/';
 
@@ -102,9 +116,9 @@ function app() {
     AGENT_MAX_STEPS: '14',
     AGENT_STEP_TIMEOUT_MS: '5000',
   });
-  const llm = new FakeLanguageModel().answer('plan', (request: LlmRequest<never>) =>
-    orderPlan(startPathOf(request)),
-  );
+  const llm = new FakeLanguageModel()
+    .answer('plan', (request: LlmRequest<never>) => orderPlan(startPathOf(request)))
+    .answer('heal', healFor);
   return createContainer(
     env,
     createLogger(() => undefined),
@@ -165,7 +179,7 @@ describe('the agent end to end: real app, real Chromium, scripted plan', () => {
     ]);
   });
 
-  it('re-runs the stable plan on redesign and stops at the renamed button (until healing lands)', async () => {
+  it('re-runs the stable plan on redesign and passes by healing the renamed controls', async () => {
     const stable = await runs.start({ targetUrl: `${baseUrl}/demo-shop/stable` });
     await runToEnd(runs, stable.id);
 
@@ -175,10 +189,18 @@ describe('the agent end to end: real app, real Chromium, scripted plan', () => {
     });
     const view = await runToEnd(runs, rerun.id);
 
+    const healings = view.scenarios
+      .flatMap((s) => s.steps)
+      .flatMap((step) => step.result?.healing ?? []);
     expect(view.pages).toEqual([]);
-    expect(view.status).toBe('failed');
-    expect(view.scenarios[0]?.steps[1]?.result?.error).toContain(
-      'No visible button "Add to order"',
-    );
+    expect(view.status).toBe('passed');
+    expect(view.stats).toMatchObject({ failed: 0, healed: 4, bugs: 0 });
+    expect(healings.map((h) => [h.method, h.to.value])).toEqual([
+      ['rule', 'Add to bag'],
+      ['rule', 'Add to bag'],
+      ['llm', 'Proceed to payment'],
+      ['llm', 'Confirm order'],
+    ]);
+    expect(healings[0]?.reason).toContain('on a page the explorer never saw');
   });
 });
