@@ -12,6 +12,12 @@
 
 # testing
 /coverage
+/test-results
+/playwright-report
+
+# TestPilot run data: screenshots, artefacts and CLI reports
+/.data
+/reports
 
 # next.js
 /.next/
@@ -30,8 +36,9 @@ yarn-debug.log*
 yarn-error.log*
 .pnpm-debug.log*
 
-# env files (can opt-in for committing if needed)
+# env files: only the template is committed
 .env*
+!.env.example
 
 # vercel
 .vercel
