@@ -1,13 +1,14 @@
 import { z } from 'zod';
-import { Locator, LocatorSchema, type ActionType } from '../domain';
+import { Locator, type ActionType } from '../domain';
 import type { PageSnapshot } from '../ports';
 import { LOCATOR_RULES } from './promptRules';
+import { ProposedLocatorSchema } from './proposedLocator';
 import { UNTRUSTED_CONTENT_RULE, wrapPageSnapshot } from './untrustedContent';
 
 export const HEAL_TEMPERATURE = 0;
 
 export const HealOutputSchema = z.object({
-  locator: LocatorSchema.describe('A locator for the element that now does the same job'),
+  locator: ProposedLocatorSchema.describe('A locator for the element that now does the same job'),
   confidence: z
     .number()
     .describe('0 to 1: how sure you are this is the same control, renamed or moved'),

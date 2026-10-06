@@ -6,6 +6,8 @@ import { toLlmError } from './toLlmError';
 const CALL_TIMEOUT_MS = 60_000;
 // The SDK retries 429 and 5xx responses with exponential backoff; once is enough (CLAUDE.md s7).
 const MAX_RETRIES = 1;
+// Plans and heals need careful reading, not long deliberation; low effort keeps a run quick.
+const REASONING = 'low';
 
 /** Structured output through the Vercel AI SDK (Adapter). Any provider the SDK supports works. */
 export class AiSdkLanguageModel implements ILanguageModel {
@@ -21,6 +23,7 @@ export class AiSdkLanguageModel implements ILanguageModel {
         prompt: request.prompt,
         output: Output.object({ schema: request.schema }),
         temperature: request.temperature,
+        reasoning: REASONING,
         maxRetries: MAX_RETRIES,
         timeout: CALL_TIMEOUT_MS,
       });

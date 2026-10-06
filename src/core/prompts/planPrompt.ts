@@ -1,7 +1,8 @@
 import { z } from 'zod';
-import { ActionTypeSchema, LocatorSchema, PrioritySchema, ScenarioKindSchema } from '../domain';
+import { ActionTypeSchema, PrioritySchema, ScenarioKindSchema } from '../domain';
 import type { PageSnapshot } from '../ports';
 import { ACTION_RULES, LOCATOR_RULES } from './promptRules';
+import { ProposedLocatorSchema } from './proposedLocator';
 import { UNTRUSTED_CONTENT_RULE, sitePath, wrapPageSnapshot } from './untrustedContent';
 
 export const PLAN_TEMPERATURE = 0.2;
@@ -24,7 +25,7 @@ export const PlanOutputSchema = z.object({
       steps: z.array(
         z.object({
           action: ActionTypeSchema,
-          target: LocatorSchema.nullable(),
+          target: ProposedLocatorSchema.nullable(),
           value: z.string().nullable(),
           intent: z.string().describe('What this step does, in plain words'),
         }),
@@ -60,7 +61,9 @@ Scenarios:
 - Every scenario runs in a fresh browser with empty storage, so start each one with a navigate step and repeat any setup it needs, such as adding items to a cart.
 - End every scenario with an assertion on the outcome a user would see.
 - Work out expected values from what the snapshots show. For example, if one item costs R 35,00, two of them cost R 70,00. Write rand amounts the way the site does, like "R 70,00".
-- For negative scenarios, do not guess error wording you have not seen. Assert that the flow did not complete instead: the URL still shows the form page, or the success heading is hidden.
+- Never assert text, headings or URLs from a page that is not in the snapshots, such as a confirmation page that only appears after a form is submitted. Its wording is unknown, so a guess would fail for the wrong reason.
+- To check that a form submission worked, assert that the form's submit button is now hidden (assertHidden). To check that a submission was refused, assert that the submit button is still visible (assertVisible). Do not guess error or success wording.
+- You may assert text that appears in the snapshots, and values you can work out from them, such as totals.
 - Use South African test data: names like Thandi Mokoena or Sipho Dlamini, cellphone numbers like 082 123 4567, Johannesburg street addresses.
 - Only plan steps for pages and controls that appear in the snapshots or that a step in your plan leads to.`;
 

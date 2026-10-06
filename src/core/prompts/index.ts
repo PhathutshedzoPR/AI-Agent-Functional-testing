@@ -19,4 +19,5 @@ export {
   type ReportOutput,
   type ReportPromptBug,
 } from './reportPrompt';
+export { ProposedLocatorSchema, type ProposedLocator } from './proposedLocator';
 export { UNTRUSTED_CONTENT_RULE, sitePath, wrapPageSnapshot } from './untrustedContent';
