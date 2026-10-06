@@ -189,7 +189,8 @@ Goal: from the browser, start a run on Kota Express and watch real steps stream 
   - One handler per event type keeps the reducer flat. It also derives the agent feed (`narrateEvent`) from events, so narration never invents numbers. Events at or below the last seen `seq` are ignored, which makes SSE reconnects safe.
 - [x] `src/contracts` schemas, `withApiHandler`, `assertSameOrigin`, `RateLimiter`, `sseResponse`, and every route in CLAUDE.md section 3. Unit-test `withApiHandler` and the limiter.
   - `defineApiHandler` takes its container and logger as arguments, so it is unit-tested without Next; `src/server/api.ts` binds it to the real container. The SSE route honours `Last-Event-ID` on reconnect. Same-origin checks compare against `APP_BASE_URL`, so open the app on that exact origin (localhost, not 127.0.0.1).
-- [ ] `useRunStream` hook. Plain but working pages: `/runs/new` (target picker and story box) and `/runs/[runId]` (steps with status, screenshots, bugs). Styling comes in Phase 4.
+- [x] `useRunStream` hook. Plain but working pages: `/runs/new` (target picker and story box) and `/runs/[runId]` (steps with status, screenshots, bugs). Styling comes in Phase 4.
+  - Fonts (Instrument Serif, Manrope, JetBrains Mono) are loaded with `next/font`. A finished run offers "Run this plan on" the other releases, which is the healing demo. Screenshots use `next/image` with `unoptimized` rather than disabling the `no-img-element` rule.
 - [ ] **HUMAN plus Claude:** run `npm run replays:record` for the four suggestion stories on all three releases, and commit `fixtures/llm-replays`.
 
 Done when: on `stable` a run streams steps with real screenshots and passes; on `buggy` it reports at least the cart-total bug. Also works with `LLM_PROVIDER=replay`.
