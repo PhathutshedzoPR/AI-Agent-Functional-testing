@@ -10,6 +10,13 @@ export class FakeLanguageModel implements ILanguageModel {
   readonly replayed = false;
   readonly requests: LlmRequest<z.ZodType>[] = [];
   private readonly answers = new Map<LlmPurpose, unknown>();
+  private delayMs = 0;
+
+  /** Makes every call take `ms` of real time, like a slow provider. */
+  slow(ms: number): this {
+    this.delayMs = ms;
+    return this;
+  }
 
   /** `value` may be a function of the request, to answer differently per call. */
   answer(purpose: LlmPurpose, value: unknown): this {
@@ -17,8 +24,9 @@ export class FakeLanguageModel implements ILanguageModel {
     return this;
   }
 
-  generateObject<S extends z.ZodType>(request: LlmRequest<S>): Promise<z.infer<S>> {
+  async generateObject<S extends z.ZodType>(request: LlmRequest<S>): Promise<z.infer<S>> {
     this.requests.push(request);
+    if (this.delayMs > 0) await new Promise((resolve) => setTimeout(resolve, this.delayMs));
     if (!this.answers.has(request.purpose)) {
       return Promise.reject(new LlmError(`No fake answer for ${request.purpose}`));
     }

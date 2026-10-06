@@ -181,7 +181,8 @@ Goal: from the browser, start a run on Kota Express and watch real steps stream 
   - Has an `IStepRepairer` hook (null for now) so Phase 3 healing plugs in without touching the loop: one repair, one retry. Cancellation (stop or timeout) surfaces as `RunCancelledError`, not as a failed step.
 - [x] `BugReporter` with template wording.
   - Steps to reproduce come from `describeStep` in the domain, which the UI reuses for captions.
-- [ ] `TestAgent` (Template Method), `RunService` and `RunQueue`: one run at a time, every per-run limit from env, cancel through an `AbortController`, browser closed in `finally`.
+- [x] `TestAgent` (Template Method), `RunService` and `RunQueue`: one run at a time, every per-run limit from env, cancel through an `AbortController`, browser closed in `finally`.
+  - Added `reusePlanFrom`: a run can re-run an earlier run's plan, rebased onto a new start page (`rebasePlan`). Without it the redesign release never heals, because a fresh plan reads the new button names. `BudgetedLanguageModel` (Decorator) enforces `AGENT_MAX_LLM_CALLS` and emits `llm.called`.
 - [x] `InMemoryRunRepository`, `FileArtifactStore`, `InMemoryEventBus`.
   - The repository keeps at most 100 runs and evicts the oldest finished ones first. The bus drops a subscriber that throws (a closed stream) and keeps delivering to the rest.
 - [x] `projectRun` reducer (events to view state) with thorough unit tests. The UI depends on it.
