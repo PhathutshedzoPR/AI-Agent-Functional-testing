@@ -12,7 +12,7 @@ export const PlanStepSchema = z.object({
   id: z.string().min(1),
   action: ActionTypeSchema,
   target: LocatorSchema.nullable(),
-  value: z.string().max(INPUT_LIMITS.stepValueMaxChars).nullable(),
+  value: z.string().nullable(),
   intent: z.string(),
 });
 
@@ -24,6 +24,11 @@ export const PlanStep = {
     const intent = step.intent.trim();
     if (intent.length === 0) {
       throw new DomainError('A plan step needs an intent.');
+    }
+    if (step.value !== null && step.value.length > INPUT_LIMITS.stepValueMaxChars) {
+      throw new DomainError(
+        `A step value may be at most ${INPUT_LIMITS.stepValueMaxChars} characters.`,
+      );
     }
     return { ...step, intent };
   },

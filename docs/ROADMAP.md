@@ -171,7 +171,8 @@ Goal: from the browser, start a run on Kota Express and watch real steps stream 
   - AI SDK v7 names the system prompt `instructions` and retries 429/5xx itself, so `maxRetries: 1` gives the single backoff retry. Unit tests use `MockLanguageModelV4` from `ai/test`.
 - [x] `RecordingLanguageModel` (Decorator) and `ReplayLanguageModel`. Unit tests.
   - Replay keys hash purpose, system prompt and prompt (not just purpose and prompt), so a changed system prompt also forces a re-record. Fixtures store the full prompt for review.
-- [ ] Prompt builders in `src/core/prompts` for plan, heal and report wording, each with its Zod output schema. Snapshot-test the built prompts so changes show up in review.
+- [x] Prompt builders in `src/core/prompts` for plan, heal and report wording, each with its Zod output schema. Snapshot-test the built prompts so changes show up in review.
+  - Prompts show site paths, never host or port, so replay keys match on any machine (the integration app runs on a random port). Length limits moved from the Locator and PlanStep schemas into `create()`, because some providers reject `maxLength` in structured-output schemas.
 - [ ] `SiteExplorer`: same-origin crawl under the start URL's path, up to `AGENT_MAX_PAGES`, aria snapshot per page, failed links recorded as findings.
 - [ ] `TestPlanner`: story optional. With acceptance criteria, map each scenario to one (`criterion`). Without, propose criteria and label them "inferred". Invalid steps become warnings.
 - [ ] `ScenarioExecutor`: runs steps through `ActionRegistry`, emits events, screenshots every step, skips the rest of a scenario after a failure. No healing yet.

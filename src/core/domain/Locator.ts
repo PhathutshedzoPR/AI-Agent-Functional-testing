@@ -23,7 +23,6 @@ export const LocatorSchema = z.object({
   ),
   value: z
     .string()
-    .max(INPUT_LIMITS.locatorValueMaxChars)
     .describe('Accessible name, label, placeholder, visible text or test id, copied exactly'),
   role: AriaRoleSchema.nullable().describe('ARIA role when "by" is "role", otherwise null'),
   exact: z.boolean().describe('true to match the whole name, false to match a substring'),
@@ -46,8 +45,10 @@ export const Locator = {
   create(input: unknown): Locator {
     const parsed = parseDomain(LocatorSchema, input, 'locator');
     const value = parsed.value.trim();
-    if (value.length === 0) {
-      throw new DomainError('A locator needs a non-empty value.');
+    if (value.length === 0 || value.length > INPUT_LIMITS.locatorValueMaxChars) {
+      throw new DomainError(
+        `A locator value must be 1 to ${INPUT_LIMITS.locatorValueMaxChars} characters.`,
+      );
     }
     if (parsed.by === 'role' && parsed.role === null) {
       throw new DomainError('A role locator needs a role.');
