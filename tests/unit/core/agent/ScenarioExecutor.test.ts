@@ -91,7 +91,7 @@ describe('ScenarioExecutor', () => {
     expect(outcome.failure).toMatchObject({
       step: { id: 's3' },
       expected: 'the page to contain "R 70,00"',
-      actual: 'the amounts shown were R 35,00',
+      actual: 'the amounts shown were R 35,00',
     });
     expect(context.events.at(-1)).toEqual({
       type: 'scenario.finished',
@@ -208,7 +208,7 @@ describe('BugReporter', () => {
       scenarioId: scenario.id,
       stepsToReproduce: scenario.steps.slice(0, 3).map(describeStep),
       expected: 'The page to contain "R 70,00"',
-      actual: 'The amounts shown were R 35,00',
+      actual: 'The amounts shown were R 35,00',
       screenshotStepId: 's3',
       findings: [],
     });

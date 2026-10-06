@@ -174,7 +174,7 @@ describe('the agent end to end: real app, real Chromium, scripted plan', () => {
     expect(view.bugs).toHaveLength(1);
     expect(view.bugs[0]).toMatchObject({
       expected: 'The page to contain "Total R 70,00"',
-      actual: 'The amounts shown were R 35,00',
+      actual: 'The amounts shown were R 35,00',
       severity: 'high',
     });
     expect(view.findings.filter((f) => f.kind === 'broken-link').map((f) => f.status)).toEqual([

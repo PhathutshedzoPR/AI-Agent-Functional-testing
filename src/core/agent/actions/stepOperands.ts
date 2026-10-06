@@ -24,7 +24,10 @@ export function requireValue(step: PlanStep): string {
  */
 export function describeActualText(actual: string, expected: string): string {
   if (findRandAmounts(expected).length > 0) {
-    const amounts = [...new Set(findRandAmounts(actual))].map((cents) => RAND.format(cents / 100));
+    // Plain spaces: Intl's no-break spaces vary between ICU versions, and evidence should not.
+    const amounts = [...new Set(findRandAmounts(actual))].map((cents) =>
+      RAND.format(cents / 100).replace(/\s/g, ' '),
+    );
     return amounts.length > 0
       ? `the amounts shown were ${amounts.join(', ')}`
       : 'no rand amount was shown';
