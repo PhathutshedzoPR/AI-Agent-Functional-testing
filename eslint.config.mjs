@@ -145,6 +145,12 @@ export default defineConfig([
     },
   },
   {
+    // The SSRF guard's tests must name loopback, private and metadata addresses to prove they
+    // are blocked. src/ keeps this rule on. Pending team sign-off (CLAUDE.md section 5, item 12).
+    files: ['tests/**'],
+    rules: { 'sonarjs/no-hardcoded-ip': 'off' },
+  },
+  {
     files: ['**/*.{js,mjs,cjs}'],
     extends: [tseslint.configs.disableTypeChecked],
   },
