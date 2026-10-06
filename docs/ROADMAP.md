@@ -153,7 +153,7 @@ Goal: a hand-written plan runs against Kota Express in real Chromium. No LLM yet
   - The guard also blocks TestPilot's own `/api/*`, so both the start URL and every browser request go through one tested check. Tests turn off `sonarjs/no-hardcoded-ip` for `tests/**` only (needs team sign-off).
 - [x] Playwright adapter: `PlaywrightBrowserFactory` (one browser per run, fresh context per scenario), `PlaywrightBrowserSession` (open, ariaSnapshot, act, screenshot, current URL, findings from console errors and failed responses, `page.route()` guard that also blocks TestPilot's own `/api/*`), `LocatorResolver` (Locator to `getBy*`, including `within`). Unit-test the resolver mapping.
   - Playwright only routes the first hop of a redirect, so `PlaywrightRequestGuard` fetches each request with `maxRedirects: 0` and checks every `Location` before fulfilling. WebSockets are checked too. Blocked requests become `blocked-request` findings. Coverage exclusion widened to `src/adapters/browser/Playwright*.ts` (integration-tested).
-- [ ] `src/adapters/system`: `SystemClock`, `CryptoIdGenerator`.
+- [x] `src/adapters/system`: `SystemClock`, `CryptoIdGenerator`.
 - [ ] Kota Express at `/demo-shop/[release]` with `stable`, `redesign` and `buggy` exactly as in CLAUDE.md section 8. Same components for every release; differences only in `_config/releases.ts`.
 - [ ] Integration test: a hand-written plan ("add two Quarter kotas, check the cart total, check out with valid details, see the confirmation") passes on `stable` and fails on `buggy` at the cart total, with real screenshots written to `.data/artifacts`.
 
