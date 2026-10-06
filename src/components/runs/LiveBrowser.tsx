@@ -19,6 +19,7 @@ export function LiveBrowser({ runId, step }: Props) {
       {/* unoptimized: private per-run JPEGs from our own API, served as they are. */}
       <Image
         unoptimized
+        loading="eager"
         src={runApiPaths.screenshot(runId, step.id)}
         alt={`Browser after: ${caption}`}
         width={1280}

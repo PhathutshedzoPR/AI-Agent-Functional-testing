@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { Logo } from '@/components/brand/Logo';
 
 const navLink =
   'rounded-lg px-3 py-2 text-sm font-semibold text-muted hover:bg-raised hover:text-text focus-visible:outline-2 focus-visible:outline-signal';
@@ -11,8 +12,12 @@ export default function DashboardLayout({ children }: Readonly<LayoutProps<'/'>>
         aria-label="TestPilot"
         className="flex shrink-0 items-center gap-2 border-b border-divider p-4 md:w-56 md:flex-col md:items-stretch md:border-r md:border-b-0"
       >
-        <Link href="/" className="mb-0 px-3 py-2 font-serif text-2xl md:mb-6">
-          TestPilot
+        <Link
+          href="/"
+          aria-label="TestPilot home"
+          className="mb-0 px-3 py-2 focus-visible:outline-2 focus-visible:outline-signal md:mb-6"
+        >
+          <Logo tone="dark" />
         </Link>
         <Link href="/runs/new" className={navLink}>
           New run

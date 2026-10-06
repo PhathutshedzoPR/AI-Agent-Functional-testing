@@ -3,11 +3,17 @@
 import { useState } from 'react';
 import { TestRun, type RunView, type StepView } from '@/core/domain';
 import { useRunStream } from '@/hooks/useRunStream';
+import { cn } from '@/lib/cn';
+import { Mascot } from '../brand/Mascot';
 import { AgentFeed } from './AgentFeed';
 import { BugCard } from './BugCard';
+import { ExportMenu } from './ExportMenu';
+import { FlightPath } from './FlightPath';
 import { LiveBrowser } from './LiveBrowser';
 import { RerunActions } from './RerunActions';
+import { ReviewList } from './ReviewList';
 import { RunHeader } from './RunHeader';
+import { RunTabs } from './RunTabs';
 import { StepList } from './StepList';
 
 type Props = Readonly<{ runId: string; appBaseUrl: string }>;
@@ -27,19 +33,68 @@ function latestCaptured(view: RunView): StepView | null {
   return captured.at(-1) ?? null;
 }
 
-const STAT_LABELS = [
-  ['passed', 'Passed'],
-  ['healed', 'Healed'],
-  ['failed', 'Failed'],
-  ['bugs', 'Bugs'],
+const TILES = [
+  { key: 'passed', label: 'Passed', className: 'bg-sky text-ink' },
+  { key: 'healed', label: 'Healed', className: 'border border-divider bg-raised' },
+  { key: 'failed', label: 'Failed', className: 'border border-divider bg-raised' },
+  { key: 'bugs', label: 'Bugs', className: 'bg-orchid text-ink' },
 ] as const;
 
-/** The live run: header, steps, real screenshots, stats, the agent's feed and bugs. */
+const panel = 'rounded-[20px] border border-divider bg-raised p-5';
+
+/** The live run: header, flight path, real screenshots, stats, the agent's feed and details. */
 export function RunDashboard({ runId, appBaseUrl }: Props) {
   const { view, stream } = useRunStream(runId);
   const [selected, setSelected] = useState<string | null>(null);
+  const [tab, setTab] = useState('steps');
   const shown = findStep(view, selected) ?? latestCaptured(view);
   const finished = TestRun.isFinal(view.status);
+  const healedCount = view.stats.healed;
+
+  const tabs = [
+    {
+      id: 'steps',
+      label: 'Steps',
+      content: (
+        <StepList
+          scenarios={view.scenarios}
+          selectedStepId={shown?.id ?? null}
+          onSelect={setSelected}
+        />
+      ),
+    },
+    {
+      id: 'bugs',
+      label: `Bugs (${view.bugs.length})`,
+      content:
+        view.bugs.length === 0 ? (
+          <div className="flex items-center gap-4 text-muted">
+            <Mascot mood={finished ? 'idle' : 'flying'} className="size-16" />
+            <p>{finished ? 'No bugs in this run.' : 'No bugs so far.'}</p>
+          </div>
+        ) : (
+          <div className="space-y-3">
+            {view.bugs.map((bug) => (
+              <BugCard key={bug.id} runId={runId} bug={bug} />
+            ))}
+          </div>
+        ),
+    },
+    {
+      id: 'review',
+      label: `Needs review (${healedCount})`,
+      content: (
+        <ReviewList
+          scenarios={view.scenarios}
+          onSelect={(stepId) => {
+            setSelected(stepId);
+            setTab('steps');
+          }}
+        />
+      ),
+    },
+    { id: 'export', label: 'Export', content: <ExportMenu runId={runId} ready={finished} /> },
+  ];
 
   return (
     <div className="space-y-5">
@@ -50,23 +105,34 @@ export function RunDashboard({ runId, appBaseUrl }: Props) {
         </p>
       )}
       {view.error && (
-        <p role="alert" className="rounded-xl border border-failed p-3">
-          {view.error.message}
-        </p>
-      )}
-      <div className="grid gap-5 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
-        <section
-          aria-label="Live browser"
-          className="rounded-[20px] border border-divider bg-raised p-5"
+        <div
+          role="alert"
+          className="flex items-center gap-4 rounded-[20px] border border-failed p-4"
         >
+          <Mascot mood="worried" className="size-14" />
+          <p>{view.error.message}</p>
+        </div>
+      )}
+      <section aria-labelledby="flight-heading" className={panel}>
+        <h2 id="flight-heading" className="mb-3 text-lg font-semibold">
+          Flight path
+        </h2>
+        <FlightPath
+          scenarios={view.scenarios}
+          selectedStepId={shown?.id ?? null}
+          onSelect={setSelected}
+        />
+      </section>
+      <div className="grid gap-5 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
+        <section aria-label="Live browser" className={panel}>
           <LiveBrowser runId={runId} step={shown} />
         </section>
         <div className="space-y-5">
           <dl className="grid grid-cols-2 gap-3">
-            {STAT_LABELS.map(([key, label]) => (
-              <div key={key} className="rounded-xl border border-divider bg-raised p-4">
-                <dt className="text-sm text-muted">{label}</dt>
-                <dd className="font-serif text-4xl">{view.stats[key]}</dd>
+            {TILES.map((tile) => (
+              <div key={tile.key} className={cn('rounded-xl p-4', tile.className)}>
+                <dt className="text-sm font-semibold opacity-80">{tile.label}</dt>
+                <dd className="font-serif text-5xl leading-tight">{view.stats[tile.key]}</dd>
               </div>
             ))}
           </dl>
@@ -74,7 +140,7 @@ export function RunDashboard({ runId, appBaseUrl }: Props) {
         </div>
       </div>
       {view.warnings.length > 0 && (
-        <details className="rounded-xl border border-divider bg-raised p-4">
+        <details className={panel}>
           <summary className="cursor-pointer font-semibold">
             Planner warnings ({view.warnings.length})
           </summary>
@@ -85,29 +151,9 @@ export function RunDashboard({ runId, appBaseUrl }: Props) {
           </ul>
         </details>
       )}
-      <section
-        aria-labelledby="steps-heading"
-        className="rounded-[20px] border border-divider bg-raised p-5"
-      >
-        <h2 id="steps-heading" className="mb-4 text-lg font-semibold">
-          Steps
-        </h2>
-        <StepList
-          scenarios={view.scenarios}
-          selectedStepId={shown?.id ?? null}
-          onSelect={setSelected}
-        />
+      <section aria-label="Run details" className={panel}>
+        <RunTabs tabs={tabs} active={tab} onChange={setTab} />
       </section>
-      {view.bugs.length > 0 && (
-        <section aria-labelledby="bugs-heading" className="space-y-3">
-          <h2 id="bugs-heading" className="text-lg font-semibold">
-            Bugs
-          </h2>
-          {view.bugs.map((bug) => (
-            <BugCard key={bug.id} runId={runId} bug={bug} />
-          ))}
-        </section>
-      )}
       {finished && view.scenarios.length > 0 && (
         <RerunActions runId={runId} appBaseUrl={appBaseUrl} currentUrl={view.targetUrl} />
       )}
