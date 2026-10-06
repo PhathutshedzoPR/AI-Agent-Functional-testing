@@ -177,8 +177,10 @@ Goal: from the browser, start a run on Kota Express and watch real steps stream 
   - Snapshots wait for network idle and two identical reads, so a hydrating page always gives the same prompt. The cart always shows its checkout link and renders the empty cart on the server, so the explorer reaches checkout. `devIndicators: false` keeps dev and production snapshots identical.
 - [x] `TestPlanner`: story optional. With acceptance criteria, map each scenario to one (`criterion`). Without, propose criteria and label them "inferred". Invalid steps become warnings.
   - Criteria come from bullets, numbered lines or Given/When/Then blocks in the story (`parseCriteria`). A scenario that does not start with `navigate` gets one to the start page, because every scenario opens a fresh browser.
-- [ ] `ScenarioExecutor`: runs steps through `ActionRegistry`, emits events, screenshots every step, skips the rest of a scenario after a failure. No healing yet.
-- [ ] `BugReporter` with template wording.
+- [x] `ScenarioExecutor`: runs steps through `ActionRegistry`, emits events, screenshots every step, skips the rest of a scenario after a failure. No healing yet.
+  - Has an `IStepRepairer` hook (null for now) so Phase 3 healing plugs in without touching the loop: one repair, one retry. Cancellation (stop or timeout) surfaces as `RunCancelledError`, not as a failed step.
+- [x] `BugReporter` with template wording.
+  - Steps to reproduce come from `describeStep` in the domain, which the UI reuses for captions.
 - [ ] `TestAgent` (Template Method), `RunService` and `RunQueue`: one run at a time, every per-run limit from env, cancel through an `AbortController`, browser closed in `finally`.
 - [ ] `InMemoryRunRepository`, `FileArtifactStore`, `InMemoryEventBus`.
 - [ ] `projectRun` reducer (events to view state) with thorough unit tests. The UI depends on it.

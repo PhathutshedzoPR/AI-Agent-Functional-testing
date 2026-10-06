@@ -11,6 +11,7 @@ export {
   type AriaRole,
   type LocatorStrategy,
 } from './Locator';
+export { describeStep } from './describeStep';
 export { parseDomain } from './parseDomain';
 export { ActionTypeSchema, PlanStep, PlanStepSchema, type ActionType } from './PlanStep';
 export {

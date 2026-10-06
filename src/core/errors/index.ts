@@ -5,5 +5,6 @@ export { DomainError } from './DomainError';
 export { LlmError } from './LlmError';
 export { NotFoundError } from './NotFoundError';
 export { RateLimitError } from './RateLimitError';
+export { RunCancelledError } from './RunCancelledError';
 export { TargetBlockedError } from './TargetBlockedError';
 export { ValidationError, type ValidationIssue } from './ValidationError';
