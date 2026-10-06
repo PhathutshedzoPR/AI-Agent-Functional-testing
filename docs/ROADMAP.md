@@ -204,7 +204,8 @@ Confirm the exact cut-off time with Sebaka, and ask a mentor whether commits aft
 
 - [x] `README.md` matches what exists: commands, env vars, a real screenshot of a run (save to `docs/images/`), the team section filled in.
   - Team section still to fill in by the team.
-- [ ] CI green on `main`. Quality gate passing, or the remaining issues listed honestly in the README.
+- [x] CI green on `main`. Quality gate passing, or the remaining issues listed honestly in the README.
+  - Green from commit 415b182: lint, typecheck, unit tests with the coverage gate, build, SonarQube Cloud scan and npm audit.
 - [ ] `git tag submission-2026-10-07 && git push origin submission-2026-10-07`, then submit the repo link through Sebaka's form.
 
 ---
