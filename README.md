@@ -1,214 +1,136 @@
-# TestPilot AI 🚀
+# TestPilot
 
-> AI-powered testing dashboard for the **Sebaka Hackathon** — catch bugs before your users do.
+TestPilot tests websites the way a QA analyst would. Give it a URL and a user story. It opens a real browser, works out what to test, clicks through the flows and tells you what broke, with screenshots and the steps to reproduce it.
 
----
+We're building it for the [Sebaka Testing AI Hackathon 2026](https://sebakasouthafrica.co.za/ai-agent-challenge.html), functional testing track.
 
-## What It Does
+<!-- SonarQube Cloud badges go here after the first scan: quality gate, coverage, security rating -->
 
-TestPilot AI is a single-page, browser-native QA dashboard that combines structured test execution with Gemini AI analysis. Drop in your Gemini API key, pick a target type, and watch the pipeline catch failures — complete with annotated screenshot evidence and AI-generated root-cause explanations.
+## The problem
 
----
+Small teams ship often and test by hand. Before a release, someone clicks through sign-up and checkout. On a busy week nobody does, and customers find the bug first.
 
-## Features
+Teams that do automate find their tests breaking every time a button is renamed or a page is rearranged. Fixing selectors becomes a chore, and the suite gets switched off.
 
-| Capability | Detail |
+## What TestPilot does
+
+| Stage | What happens |
 |---|---|
-| **8 Target Types** | Web App, REST/GraphQL API, Android APK, Source Code, Database, Spec/PDF, Security Scan, Performance |
-| **22 Test Cases** | Spread across Functional, Security, Performance, Compatibility, Accessibility, Regression, Integration, Database quality categories |
-| **Screenshot Evidence** | Canvas-rendered mock browser frames with red failure highlight boxes — no real browser automation required |
-| **AI Root-Cause Analysis** | Gemini explains *why* each failure happened and *how* to fix it |
-| **Recommendations Panel** | 8 AI-driven QA priorities ranked by risk, with severity badges and fix-effort estimates |
-| **Live Pipeline Log** | Real-time test execution log with pass/fail/skip status per step |
-| **Bug Reports** | Auto-generated bug cards with severity, reproduction steps, expected vs. actual, and embedded screenshot |
-| **Export** | Copy report as JSON, CSV, or JUnit XML (CI-ready) |
-| **OOP Architecture** | 9 ES6 classes, EventBus pub/sub, clean separation of concerns |
+| **Receives** | A URL, and optionally a user story with acceptance criteria. |
+| **Decides** | Reads each page's accessibility tree, then plans happy-path, negative and edge-case scenarios. |
+| **Executes** | Runs every step in headless Chromium with Playwright and takes a screenshot after each one. When a button has been renamed, it finds it again and marks the step as healed so a person can check it. |
+| **Delivers** | A live dashboard, bug reports with expected and actual results, JUnit XML for CI, and a Playwright test file your team can keep. |
 
----
+## The AI proposes, Playwright decides
 
-## Architecture
+The language model plans the tests and suggests how to find elements. It never decides whether a test passed. Every pass or fail comes from a real assertion in a real browser, every screenshot is a real capture, and every timing is measured.
 
-```
-TestPilot (app entry point)
-├── EventBus          — decoupled pub/sub between modules
-├── StorageManager    — safe localStorage with JSON serialisation
-├── GeminiClient      — REST calls to generativelanguage.googleapis.com
-├── ScreenshotEngine  — HTML5 Canvas mock-browser renderer
-│   ├── _drawCheckout()   Web 502 error state
-│   ├── _drawLogin()      SQL injection bypass
-│   ├── _drawApi()        500 JSON terminal response
-│   ├── _drawApk()        apktool exported-activities output
-│   ├── _drawCode()       dead-branch code highlight
-│   └── _drawDb()         negative-stock race condition
-├── TestCase          — single test definition + runtime state
-├── BugReport         — structured defect with screenshot data URI
-├── TestRunner        — async state machine; drives test loop
-└── ReportGenerator   — summary(), toJSON(), toCSV(), toJUnit()
+If TestPilot shows you a result, it happened.
+
+## Try it
+
+You need Node 22 or newer and an API key for Gemini, Claude or OpenAI. A run makes only a handful of model calls, so Gemini's free tier is enough to try it.
+
+```bash
+git clone https://github.com/PhathutshedzoPR/AI-Agent-Functional-testing.git testpilot
+cd testpilot
+npm install
+npx playwright install chromium
+cp .env.example .env.local
 ```
 
-All modules communicate via `EventBus` events (`test:start`, `test:done`, `run:complete`, etc.) so the UI never calls runner internals directly.
+Put your provider, model and key in `.env.local`, then:
 
----
+```bash
+npm run dev
+```
 
-## Quick Start
+Open http://localhost:3000, click **Run a test**, pick Kota Express and one of the suggested stories.
 
-1. **Open** `TestPilot_AI.html` in any modern browser (Chrome, Edge, Firefox).
-2. Click the **⚙ Config** icon (top-right) and paste your **Gemini API key**.
-3. Select a **model** (`gemini-1.5-flash` is fastest; `gemini-1.5-pro` is most thorough).
-4. Choose a **Target Type** from the dropdown (e.g. *Web App*, *Android APK*).
-5. Hit **▶ Run Tests** on the Dashboard and watch the pipeline execute.
-6. Switch to **Bugs** to inspect failure screenshots and AI explanations.
-7. Open **AI Report** for the full coverage breakdown and export options.
+No key? Set `LLM_PROVIDER=replay` in `.env.local`. TestPilot then uses plans we recorded earlier for the suggested stories. The browser still runs for real.
 
-> **No API key?** The dashboard still runs with deterministic mock results — you just won't get live Gemini analysis text.
+## Kota Express
 
----
+Testing a tester needs a site where you already know the right answers. Kota Express is a small kota ordering site that ships inside this repo at `/demo-shop`, in three releases:
 
-## Target Types & What Gets Tested
+- **stable** works.
+- **redesign** behaves the same, but the buttons are renamed and the layout has moved. Hand-written test scripts break here. TestPilot heals and flags what changed.
+- **buggy** has four seeded bugs, including a cart total that ignores quantity and a cellphone field that accepts letters.
 
-### 🌐 Web App
-Checkout flow, payment gateway, form validation, XSS resistance, WCAG contrast, Core Web Vitals, session handling, cookie security.
+<!-- Scorecard: paste the real table printed by tests/integration/scorecard.test.ts here -->
 
-### 🔌 REST / GraphQL API
-Rate limiting, schema validation, authentication bypass, error format consistency, response-time SLAs, CORS headers, pagination edge-cases, input sanitisation.
+## How it's built
 
-### 📱 Android APK
-Exported activity enumeration, permission over-grant, debug flag detection, certificate pinning, memory leak profiling, deep-link hijacking, obfuscation checks, backup-flag exposure.
+```mermaid
+flowchart LR
+    UI[Dashboard] -->|start run| API[API routes]
+    API --> Service[RunService]
+    Service --> Agent[TestAgent]
+    Agent --> Explorer[SiteExplorer]
+    Agent --> Planner[TestPlanner]
+    Agent --> Executor[ScenarioExecutor]
+    Executor --> Healer[SelfHealer]
+    Agent --> Reporter[BugReporter]
+    Planner -.-> LLM[(LLM)]
+    Healer -.-> LLM
+    Executor --> Browser[(Chromium via Playwright)]
+    Agent -->|events| Bus[Event bus]
+    Bus -->|Server-Sent Events| UI
+```
 
-### 💻 Source Code
-Dead-code branch detection, SQL injection sink tracing, hardcoded secret scanning, async race-condition analysis, dependency CVE check, cyclomatic complexity, error-handling coverage, type-safety audit.
+- **Next.js 16** and TypeScript for the dashboard, the API and the demo shop.
+- **Playwright** drives Chromium. The agent finds elements the way a person would describe them (role and name, label, visible text), so the tests it exports read like good hand-written ones.
+- **Vercel AI SDK** talks to Gemini, Claude or OpenAI. Every response is checked against a Zod schema before we use it.
+- **SonarQube Cloud**, ESLint with the SonarJS rules, and Vitest run on every push.
 
-### 🗄️ Database
-Race condition on concurrent writes, N+1 query detection, index coverage on hot queries, referential-integrity constraint verification, transaction isolation level, slow-query threshold, backup/restore roundtrip, connection-pool exhaustion.
+The code is split so the agent doesn't know it lives in a web app:
 
-### 📄 Spec / PDF
-Requirement traceability, ambiguity scoring, acceptance-criteria completeness, UI copy consistency, edge-case documentation coverage, regulatory-keyword scan, version-delta diff.
-
-### 🔒 Security Scan
-CVE dependency audit, TLS configuration grade, HTTP security-header checklist, OWASP Top-10 surface mapping, secrets-in-repo detection, JWT algorithm confusion, CSRF token validation, clickjacking frame-options.
-
-### ⚡ Performance
-Time-to-first-byte, Lighthouse score regression, bundle-size budget, cache hit-rate, memory heap growth, CPU flame-graph hotspot, third-party script cost, server error-rate under load.
-
----
-
-## Screenshot Evidence Engine
-
-When a test fails, `ScreenshotEngine` renders a 600 × 380 mock browser frame on a hidden `<canvas>` element. Each renderer draws page-specific content (form fields, terminal output, code lines, SQL results) then overlays:
-
-- A **red translucent highlight box** around the failure region
-- A **⚠ label** naming the failure
-- A **grey annotation strip** at the bottom with a one-line explanation
-
-The canvas is serialised to a PNG data URI and embedded directly in the bug card — no server, no file system, no external dependencies.
-
----
-
-## AI Recommendations Panel
-
-Eight standing recommendations are always visible, ranked by risk:
-
-| # | Risk Area | Severity |
-|---|---|---|
-| 1 | Payment gateway error handling | Critical |
-| 2 | SQL injection hardening | Critical |
-| 3 | Accessibility WCAG 2.1 AA | High |
-| 4 | API rate-limit & retry logic | High |
-| 5 | Mobile performance budget | Medium |
-| 6 | Session token rotation | Medium |
-| 7 | Dependency CVE patching | Low |
-| 8 | Test coverage baseline (80 %) | Low |
-
-Each card shows estimated fix effort (e.g. "2–4 h") and a one-line rationale.
-
----
-
-## Export Formats
-
-| Format | Use Case |
+| Folder | What's in it |
 |---|---|
-| **JSON** | Attach to a Jira/Linear ticket or feed into a CI artifact |
-| **CSV** | Paste into Google Sheets / Excel for stakeholder review |
-| **JUnit XML** | Drop into Jenkins, GitHub Actions, or any CI that reads Surefire reports |
+| `src/core` | The agent, the domain model and the interfaces it needs. Plain TypeScript with no framework imports. |
+| `src/adapters` | Playwright, the LLM providers, storage, exporters and the URL guard, each behind an interface from `src/core/ports`. |
+| `src/server` | Wiring, environment validation, rate limiting and HTTP helpers. |
+| `src/app`, `src/components` | The dashboard, the API routes and Kota Express. |
+| `tests` | Unit tests with fakes, and integration tests against Kota Express in a real browser. |
 
-All exports are copied to the clipboard (clipboard API with `execCommand` fallback).
+Because the core only depends on interfaces, the same agent also runs from the command line (`npm run agent`), which is how it would sit in a CI pipeline.
 
----
+Patterns we used on purpose: Strategy for actions, healing and exporters; Template Method for the agent's pipeline; Observer for live events; Decorator for recording LLM responses; Repository for runs; constructor injection from a single composition root.
 
-## Tech Stack
+## Security
 
-- **Vanilla ES6** — no build step, no bundler, no `node_modules`
-- **HTML5 Canvas API** — screenshot rendering
-- **Google Fonts** — Inter (UI) + JetBrains Mono (code/logs)
-- **Gemini REST API** — `generativelanguage.googleapis.com/v1beta/models/{model}:generateContent`
-- **CSS custom properties** — dark-first design tokens with `prefers-color-scheme: light` override
+An agent that opens whatever URL you give it, on a server, needs guard rails:
 
----
+- API keys stay on the server and are validated before use. Nothing secret reaches the browser.
+- By default the agent only visits hosts on an allowlist. In public mode it refuses private, loopback and cloud metadata addresses, and checks every request the browser makes, including redirects.
+- Web pages are untrusted input. The model's output has to match a schema and an allowlist of actions, and nothing it returns is run as code.
+- Every API input is validated. Runs are rate-limited, time-boxed and capped in steps and LLM calls, and the browser is always closed afterwards.
+- Known gap: in public mode, DNS rebinding could slip between our address check and the browser's own lookup. Allowlist mode doesn't have this problem.
 
-## Customising
+## Scripts
 
-### Add a new test case
-```js
-// Inside TestRunner constructor, push to this.tests:
-new TestCase({
-  id: 'TC-023',
-  title: 'My New Test',
-  category: 'Functional',
-  priority: 'High',
-  targetType: 'Web App',
-  steps: ['Step 1', 'Step 2'],
-  expected: 'Expected result',
-  screenshotCfg: { page: 'checkout', failRegion: { x:120, y:180, w:360, h:60 }, label:'MY FAILURE', annotation:'What went wrong' }
-})
-```
-
-### Make a test always fail (deterministic)
-```js
-// In TestRunner.run(), add the ID to FAIL_IDS:
-const FAIL_IDS = new Set(['TC-002','TC-007','TC-012','TC-015','TC-017','TC-022','TC-023']);
-```
-
-### Add a new screenshot renderer
-```js
-// In ScreenshotEngine, add a method and map it:
-_drawMyPage(c, W, H) { /* use c.fillRect, c.fillText, etc. */ }
-// Then in render(), add to the page switch:
-case 'mypage': this._drawMyPage(c, W, H); break;
-```
-
-### Change the Gemini model
-Select from the **Config** panel: `gemini-1.5-flash`, `gemini-1.5-pro`, or `gemini-2.0-flash`.
-
----
-
-## File Structure
-
-```
-TestPilot_AI.html     ← entire app (single file, self-contained)
-README.md             ← this file
-```
-
----
+| Command | What it does |
+|---|---|
+| `npm run dev` | Development server on port 3000 |
+| `npm run build`, then `npm start` | Production build and server |
+| `npm run check` | Lint, typecheck and unit tests |
+| `npm run test:coverage` | Unit tests with coverage for SonarQube Cloud |
+| `npm run test:integration` | The agent against Kota Express in real Chromium |
+| `npm run agent -- --url <url> --story "<text>"` | Run the agent from a terminal; JUnit and Markdown go to `./reports` |
 
 ## Limitations
 
-- Screenshot frames are **mock renderings**, not real browser captures. They illustrate *where* a failure occurs; actual pixel evidence requires a headless browser (Playwright/Puppeteer).
-- Export uses the clipboard API. In environments where `navigator.clipboard` is blocked (some CI headless contexts), it falls back to `document.execCommand('copy')`.
-- Gemini API calls go directly from the browser — keep your API key out of version control and consider a backend proxy for production use.
-- localStorage is used for API-key persistence; it is session-scoped per origin and is cleared with the browser.
+- It needs a long-running Node server: a laptop, a VM or Docker. Serverless functions can't launch Chromium the way we use it.
+- One run at a time. Others wait in a queue.
+- It can't get past CAPTCHAs or two-factor logins.
+- Healing can hide a real change. That's why healed steps are listed for review instead of counted as clean passes.
 
----
+## History
 
-## Hackathon Notes (Sebaka)
+The first prototype (tag `v0-prototype`) was a single-file dashboard that sketched the product with simulated results. This version runs every test in a real browser.
 
-This project was built for the **Sebaka Hackathon** to demonstrate how AI can accelerate QA workflows:
+<!-- Team: add names and roles before submitting -->
 
-- **Zero infrastructure** — entirely client-side, deployable as a single HTML file to any static host (GitHub Pages, Netlify, Vercel)
-- **AI-augmented QA** — Gemini provides root-cause analysis that would take a senior QA engineer hours to write
-- **Modular by design** — the OOP class hierarchy makes it easy to swap the AI backend, add new test types, or plug in a real screenshot engine
+## Licence
 
----
-
-## License
-
-MIT — do whatever you want, just don't blame us if the tests pass and the app still breaks. 😄
+MIT
