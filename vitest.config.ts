@@ -26,7 +26,7 @@ export default defineConfig({
         '**/index.ts',
         '**/*.d.ts',
         'src/server/container.ts',
-        'src/adapters/browser/PlaywrightBrowser*.ts',
+        'src/adapters/browser/Playwright*.ts',
       ],
       thresholds: Object.fromEntries(COVERED_FOLDERS.map((folder) => [`${folder}/**`, GATE])),
     },

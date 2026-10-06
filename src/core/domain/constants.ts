@@ -121,7 +121,13 @@ export const RUN_STATUSES = [
   'cancelled',
 ] as const;
 export const HEALING_METHODS = ['rule', 'llm'] as const;
-export const FINDING_KINDS = ['console-error', 'page-error', 'http-error', 'broken-link'] as const;
+export const FINDING_KINDS = [
+  'console-error',
+  'page-error',
+  'http-error',
+  'broken-link',
+  'blocked-request',
+] as const;
 
 /** Severity when a scenario of this kind fails (CLAUDE.md section 6, bug reports). */
 export const DEFAULT_SEVERITY = { happy: 'high', negative: 'medium', edge: 'low' } as const;
