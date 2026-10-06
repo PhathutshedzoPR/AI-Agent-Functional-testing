@@ -2,11 +2,23 @@
   "name": "testpilot",
   "version": "0.1.0",
   "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=22"
+  },
   "scripts": {
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint .",
+    "typecheck": "next typegen && tsc --noEmit",
+    "test": "vitest run --project unit",
+    "test:watch": "vitest --project unit",
+    "test:coverage": "vitest run --project unit --coverage",
+    "test:integration": "vitest run --project integration",
+    "check": "npm run lint && npm run typecheck && npm test",
+    "format": "prettier --write .",
+    "format:check": "prettier --check ."
   },
   "dependencies": {
     "@ai-sdk/anthropic": "^4.0.72",
