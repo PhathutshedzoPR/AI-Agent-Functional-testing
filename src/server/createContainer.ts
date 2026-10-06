@@ -35,11 +35,18 @@ export type Container = Readonly<{
 
 type Shared = Readonly<{ clock: IClock; ids: IIdGenerator; artifacts: IArtifactStore }>;
 
+/** Replaceable parts, for integration tests that script the model but keep everything else real. */
+export type ContainerOverrides = Readonly<{ llm?: ILanguageModel }>;
+
 /**
  * Composition root: the only place that constructs adapters (constructor injection). It has no
  * Next imports, so the CLI and tests can build the same graph.
  */
-export function createContainer(env: Env, logger: Logger): Container {
+export function createContainer(
+  env: Env,
+  logger: Logger,
+  overrides: ContainerOverrides = {},
+): Container {
   const shared: Shared = {
     clock: new SystemClock(),
     ids: new CryptoIdGenerator(),
@@ -53,7 +60,7 @@ export function createContainer(env: Env, logger: Logger): Container {
     bus: new InMemoryEventBus(),
     queue: new RunQueue((error) => logError('A queued run failed outside its own handling', error)),
     agent: buildAgent(env, policy, shared),
-    llm: buildLanguageModel(env),
+    llm: overrides.llm ?? buildLanguageModel(env),
     policy,
     runTimeoutMs: env.AGENT_RUN_TIMEOUT_MS,
     logError,
@@ -93,6 +100,7 @@ function buildAgent(env: Env, policy: ITargetPolicy, { clock, ids, artifacts }: 
     executor: new ScenarioExecutor({ registry, artifacts, clock, ids, repairer: null }),
     reporter: new BugReporter(ids),
     clock,
+    ids,
     settings: {
       maxPages: env.AGENT_MAX_PAGES,
       maxScenarios: env.AGENT_MAX_SCENARIOS,

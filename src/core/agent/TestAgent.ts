@@ -1,5 +1,12 @@
-import type { BugReport, RunLimits, TestPlan } from '../domain';
-import type { IBrowser, IBrowserFactory, IClock, ILanguageModel, PageSnapshot } from '../ports';
+import { Finding, type BugReport, type RunLimits, type TestPlan } from '../domain';
+import type {
+  IBrowser,
+  IBrowserFactory,
+  IClock,
+  IIdGenerator,
+  ILanguageModel,
+  PageSnapshot,
+} from '../ports';
 import { BudgetedLanguageModel } from './BudgetedLanguageModel';
 import type { BugReporter } from './BugReporter';
 import type { RunContext } from './RunContext';
@@ -25,6 +32,7 @@ export type AgentDependencies = Readonly<{
   executor: ScenarioExecutor;
   reporter: BugReporter;
   clock: IClock;
+  ids: IIdGenerator;
   settings: AgentSettings;
 }>;
 
@@ -108,9 +116,18 @@ export class TestAgent {
   private async explore(browser: IBrowser, context: RunContext): Promise<readonly PageSnapshot[]> {
     const session = await browser.newSession();
     try {
-      const { pages } = await this.deps.explorer.explore(session, context.start, (page) =>
+      const { pages, findings } = await this.deps.explorer.explore(session, context.start, (page) =>
         context.emit({ type: 'explore.page', url: page.url, title: page.title }),
       );
+      for (const raw of findings) {
+        const finding = Finding.create({
+          ...raw,
+          id: this.deps.ids.next(),
+          scenarioId: null,
+          stepId: null,
+        });
+        await context.emit({ type: 'finding', finding });
+      }
       return pages;
     } finally {
       await session.close();

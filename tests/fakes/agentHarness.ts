@@ -78,6 +78,7 @@ export function agentHarness(pageText = 'Total R 35,00', plan: PlanOutput = ORDE
     }),
     reporter: new BugReporter(ids),
     clock,
+    ids,
     settings: SETTINGS,
   });
   return { agent, browsers, artifacts, llm, clock, ids };
