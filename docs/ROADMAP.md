@@ -28,7 +28,8 @@ Goal: an empty but production-shaped repo, green CI, SonarQube Cloud connected.
   - Defaults to `LLM_PROVIDER=replay` when unset, so a fresh clone starts without keys. Blank values count as unset. Added `LLM_REPLAY_DIR` and `DATA_DIR` with defaults.
 - [x] `next.config.ts`: security headers (CLAUDE.md section 4, item 12). Add `serverExternalPackages: ['playwright']` only if bundling complains.
   - Headers come from `src/server/security/securityHeaders.ts` (unit-tested). No `upgrade-insecure-requests` or HSTS because the demo runs on plain-HTTP localhost.
-- [ ] `.github/workflows/ci.yml` and `sonar-project.properties` (below), `.github/dependabot.yml` for `npm` and `github-actions`, weekly.
+- [x] `.github/workflows/ci.yml` and `sonar-project.properties` (below), `.github/dependabot.yml` for `npm` and `github-actions`, weekly.
+  - Actions pinned to current majors (checkout v7, setup-node v7, sonarqube-scan-action v8). The scan step is skipped until `SONAR_TOKEN` exists, so CI can go green first.
 - [ ] **HUMAN (repo owner):** sign in to sonarcloud.io with GitHub, import the repo, set **Administration > Analysis Method > Automatic Analysis: off**, generate a token, add it as the GitHub secret `SONAR_TOKEN`, then copy the organization and project keys into `sonar-project.properties`.
 - [ ] **HUMAN:** create an API key (Google AI Studio for Gemini, or Anthropic/OpenAI), pick a current model ID, put both in `.env.local`. Never commit it.
 - [ ] After the first green scan, add the quality gate, coverage and security rating badges to the top of `README.md`.
