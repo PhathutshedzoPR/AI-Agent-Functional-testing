@@ -8,24 +8,27 @@ import { cn } from '@/lib/cn';
 import { formatRand } from '@/lib/formatRand';
 import { shopButton, shopLink } from './shopStyles';
 import { useCart } from './useCart';
-import { useHydrated } from './useHydrated';
 
 type Props = Readonly<{ release: ReleaseConfig }>;
 
 export function CartSummary({ release }: Props) {
+  // The server renders the empty cart, so a fresh visitor sees the same page before and after
+  // hydration. The checkout link is always there, so crawlers (and TestPilot) can find checkout.
   const cart = useCart(release.id);
-  const hydrated = useHydrated();
+  const checkout = (
+    <Link href={shopPath(release.id, 'checkout')} className={cn(shopButton(), 'w-full sm:w-auto')}>
+      {release.labels.checkout}
+    </Link>
+  );
 
-  if (!hydrated) {
-    return <p>Loading your cart...</p>;
-  }
   if (cart.lines.length === 0) {
     return (
-      <div className="space-y-3">
+      <div className="space-y-4">
         <p>Your cart is empty.</p>
         <Link href={shopPath(release.id)} className={shopLink}>
           Back to the menu
         </Link>
+        <div>{checkout}</div>
       </div>
     );
   }
@@ -70,12 +73,7 @@ export function CartSummary({ release }: Props) {
         <dt className="font-semibold">Total</dt>
         <dd className="font-extrabold">{formatRand(cartTotalCents(cart.lines, release.bugs))}</dd>
       </dl>
-      <Link
-        href={shopPath(release.id, 'checkout')}
-        className={cn(shopButton(), 'w-full sm:w-auto')}
-      >
-        {release.labels.checkout}
-      </Link>
+      {checkout}
     </div>
   );
 }

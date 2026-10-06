@@ -3,6 +3,9 @@ import { securityHeaders } from './src/server/security/securityHeaders';
 
 const nextConfig: NextConfig = {
   poweredByHeader: false,
+  // The dev tools badge would add a button to every page snapshot in development only, so dev
+  // and production runs would build different prompts and miss each other's replays.
+  devIndicators: false,
   headers() {
     const headers = securityHeaders(process.env.NODE_ENV === 'development');
     return Promise.resolve([{ source: '/:path*', headers: [...headers] }]);

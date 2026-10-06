@@ -173,7 +173,8 @@ Goal: from the browser, start a run on Kota Express and watch real steps stream 
   - Replay keys hash purpose, system prompt and prompt (not just purpose and prompt), so a changed system prompt also forces a re-record. Fixtures store the full prompt for review.
 - [x] Prompt builders in `src/core/prompts` for plan, heal and report wording, each with its Zod output schema. Snapshot-test the built prompts so changes show up in review.
   - Prompts show site paths, never host or port, so replay keys match on any machine (the integration app runs on a random port). Length limits moved from the Locator and PlanStep schemas into `create()`, because some providers reject `maxLength` in structured-output schemas.
-- [ ] `SiteExplorer`: same-origin crawl under the start URL's path, up to `AGENT_MAX_PAGES`, aria snapshot per page, failed links recorded as findings.
+- [x] `SiteExplorer`: same-origin crawl under the start URL's path, up to `AGENT_MAX_PAGES`, aria snapshot per page, failed links recorded as findings.
+  - Snapshots wait for network idle and two identical reads, so a hydrating page always gives the same prompt. The cart always shows its checkout link and renders the empty cart on the server, so the explorer reaches checkout. `devIndicators: false` keeps dev and production snapshots identical.
 - [ ] `TestPlanner`: story optional. With acceptance criteria, map each scenario to one (`criterion`). Without, propose criteria and label them "inferred". Invalid steps become warnings.
 - [ ] `ScenarioExecutor`: runs steps through `ActionRegistry`, emits events, screenshots every step, skips the rest of a scenario after a failure. No healing yet.
 - [ ] `BugReporter` with template wording.

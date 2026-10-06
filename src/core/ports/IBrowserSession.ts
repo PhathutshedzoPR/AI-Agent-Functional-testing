@@ -23,9 +23,12 @@ export type PollResult = Readonly<{ matched: boolean; actual: string }>;
  * match exactly one visible element. Waits use the run's step timeout.
  */
 export interface IBrowserSession {
-  goto(url: string): Promise<void>;
+  /** Opens a URL and returns the HTTP status of the main response, or null when there is none. */
+  goto(url: string): Promise<number | null>;
   currentUrl(): string;
   snapshot(maxChars: number): Promise<PageSnapshot>;
+  /** Absolute URLs of the visible links on the page, in document order. */
+  links(): Promise<string[]>;
 
   click(target: Locator): Promise<void>;
   check(target: Locator): Promise<void>;

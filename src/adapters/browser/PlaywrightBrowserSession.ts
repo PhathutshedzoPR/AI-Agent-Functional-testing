@@ -11,6 +11,7 @@ export type SessionTiming = Readonly<{ stepTimeoutMs: number; navigationTimeoutM
 
 const TRIM_NOTE = '\n# (snapshot trimmed)';
 const JPEG_QUALITY = 60;
+const SETTLE_INTERVAL_MS = 250;
 
 /** One scenario's browser context and page (Adapter over Playwright). */
 export class PlaywrightBrowserSession implements IBrowserSession {
@@ -22,9 +23,13 @@ export class PlaywrightBrowserSession implements IBrowserSession {
     private readonly timing: SessionTiming,
   ) {}
 
-  async goto(url: string): Promise<void> {
+  async goto(url: string): Promise<number | null> {
     try {
-      await this.page.goto(url, { waitUntil: 'load', timeout: this.timing.navigationTimeoutMs });
+      const response = await this.page.goto(url, {
+        waitUntil: 'load',
+        timeout: this.timing.navigationTimeoutMs,
+      });
+      return response?.status() ?? null;
     } catch (error) {
       throw toBrowserError(error, `Opening ${url}`);
     }
@@ -34,15 +39,48 @@ export class PlaywrightBrowserSession implements IBrowserSession {
     return this.page.url();
   }
 
+  async links(): Promise<string[]> {
+    try {
+      // A fixed function of ours, never model-provided code (CLAUDE.md section 4, item 4).
+      return await this.page
+        .getByRole('link')
+        .filter({ visible: true })
+        .evaluateAll((anchors) => anchors.map((anchor) => (anchor as HTMLAnchorElement).href));
+    } catch (error) {
+      throw toBrowserError(error, 'Reading the links');
+    }
+  }
+
   async snapshot(maxChars: number): Promise<PageSnapshot> {
     try {
-      const aria = await this.page.locator('body').ariaSnapshot({
-        timeout: this.timing.stepTimeoutMs,
-      });
+      const aria = await this.settledAriaSnapshot();
       return { url: this.page.url(), title: await this.page.title(), aria: trim(aria, maxChars) };
     } catch (error) {
       throw toBrowserError(error, 'Reading the page');
     }
+  }
+
+  /**
+   * Pages keep changing while they hydrate and fetch data. Waiting for the network to go quiet
+   * and for two reads to agree keeps snapshots (and so prompts and replay keys) stable.
+   */
+  private async settledAriaSnapshot(): Promise<string> {
+    const timeout = this.timing.stepTimeoutMs;
+    await this.page.waitForLoadState('networkidle', { timeout }).catch(() => {
+      // A page that never goes quiet (polling, streaming) is still worth reading.
+    });
+    const read = (): Promise<string> => this.page.locator('body').ariaSnapshot({ timeout });
+    let previous: string | null = null;
+    const outcome = await pollUntil(
+      read,
+      (current) => {
+        const settled = current === previous;
+        previous = current;
+        return settled;
+      },
+      { timeoutMs: timeout, intervalMs: SETTLE_INTERVAL_MS },
+    );
+    return outcome.value;
   }
 
   click(target: Locator): Promise<void> {

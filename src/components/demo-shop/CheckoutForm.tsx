@@ -45,7 +45,7 @@ export function CheckoutForm({ release }: Props) {
   const [errors, setErrors] = useState<CheckoutErrors>({});
   const [formError, setFormError] = useState<string | null>(null);
   const subtotalCents = cartTotalCents(cart.lines, release.bugs);
-  const isEmpty = hydrated && cart.lines.length === 0;
+  const isEmpty = cart.lines.length === 0;
 
   const submit = (event: SubmitEvent<HTMLFormElement>): void => {
     event.preventDefault();

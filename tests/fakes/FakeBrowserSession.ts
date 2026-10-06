@@ -53,10 +53,21 @@ export class FakeBrowserSession implements IBrowserSession {
     return this;
   }
 
-  goto(url: string): Promise<void> {
+  /** Status per URL for goto; unlisted URLs answer 200. */
+  readonly statuses = new Map<string, number>();
+  /** Links per URL, returned by links() while that URL is open. */
+  readonly linksByUrl = new Map<string, string[]>();
+  /** Snapshot text per URL; falls back to `aria`. */
+  readonly ariaByUrl = new Map<string, string>();
+
+  goto(url: string): Promise<number | null> {
     this.calls.push(`goto ${url}`);
     this.url = url;
-    return Promise.resolve();
+    return Promise.resolve(this.statuses.get(url) ?? 200);
+  }
+
+  links(): Promise<string[]> {
+    return Promise.resolve(this.linksByUrl.get(this.url) ?? []);
   }
 
   currentUrl(): string {
@@ -67,7 +78,7 @@ export class FakeBrowserSession implements IBrowserSession {
     return Promise.resolve({
       url: this.url,
       title: this.title,
-      aria: this.aria.slice(0, maxChars),
+      aria: (this.ariaByUrl.get(this.url) ?? this.aria).slice(0, maxChars),
     });
   }
 
