@@ -12,6 +12,7 @@ export type SessionTiming = Readonly<{ stepTimeoutMs: number; navigationTimeoutM
 const TRIM_NOTE = '\n# (snapshot trimmed)';
 const JPEG_QUALITY = 60;
 const SETTLE_INTERVAL_MS = 250;
+const SCREENSHOT_SETTLE_MS = 1_500;
 
 /** One scenario's browser context and page (Adapter over Playwright). */
 export class PlaywrightBrowserSession implements IBrowserSession {
@@ -155,6 +156,11 @@ export class PlaywrightBrowserSession implements IBrowserSession {
   }
 
   async screenshot(): Promise<Uint8Array> {
+    // A click that starts a client-side navigation returns before the next page arrives; a short
+    // wait for the network to go quiet makes the screenshot show what the step led to.
+    await this.page
+      .waitForLoadState('networkidle', { timeout: SCREENSHOT_SETTLE_MS })
+      .catch(() => undefined); // a page that never goes quiet is captured as it is
     try {
       return await this.page.screenshot({ type: 'jpeg', quality: JPEG_QUALITY });
     } catch (error) {

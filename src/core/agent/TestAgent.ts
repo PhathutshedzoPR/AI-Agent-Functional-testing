@@ -76,7 +76,12 @@ export class TestAgent {
       const { plan, explored } = request.savedPlan
         ? { plan: await this.announce(request.savedPlan, context), explored: new Set<string>() }
         : await this.planFresh(browser, budgeted, request, context);
-      const outcomes = await this.execute(browser, plan, { ...context, llm: budgeted, explored });
+      const outcomes = await this.execute(browser, plan, {
+        ...context,
+        llm: budgeted,
+        explored,
+        renames: new Map(),
+      });
       await this.report(outcomes, plan, budgeted, context);
       const status = outcomes.some((outcome) => outcome.status === 'failed') ? 'failed' : 'passed';
       const durationMs = Math.round(this.deps.clock.monotonicMs() - started);

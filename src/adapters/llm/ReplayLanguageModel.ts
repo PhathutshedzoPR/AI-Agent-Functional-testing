@@ -13,7 +13,8 @@ export class ReplayLanguageModel implements ILanguageModel {
   constructor(private readonly store: ReplayStore) {}
 
   async generateObject<S extends z.ZodType>(request: LlmRequest<S>): Promise<z.infer<S>> {
-    const record = await this.store.read(ReplayStore.key(request));
+    const record =
+      (await this.store.read(ReplayStore.key(request))) ?? (await this.similarHeal(request));
     if (!record) {
       throw new LlmError(
         `No recorded ${request.purpose} response matches this request. Record it with npm run replays:record, or use a live provider.`,
@@ -24,5 +25,21 @@ export class ReplayLanguageModel implements ILanguageModel {
       throw new LlmError(`The recorded ${request.purpose} response no longer fits its schema.`);
     }
     return parsed.data;
+  }
+
+  /**
+   * A heal prompt carries the live page, which can shift slightly between runs (timing, form
+   * state). For heals only, fall back to a recording for the same step, broken locator and page.
+   * The healer still checks the suggestion in the real browser before using it.
+   */
+  private similarHeal<S extends z.ZodType>(request: LlmRequest<S>) {
+    if (request.purpose !== 'heal') return Promise.resolve(null);
+    const lines = request.prompt
+      .split(/\r?\n/)
+      .filter((line) => /^(Step: |Broken locator: |<page_snapshot path=)/.test(line))
+      .map((line) =>
+        line.startsWith('<page_snapshot') ? line.replace(/ title="[^"]*">$/, '') : line,
+      );
+    return lines.length === 3 ? this.store.findByPromptLines('heal', lines) : Promise.resolve(null);
   }
 }

@@ -170,3 +170,53 @@ describe('createLanguageModel', () => {
     ).toBeInstanceOf(RecordingLanguageModel);
   });
 });
+
+describe('ReplayLanguageModel heal fallback', () => {
+  let dir: string;
+
+  beforeEach(async () => {
+    dir = await mkdtemp(join(tmpdir(), 'testpilot-heal-replays-'));
+  });
+
+  afterEach(async () => {
+    await rm(dir, { recursive: true, force: true });
+  });
+
+  const HealSchema = z.object({ to: z.string() });
+  const heal = (page: string): LlmRequest<typeof HealSchema> => ({
+    purpose: 'heal',
+    system: 's',
+    prompt: [
+      'Step: click - Place the order',
+      'Broken locator: {"value":"Place order"} (button "Place order")',
+      'Problem: gone',
+      '<page_snapshot path="/demo-shop/redesign/checkout" title="Checkout">',
+      page,
+      '</page_snapshot>',
+    ].join('\n'),
+    schema: HealSchema,
+    temperature: 0,
+  });
+
+  it('replays a heal for the same step, locator and page when page details shifted', async () => {
+    const store = new ReplayStore(dir);
+    const recorded = heal('- textbox "Full name": Thandi');
+    await store.write(ReplayStore.key(recorded), { ...recorded, output: { to: 'Confirm order' } });
+
+    await expect(
+      new ReplayLanguageModel(store).generateObject(heal('- textbox "Full name": Sipho')),
+    ).resolves.toEqual({ to: 'Confirm order' });
+  });
+
+  it('never stretches plans that way, and finds nothing in an empty folder', async () => {
+    const empty = new ReplayStore(join(dir, 'missing'));
+
+    await expect(empty.findByPromptLines('heal', ['x'])).resolves.toBeNull();
+    await expect(
+      new ReplayLanguageModel(empty).generateObject({ ...heal('x'), purpose: 'plan' }),
+    ).rejects.toThrow(/No recorded plan/);
+    await expect(new ReplayLanguageModel(empty).generateObject(heal('x'))).rejects.toThrow(
+      /No recorded heal/,
+    );
+  });
+});
