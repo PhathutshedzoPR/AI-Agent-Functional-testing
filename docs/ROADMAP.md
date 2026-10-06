@@ -26,7 +26,8 @@ Goal: an empty but production-shaped repo, green CI, SonarQube Cloud connected.
 - [x] `vitest.config.ts`: `tests/unit` and `tests/integration` as separate projects; v8 coverage with `text` and `lcov` reporters to `coverage/lcov.info`; 80% thresholds on `src/core`, `src/adapters`, `src/server`, `src/contracts`, `src/lib`; alias `server-only` to an empty module. The integration project gets a `globalSetup` that reuses a running app at `INTEGRATION_BASE_URL` or builds and starts one on a spare port.
 - [x] `src/server/env.ts` (`parseEnv` and lazy `getEnv`, provider-specific required keys via `superRefine`), `.env.example` (below), `.gitignore` for `.env*` (except `.env.example`), `.data/`, `coverage/`, `reports/`, `test-results/`.
   - Defaults to `LLM_PROVIDER=replay` when unset, so a fresh clone starts without keys. Blank values count as unset. Added `LLM_REPLAY_DIR` and `DATA_DIR` with defaults.
-- [ ] `next.config.ts`: security headers (CLAUDE.md section 4, item 12). Add `serverExternalPackages: ['playwright']` only if bundling complains.
+- [x] `next.config.ts`: security headers (CLAUDE.md section 4, item 12). Add `serverExternalPackages: ['playwright']` only if bundling complains.
+  - Headers come from `src/server/security/securityHeaders.ts` (unit-tested). No `upgrade-insecure-requests` or HSTS because the demo runs on plain-HTTP localhost.
 - [ ] `.github/workflows/ci.yml` and `sonar-project.properties` (below), `.github/dependabot.yml` for `npm` and `github-actions`, weekly.
 - [ ] **HUMAN (repo owner):** sign in to sonarcloud.io with GitHub, import the repo, set **Administration > Analysis Method > Automatic Analysis: off**, generate a token, add it as the GitHub secret `SONAR_TOKEN`, then copy the organization and project keys into `sonar-project.properties`.
 - [ ] **HUMAN:** create an API key (Google AI Studio for Gemini, or Anthropic/OpenAI), pick a current model ID, put both in `.env.local`. Never commit it.
