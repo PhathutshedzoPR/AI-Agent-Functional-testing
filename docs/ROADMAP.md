@@ -30,8 +30,8 @@ Goal: an empty but production-shaped repo, green CI, SonarQube Cloud connected.
   - Headers come from `src/server/security/securityHeaders.ts` (unit-tested). No `upgrade-insecure-requests` or HSTS because the demo runs on plain-HTTP localhost.
 - [x] `.github/workflows/ci.yml` and `sonar-project.properties` (below), `.github/dependabot.yml` for `npm` and `github-actions`, weekly.
   - Actions pinned to current majors (checkout v7, setup-node v7, sonarqube-scan-action v8). The scan step is skipped until `SONAR_TOKEN` exists, so CI can go green first.
-- [ ] **HUMAN (repo owner):** sign in to sonarcloud.io with GitHub, import the repo, set **Administration > Analysis Method > Automatic Analysis: off**, generate a token, add it as the GitHub secret `SONAR_TOKEN`, then copy the organization and project keys into `sonar-project.properties`.
-- [ ] **HUMAN:** create an API key (Google AI Studio for Gemini, or Anthropic/OpenAI), pick a current model ID, put both in `.env.local`. Never commit it.
+- [x] **HUMAN (repo owner):** sign in to sonarcloud.io with GitHub, import the repo, set **Administration > Analysis Method > Automatic Analysis: off**, generate a token, add it as the GitHub secret `SONAR_TOKEN`, then copy the organization and project keys into `sonar-project.properties`.
+- [x] **HUMAN:** create an API key (Google AI Studio for Gemini, or Anthropic/OpenAI), pick a current model ID, put both in `.env.local`. Never commit it.
 - [ ] After the first green scan, add the quality gate, coverage and security rating badges to the top of `README.md`.
 
 Done when: `npm run check` and `npm run build` pass locally, and the CI run on `main` is green with an analysis visible in SonarQube Cloud.
@@ -154,7 +154,8 @@ Goal: a hand-written plan runs against Kota Express in real Chromium. No LLM yet
 - [x] Playwright adapter: `PlaywrightBrowserFactory` (one browser per run, fresh context per scenario), `PlaywrightBrowserSession` (open, ariaSnapshot, act, screenshot, current URL, findings from console errors and failed responses, `page.route()` guard that also blocks TestPilot's own `/api/*`), `LocatorResolver` (Locator to `getBy*`, including `within`). Unit-test the resolver mapping.
   - Playwright only routes the first hop of a redirect, so `PlaywrightRequestGuard` fetches each request with `maxRedirects: 0` and checks every `Location` before fulfilling. WebSockets are checked too. Blocked requests become `blocked-request` findings. Coverage exclusion widened to `src/adapters/browser/Playwright*.ts` (integration-tested).
 - [x] `src/adapters/system`: `SystemClock`, `CryptoIdGenerator`.
-- [ ] Kota Express at `/demo-shop/[release]` with `stable`, `redesign` and `buggy` exactly as in CLAUDE.md section 8. Same components for every release; differences only in `_config/releases.ts`.
+- [x] Kota Express at `/demo-shop/[release]` with `stable`, `redesign` and `buggy` exactly as in CLAUDE.md section 8. Same components for every release; differences only in `_config/releases.ts`.
+  - Cart and order live in sessionStorage (fresh per scenario context). Buttons stay disabled until hydration so early clicks are never lost. Line items show "2 × R 35,00" and only the total shows the sum, so a whole-page total check is unambiguous. Bugs: cart total ignores quantity, cellphone check is length-only, confirmation shows the express fee (R 45) instead of the R 30 charged, Specials page calls `notFound()`. All shop colour pairs pass AA.
 - [ ] Integration test: a hand-written plan ("add two Quarter kotas, check the cart total, check out with valid details, see the confirmation") passes on `stable` and fails on `buggy` at the cart total, with real screenshots written to `.data/artifacts`.
 
 Done when: that integration test passes locally.

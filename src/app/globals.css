@@ -128,3 +128,40 @@
     @apply font-sans;
   }
 }
+
+/* TestPilot palette (CLAUDE.md section 9). Status colours come in dark and light pairs. */
+@theme {
+  --color-paper: #eef0ea;
+  --color-ink: #151a17;
+  --color-forest: #123d33;
+  --color-signal: #c8f25b;
+  --color-sky: #bed5ef;
+  --color-orchid: #e2b6e4;
+
+  --color-surface: #141816;
+  --color-raised: #1c211e;
+  --color-divider: #2c332e;
+  --color-control: #66706a;
+  --color-control-light: #7d867f;
+  --color-text: #e9ede9;
+  --color-muted: #9aa39d;
+
+  --color-passed: #2e9e6b;
+  --color-healed: #d99a2b;
+  --color-failed: #ec625a;
+  --color-skipped: #8e9690;
+  --color-passed-light: #1c7049;
+  --color-healed-light: #875a0b;
+  --color-failed-light: #b3352d;
+  --color-skipped-light: #5e6862;
+
+  /* Kota Express, the demo shop: warm and plainly a customer's app, not TestPilot. */
+  --color-kota-cream: #fff7ea;
+  --color-kota-bun: #f6e3c3;
+  --color-kota-mustard: #f2b544;
+  --color-kota-tomato: #b23a12;
+  --color-kota-crust: #6b3a17;
+  --color-kota-ink: #2b1a10;
+  --color-kota-line: #e3cfac;
+  --font-kota: ui-rounded, 'Segoe UI', system-ui, sans-serif;
+}

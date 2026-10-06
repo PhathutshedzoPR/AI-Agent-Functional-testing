@@ -17,7 +17,7 @@ export const metadata: Metadata = {
   description: 'An AI agent for functional testing that runs every step in a real browser.',
 };
 
-export default function RootLayout({ children }: LayoutProps<'/'>) {
+export default function RootLayout({ children }: Readonly<LayoutProps<'/'>>) {
   return (
     <html lang="en" className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}>
       <body className="min-h-full flex flex-col">{children}</body>
