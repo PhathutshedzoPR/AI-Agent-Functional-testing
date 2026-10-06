@@ -23,7 +23,7 @@ Goal: an empty but production-shaped repo, green CI, SonarQube Cloud connected.
   - Explicit return types are enforced on `src/**/*.ts`; React components (`.tsx`) infer theirs.
 - [x] Prettier config and the scripts from CLAUDE.md section 11 (`check` must exist from day one).
   - `package.json` has `"type": "module"`. `agent` and `replays:record` scripts land with Phase 5 and Phase 2.
-- [ ] `vitest.config.ts`: `tests/unit` and `tests/integration` as separate projects; v8 coverage with `text` and `lcov` reporters to `coverage/lcov.info`; 80% thresholds on `src/core`, `src/adapters`, `src/server`, `src/contracts`, `src/lib`; alias `server-only` to an empty module. The integration project gets a `globalSetup` that reuses a running app at `INTEGRATION_BASE_URL` or builds and starts one on a spare port.
+- [x] `vitest.config.ts`: `tests/unit` and `tests/integration` as separate projects; v8 coverage with `text` and `lcov` reporters to `coverage/lcov.info`; 80% thresholds on `src/core`, `src/adapters`, `src/server`, `src/contracts`, `src/lib`; alias `server-only` to an empty module. The integration project gets a `globalSetup` that reuses a running app at `INTEGRATION_BASE_URL` or builds and starts one on a spare port.
 - [ ] `src/server/env.ts` (`parseEnv` and lazy `getEnv`, provider-specific required keys via `superRefine`), `.env.example` (below), `.gitignore` for `.env*` (except `.env.example`), `.data/`, `coverage/`, `reports/`, `test-results/`.
 - [ ] `next.config.ts`: security headers (CLAUDE.md section 4, item 12). Add `serverExternalPackages: ['playwright']` only if bundling complains.
 - [ ] `.github/workflows/ci.yml` and `sonar-project.properties` (below), `.github/dependabot.yml` for `npm` and `github-actions`, weekly.
