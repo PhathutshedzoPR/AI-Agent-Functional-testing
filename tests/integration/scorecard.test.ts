@@ -29,6 +29,11 @@ const recording = process.env.SCORECARD_RECORD === 'true';
 function llmSettings(): Record<string, string | undefined> {
   if (!recording) return { LLM_PROVIDER: 'replay' };
   process.loadEnvFile('.env.local');
+  if (!process.env.LLM_PROVIDER || process.env.LLM_PROVIDER === 'replay') {
+    throw new Error(
+      'npm run replays:record calls a live model. In .env.local set LLM_PROVIDER to google, anthropic or openai, with LLM_MODEL and that provider key, then run it again. Set it back to replay afterwards.',
+    );
+  }
   const live = Object.fromEntries(LIVE_SETTINGS.map((name) => [name, process.env[name]]));
   return { ...live, LLM_RECORD: 'true' };
 }
