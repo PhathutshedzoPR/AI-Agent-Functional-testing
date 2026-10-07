@@ -132,7 +132,7 @@ Patterns we used on purpose: Strategy for actions, healing and exporters; Templa
 ## Security
 
 An agent that opens whatever URL you give it, on a server, needs guard rails:
-
+/
 - API keys stay on the server and are validated before use. Nothing secret reaches the browser.
 - By default the agent only visits hosts on an allowlist. In public mode it refuses private, loopback and cloud metadata addresses, and checks every request the browser makes, including redirects.
 - Web pages are untrusted input. The model's output has to match a schema and an allowlist of actions, and nothing it returns is run as code.
