@@ -3,7 +3,13 @@
 import { useId, useRef, type KeyboardEvent, type ReactNode } from 'react';
 import { cn } from '@/lib/cn';
 
-export type RunTab = Readonly<{ id: string; label: string; content: ReactNode }>;
+export type RunTab = Readonly<{
+  id: string;
+  label: string;
+  content: ReactNode;
+  /** Left out of the printed report (the export links, say). */
+  screenOnly?: boolean;
+}>;
 
 type Props = Readonly<{ tabs: readonly RunTab[]; active: string; onChange: (id: string) => void }>;
 
@@ -29,7 +35,7 @@ export function RunTabs({ tabs, active, onChange }: Props) {
       <div
         role="tablist"
         aria-label="Run details"
-        className="flex flex-wrap gap-2 border-b border-divider pb-3"
+        className="flex flex-wrap gap-2 border-b border-divider pb-3 print:hidden"
       >
         {tabs.map((tab, index) => (
           <button
@@ -54,16 +60,24 @@ export function RunTabs({ tabs, active, onChange }: Props) {
           </button>
         ))}
       </div>
-      {current && (
+      {/* Every panel is rendered so "Save as PDF" prints them all; only the open one shows on screen. */}
+      {tabs.map((tab) => (
         <div
+          key={tab.id}
           role="tabpanel"
-          id={`${base}-${current.id}-panel`}
-          aria-labelledby={`${base}-${current.id}-tab`}
-          className="pt-5"
+          id={`${base}-${tab.id}-panel`}
+          aria-labelledby={`${base}-${tab.id}-tab`}
+          // A class, not the hidden attribute: Tailwind forces [hidden] off even in print.
+          className={cn(
+            'pt-5',
+            tab.id !== current?.id && 'hidden',
+            tab.screenOnly ? 'print:hidden' : 'print:block',
+          )}
         >
-          {current.content}
+          <h2 className="hidden text-lg font-semibold print:block">{tab.label}</h2>
+          {tab.content}
         </div>
-      )}
+      ))}
     </div>
   );
 }

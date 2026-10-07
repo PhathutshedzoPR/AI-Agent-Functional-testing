@@ -40,7 +40,7 @@ export function RerunActions({ runId, appBaseUrl, currentUrl }: Props) {
   };
 
   return (
-    <div className="flex flex-wrap items-center gap-2">
+    <div className="flex flex-wrap items-center gap-2 print:hidden">
       <span className="text-sm text-muted">Run this plan on</span>
       {others.map((release) => (
         <button

@@ -102,7 +102,12 @@ export function RunDashboard({ runId, appBaseUrl }: Props) {
         />
       ),
     },
-    { id: 'export', label: 'Export', content: <ExportMenu runId={runId} ready={finished} /> },
+    {
+      id: 'export',
+      label: 'Export',
+      content: <ExportMenu runId={runId} ready={finished} />,
+      screenOnly: true,
+    },
   ];
 
   return (
@@ -133,7 +138,7 @@ export function RunDashboard({ runId, appBaseUrl }: Props) {
         />
       </section>
       <div className="grid gap-5 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
-        <section aria-label="Live browser" className={panel}>
+        <section aria-label="Live browser" className={cn(panel, 'print:hidden')}>
           <LiveBrowser runId={runId} step={shown} />
         </section>
         <div className="space-y-5">
@@ -145,7 +150,9 @@ export function RunDashboard({ runId, appBaseUrl }: Props) {
               </div>
             ))}
           </dl>
-          <AgentFeed items={view.feed} />
+          <div className="print:hidden">
+            <AgentFeed items={view.feed} />
+          </div>
         </div>
       </div>
       {view.warnings.length > 0 && (

@@ -10,7 +10,7 @@ export default function DashboardLayout({ children }: Readonly<LayoutProps<'/'>>
     <div className="flex min-h-screen flex-col bg-surface text-text md:flex-row">
       <nav
         aria-label="TestPilot"
-        className="flex shrink-0 items-center gap-2 border-b border-divider p-4 md:w-56 md:flex-col md:items-stretch md:border-r md:border-b-0"
+        className="flex shrink-0 items-center gap-2 border-b border-divider p-4 print:hidden md:w-56 md:flex-col md:items-stretch md:border-r md:border-b-0"
       >
         <Link
           href="/"

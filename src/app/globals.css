@@ -196,3 +196,31 @@
     radial-gradient(36rem 26rem at 85% 30%, rgb(190 213 239 / 0.55), transparent 70%),
     radial-gradient(30rem 22rem at 60% 90%, rgb(226 182 228 / 0.4), transparent 70%);
 }
+
+/* "Save as PDF" on a run gives a light report: the dark dashboard tokens switch to light ones and
+   the status colours to the shades checked for contrast on light. Backgrounds are kept so the
+   stat tiles print in colour. */
+@media print {
+  :root {
+    --color-surface: #ffffff;
+    --color-raised: #ffffff;
+    --color-divider: #d5dad6;
+    --color-control: var(--color-control-light);
+    --color-text: var(--color-ink);
+    --color-muted: var(--color-skipped-light);
+    --color-signal: var(--color-forest);
+    --color-passed: var(--color-passed-light);
+    --color-healed: var(--color-healed-light);
+    --color-failed: var(--color-failed-light);
+    --color-skipped: var(--color-skipped-light);
+    print-color-adjust: exact;
+  }
+
+  @page {
+    margin: 14mm;
+  }
+
+  li {
+    break-inside: avoid;
+  }
+}

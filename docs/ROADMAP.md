@@ -212,7 +212,7 @@ Confirm the exact cut-off time with Sebaka, and ask a mentor whether commits aft
   - Rotated by the team on 7 Oct; the new key lives only in `.env.local`.
 - [x] **HUMAN:** Dependabot's pull requests were opened before the lockfile fix, so their CI fails. Comment `@dependabot recreate` on each, then merge the ones that go green.
   - All three merged by the team on 7 Oct (React 19.3, ESLint 10, `@types/node` 26). Lint, typecheck, unit and integration tests pass on the merged versions.
-- [ ] `git tag submission-2026-10-07 && git push origin submission-2026-10-07`, then submit the repo link through Sebaka's form.
+- [x] `git tag submission-2026-10-07 && git push origin submission-2026-10-07`, then submit the repo link through Sebaka's form.
 
 ---
 
@@ -252,7 +252,8 @@ Goal: the design in CLAUDE.md section 9, wired to real data.
   - Renames found by healing now carry through the rest of the run, so checks on a renamed control test the new control.
 - [x] New run: "Choose a target" cards, then "What should I test?" composer with four suggestion cards. Clicking a card fills the composer; "Start run" starts it.
 - [x] Live run dashboard: header (target, status, elapsed, LLM calls, "Stop run"), flight path, live browser tile with scrubber, stat tiles, agent feed with `aria-live`.
-- [ ] Tabs: Steps, Bugs (evidence, expected vs actual), Needs review (healed steps with from, to and reason), Traceability, Export. A print stylesheet so "Save as PDF" from the browser gives a clean report.
+- [x] Tabs: Steps, Bugs (evidence, expected vs actual), Needs review (healed steps with from, to and reason), Traceability, Export. A print stylesheet so "Save as PDF" from the browser gives a clean report.
+  - Print (Save as PDF) gives a light report with every panel (steps, bugs with screenshot, needs review, traceability) and no navigation, buttons or export links: the dark tokens switch to light ones in @media print, and inactive panels use the hidden class rather than the hidden attribute, which Tailwind forces off even in print.
 - [x] History page.
 - [x] Landing page. Record one real run's events to `src/app/(marketing)/_data/sample-run.json` and replay them through `projectRun` in the hero, captioned with where and when it was recorded.
   - The hero replays a real recorded stable run (`src/app/(marketing)/_data/sample-run.json`); only its label was set to the dashboard name.

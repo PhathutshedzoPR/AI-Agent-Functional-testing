@@ -67,7 +67,7 @@ export function RunHeader({ runId, view }: Props) {
           disabled={stopping}
           className={cn(
             buttonStyles({ tone: 'outline', size: 'sm' }),
-            'ml-auto hover:border-failed',
+            'ml-auto hover:border-failed print:hidden',
           )}
         >
           {stopping ? 'Stopping...' : 'Stop run'}
