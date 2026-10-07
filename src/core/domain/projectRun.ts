@@ -129,5 +129,7 @@ export function applyRunEvent(view: RunView, event: RunEvent): RunView {
 
 /** Folds a run's events into the view the dashboard shows (pure; used on server and client). */
 export function projectRun(events: readonly RunEvent[], from: RunView = EMPTY_RUN_VIEW): RunView {
-  return [...events].sort((a, b) => a.seq - b.seq).reduce(applyRunEvent, from);
+  return [...events]
+    .sort((a, b) => a.seq - b.seq)
+    .reduce((view, event) => applyRunEvent(view, event), from);
 }

@@ -206,7 +206,7 @@ describe('BugReporter', () => {
       title: 'Order two kotas: Total failed',
       severity: 'high',
       scenarioId: scenario.id,
-      stepsToReproduce: scenario.steps.slice(0, 3).map(describeStep),
+      stepsToReproduce: scenario.steps.slice(0, 3).map((step) => describeStep(step)),
       expected: 'The page to contain "R 70,00"',
       actual: 'The amounts shown were R 35,00',
       screenshotStepId: 's3',
@@ -245,7 +245,7 @@ describe('describeStep', () => {
         aStep({ action: 'assertHidden', target: add }),
         aStep({ action: 'assertUrl', target: null, value: '/confirmation' }),
         aStep({ action: 'assertValue', target: label, value: 'Soweto' }),
-      ].map(describeStep),
+      ].map((step) => describeStep(step)),
     ).toEqual([
       'Open /cart',
       'Tick button "Add to order"',
