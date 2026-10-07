@@ -116,6 +116,25 @@ describe('recording and replay', () => {
     expect(await readdir(dir)).toEqual([`${ReplayStore.key(request)}.json`]);
   });
 
+  it('answers a request it already recorded without calling the model again', async () => {
+    const store = new ReplayStore(dir);
+    const { purpose, system, prompt } = request;
+    await store.write(ReplayStore.key(request), {
+      purpose,
+      system,
+      prompt,
+      output: { summary: 'Kept', count: 2 },
+    });
+    const live = mockAiModel({ text: '{"summary":"New","count":3}' });
+    const recorder = new RecordingLanguageModel(new AiSdkLanguageModel(live), store);
+
+    await expect(recorder.generateObject(request)).resolves.toEqual({ summary: 'Kept', count: 2 });
+    await expect(
+      recorder.generateObject({ ...request, prompt: 'A new question.' }),
+    ).resolves.toEqual({ summary: 'New', count: 3 });
+    expect(await readdir(dir)).toHaveLength(2);
+  });
+
   it('keys recordings by purpose, system prompt and prompt', () => {
     const key = ReplayStore.key(request);
 
@@ -128,7 +147,7 @@ describe('recording and replay', () => {
   it('says how to fix a missing recording', async () => {
     await expect(
       new ReplayLanguageModel(new ReplayStore(dir)).generateObject(request),
-    ).rejects.toThrow(/npm run replays:record/);
+    ).rejects.toThrow(/no recorded plan for this story.*Run this plan on.*npm run replays:record/);
   });
 
   it('refuses a recording that no longer fits the schema', async () => {
@@ -214,9 +233,9 @@ describe('ReplayLanguageModel heal fallback', () => {
     await expect(empty.findByPromptLines('heal', ['x'])).resolves.toBeNull();
     await expect(
       new ReplayLanguageModel(empty).generateObject({ ...heal('x'), purpose: 'plan' }),
-    ).rejects.toThrow(/No recorded plan/);
+    ).rejects.toThrow(/no recorded plan/);
     await expect(new ReplayLanguageModel(empty).generateObject(heal('x'))).rejects.toThrow(
-      /No recorded heal/,
+      /no recorded repair/,
     );
   });
 });

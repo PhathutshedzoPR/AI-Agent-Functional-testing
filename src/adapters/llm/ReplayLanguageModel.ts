@@ -1,7 +1,14 @@
 import type { z } from 'zod';
 import { LlmError } from '@/core/errors';
-import type { ILanguageModel, LlmRequest } from '@/core/ports';
+import type { ILanguageModel, LlmPurpose, LlmRequest } from '@/core/ports';
 import { ReplayStore } from './ReplayStore';
+
+// Shown in the dashboard when a run stops, so each says what to do next.
+const MISSING: Readonly<Record<LlmPurpose, string>> = {
+  plan: 'Replay mode has no recorded plan for this story on this page. Run the story where it was recorded, then use "Run this plan on" to bring that plan here.',
+  heal: 'Replay mode has no recorded repair for this broken locator.',
+  report: 'Replay mode has no recorded wording for these bugs.',
+};
 
 /**
  * Serves recorded responses instead of calling a provider. Only the plan text is replayed; the
@@ -17,7 +24,7 @@ export class ReplayLanguageModel implements ILanguageModel {
       (await this.store.read(ReplayStore.key(request))) ?? (await this.similarHeal(request));
     if (!record) {
       throw new LlmError(
-        `No recorded ${request.purpose} response matches this request. Record it with npm run replays:record, or use a live provider.`,
+        `${MISSING[request.purpose]} To plan anything new, use a live provider, or record it with npm run replays:record.`,
       );
     }
     const parsed = request.schema.safeParse(record.output);

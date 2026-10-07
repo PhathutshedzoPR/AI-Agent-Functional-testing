@@ -209,7 +209,9 @@ Confirm the exact cut-off time with Sebaka, and ask a mentor whether commits aft
   - Green from commit 415b182: lint, typecheck, unit tests with the coverage gate, build, SonarQube Cloud scan and npm audit.
   - The gate then failed on one reliability bug (S7727, a function passed straight to `reduce`); fixed in 09ddee5.
 - [x] **HUMAN:** rotate the Gemini API key. It was pasted into chat sessions and sat in an unpushed commit before it was scrubbed. Create a new key in AI Studio, put it in `.env.local` only, then delete the old key.
+  - Rotated by the team on 7 Oct; the new key lives only in `.env.local`.
 - [x] **HUMAN:** Dependabot's pull requests were opened before the lockfile fix, so their CI fails. Comment `@dependabot recreate` on each, then merge the ones that go green.
+  - Handled without comments: the React 19.3 update from #1 is on `main` (Dependabot closes #1 when it sees that), and `dependabot.yml` now holds majors for `@types/node` (we run Node 22) and `eslint` (its plugins first), so #2 and #3 can simply be closed.
 - [ ] `git tag submission-2026-10-07 && git push origin submission-2026-10-07`, then submit the repo link through Sebaka's form.
 
 ---
@@ -283,6 +285,7 @@ Done when: a full run looks right on a projector-sized screen and on a phone.
 - [ ] Demo settings: `AGENT_MAX_SCENARIOS=3`, every run under about 40 seconds. Do a warm-up run before going on stage.
 - [ ] Add the `replays:record` script that CLAUDE.md lists (it runs each suggestion story on each release with `LLM_RECORD=true`), then record the three stories that aren't recorded yet: bad cellphone number, delivery fee on the confirmation, every navigation link works. Then every suggestion card works offline.
   - Script added: `npm run replays:record` runs the scorecard with the live model and records it. On 7 Oct the free tier (20 requests per model per day) ran out after stories 1 and 3 (gemini-3.6-flash) and story 2 on stable and buggy plus story 4 on stable (gemini-3.7-flash). **To do after the daily reset:** record story 2 on redesign and story 4 on buggy and redesign, then add both titles to `RECORDED` in the scorecard.
+  - The recorder now answers any request it already recorded from the recording, so `replays:record` spends provider calls only on what is missing. Still missing: a fresh plan for each story on redesign (a fresh redesign run in replay mode stops with a message that says what to do), story 2 on redesign and story 4 on buggy and redesign.
 - [ ] Offline drill: Wi-Fi off, `LLM_PROVIDER=replay`, the whole script still works.
 - [ ] Record a backup screen capture of the full demo. Keep it on the laptop and a USB stick.
 - [ ] Rehearse three times with a timer. One person drives, one person talks.

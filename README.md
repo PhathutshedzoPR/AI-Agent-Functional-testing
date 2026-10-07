@@ -2,7 +2,7 @@
 
 TestPilot tests websites the way a QA analyst would. Give it a URL and a user story. It opens a real browser, works out what to test, clicks through the flows and tells you what broke, with screenshots and the steps to reproduce it.
 
-We're building it for the [Sebaka Testing AI Hackathon 2026](https://sebakasouthafrica.co.za/ai-agent-challenge.html), functional testing track.
+We're building it for the [Sebaka Testing AI Hackathon 2026](https://sebakasouthafrica.co.za/ai-agent-challenge.html), functional testing track. The idea on one page: [docs/IDEA.md](docs/IDEA.md).
 
 [![CI](https://github.com/PhathutshedzoPR/AI-Agent-Functional-testing/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/PhathutshedzoPR/AI-Agent-Functional-testing/actions/workflows/ci.yml)
 [![Quality gate](https://sonarcloud.io/api/project_badges/measure?project=PhathutshedzoPR_AI-Agent-Functional-testing&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=PhathutshedzoPR_AI-Agent-Functional-testing)
@@ -145,10 +145,10 @@ An agent that opens whatever URL you give it, on a server, needs guard rails:
 |---|---|
 | `npm run dev` | Development server on port 3000 |
 | `npm run build`, then `npm start` | Production build and server (use this for the demo) |
-| `npm run check` | Lint, typecheck and unit tests (323 tests) |
+| `npm run check` | Lint, typecheck and unit tests (324 tests) |
 | `npm run test:coverage` | Unit tests with coverage for SonarQube Cloud |
 | `npm run test:integration` | Builds the app, starts it on a spare port and runs the agent against Kota Express in real Chromium, including the scorecard (every suggestion story on every release, replayed); the scorecard table lands in `.data/scorecard.md` |
-| `npm run replays:record` | The same scorecard with the live model from `.env.local`, saving every response to `fixtures/llm-replays`. Re-run it whenever a prompt changes |
+| `npm run replays:record` | The same scorecard with the live model from `.env.local`, saving every response to `fixtures/llm-replays`. Requests already recorded are answered from the recording, so only new ones use provider calls. Re-run it whenever a prompt changes |
 | `npm run format` | Prettier |
 
 Planned, not built yet: a command-line runner (`npm run agent`) for CI pipelines.
