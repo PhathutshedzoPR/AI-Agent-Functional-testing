@@ -14,6 +14,7 @@ export function recordingContext(
     signal: new AbortController().signal,
     llm: new FakeLanguageModel(),
     explored: new Set<string>(),
+    renames: new Map(),
     emit: (payload) => {
       events.push(payload);
       return Promise.resolve();

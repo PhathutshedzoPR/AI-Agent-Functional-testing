@@ -11,6 +11,6 @@
       "within": null
     },
     "confidence": 1,
-    "reason": "The link was renamed from 'Checkout' to 'Proceed to payment' and points to the checkout URL."
+    "reason": "Link text changed from Checkout to Proceed to payment"
   }
 }

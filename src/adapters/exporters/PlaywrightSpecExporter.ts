@@ -31,7 +31,9 @@ function callCode(call: LocatorCall): string {
 
 /** The locator as Playwright code, built from the same call chain the agent ran. */
 export function locatorCode(locator: Locator): string {
-  return `page${toLocatorCalls(locator).map(callCode).join('')}`;
+  return `page${toLocatorCalls(locator)
+    .map((call) => callCode(call))
+    .join('')}`;
 }
 
 function stepCode(step: StepView, start: URL): string {

@@ -1,5 +1,6 @@
 import {
   Finding,
+  type Locator,
   StepResult,
   type Healing,
   type PlanStep,
@@ -10,6 +11,11 @@ import { AppError, AssertionFailedError, RunCancelledError } from '../errors';
 import type { IArtifactStore, IBrowserSession, IClock, IIdGenerator } from '../ports';
 import type { ActionRegistry } from './actions';
 import type { ExecutionContext } from './RunContext';
+
+/** What one step needs besides itself: the page and the run. */
+type StepRun = Readonly<{ session: IBrowserSession; context: ExecutionContext }>;
+
+const locatorKey = (locator: Locator): string => JSON.stringify(locator);
 
 export type StepFailure = Readonly<{ step: PlanStep; expected: string; actual: string }>;
 
@@ -56,6 +62,7 @@ export class ScenarioExecutor {
     const results: StepResult[] = [];
     const findings: Finding[] = [];
     let failure: StepFailure | null = null;
+    const run: StepRun = { session, context };
 
     for (const step of scenario.steps) {
       if (failure) {
@@ -65,7 +72,7 @@ export class ScenarioExecutor {
         continue;
       }
       RunCancelledError.throwIfAborted(context.signal);
-      const { result, error } = await this.runStep(scenario, step, session, context);
+      const { result, error } = await this.runStep(scenario, step, run);
       results.push(result);
       findings.push(...(await this.recordFindings(scenario, step, session, context)));
       if (error) failure = describeFailure(step, error);
@@ -79,15 +86,15 @@ export class ScenarioExecutor {
   private async runStep(
     scenario: Scenario,
     step: PlanStep,
-    session: IBrowserSession,
-    context: ExecutionContext,
+    run: StepRun,
   ): Promise<{ result: StepResult; error: AppError | null }> {
+    const { session, context } = run;
     await context.emit({ type: 'step.started', scenarioId: scenario.id, stepId: step.id });
     const started = this.deps.clock.monotonicMs();
     let error: AppError | null = null;
     let healing: Healing | null = null;
     try {
-      healing = await this.execute(step, session, context);
+      healing = await this.execute(step, run);
     } catch (caught) {
       // A stop request closes the browser, which makes the current step fail; report the stop.
       RunCancelledError.throwIfAborted(context.signal);
@@ -110,13 +117,22 @@ export class ScenarioExecutor {
     return { result, error };
   }
 
-  private async execute(
-    step: PlanStep,
-    session: IBrowserSession,
-    context: ExecutionContext,
-  ): Promise<Healing | null> {
+  private async execute(step: PlanStep, run: StepRun): Promise<Healing | null> {
+    const { session, context } = run;
+    const { renames } = context;
     const action = this.deps.registry.get(step.action);
     const stepContext = { session, baseUrl: context.start };
+    // A control renamed earlier in this run (same app version) keeps its new name for every later step,
+    // checks included, so "Place order is hidden" cannot pass just because it was renamed.
+    const known = step.target ? renames.get(locatorKey(step.target)) : undefined;
+    if (known) {
+      await action.execute({ ...step, target: known.to }, stepContext);
+      return {
+        ...known,
+        strategy: 'reused',
+        reason: `Same replacement as an earlier step. ${known.reason}`,
+      };
+    }
     try {
       await action.execute(step, stepContext);
       return null;
@@ -126,6 +142,7 @@ export class ScenarioExecutor {
           ? await this.deps.repairer.repair(step, error, session, context)
           : null;
       if (!healing) throw error;
+      if (step.target) renames.set(locatorKey(step.target), healing);
       // Retry once with the repaired locator; a second failure is a real failure.
       await action.execute({ ...step, target: healing.to }, stepContext);
       return healing;

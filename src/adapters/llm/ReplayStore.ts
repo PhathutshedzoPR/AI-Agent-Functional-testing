@@ -1,5 +1,5 @@
 import { createHash } from 'node:crypto';
-import { mkdir, readFile, writeFile } from 'node:fs/promises';
+import { mkdir, readFile, readdir, writeFile } from 'node:fs/promises';
 import { join, resolve } from 'node:path';
 import { z } from 'zod';
 import type { LlmPurpose, LlmRequest } from '@/core/ports';
@@ -47,6 +47,32 @@ export class ReplayStore {
   ): Promise<void> {
     await mkdir(this.dir, { recursive: true });
     await writeFile(this.path(key), `${JSON.stringify(record, null, 2)}\n`, 'utf8');
+  }
+
+  /**
+   * The first recording for `purpose` whose prompt contains every one of `lines`. Used when an
+   * exact match is missing because live page details shifted between recording and replay.
+   */
+  async findByPromptLines(
+    purpose: LlmPurpose,
+    lines: readonly string[],
+  ): Promise<ReplayRecord | null> {
+    let names: string[];
+    try {
+      names = await readdir(this.dir);
+    } catch {
+      return null; // no recordings folder yet means nothing to find
+    }
+    const recordings = names
+      .filter((file) => /^[\da-f]{64}\.json$/.test(file))
+      .sort((a, b) => a.localeCompare(b));
+    for (const name of recordings) {
+      const record = await this.read(name.slice(0, 64));
+      if (record?.purpose === purpose && lines.every((line) => record.prompt.includes(line))) {
+        return record;
+      }
+    }
+    return null;
   }
 
   private path(key: string): string {

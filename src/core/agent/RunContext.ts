@@ -1,4 +1,4 @@
-import type { RunEventPayload } from '../domain';
+import type { Healing, RunEventPayload } from '../domain';
 import type { ILanguageModel } from '../ports';
 
 /** Publishes one event of the current run; the emitter stamps runId, seq and time. */
@@ -18,4 +18,6 @@ export type ExecutionContext = RunContext &
   Readonly<{
     llm: ILanguageModel;
     explored: ReadonlySet<string>;
+    /** Replacements found so far in this run, keyed by the locator that broke (JSON). */
+    renames: Map<string, Healing>;
   }>;

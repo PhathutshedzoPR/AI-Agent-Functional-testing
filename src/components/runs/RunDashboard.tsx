@@ -15,6 +15,7 @@ import { ReviewList } from './ReviewList';
 import { RunHeader } from './RunHeader';
 import { RunTabs } from './RunTabs';
 import { StepList } from './StepList';
+import { TraceabilityTable } from './TraceabilityTable';
 
 type Props = Readonly<{ runId: string; appBaseUrl: string }>;
 
@@ -50,6 +51,10 @@ export function RunDashboard({ runId, appBaseUrl }: Props) {
   const shown = findStep(view, selected) ?? latestCaptured(view);
   const finished = TestRun.isFinal(view.status);
   const healedCount = view.stats.healed;
+  const showStep = (stepId: string): void => {
+    setSelected(stepId);
+    setTab('steps');
+  };
 
   const tabs = [
     {
@@ -83,13 +88,17 @@ export function RunDashboard({ runId, appBaseUrl }: Props) {
     {
       id: 'review',
       label: `Needs review (${healedCount})`,
+      content: <ReviewList scenarios={view.scenarios} onSelect={showStep} />,
+    },
+    {
+      id: 'trace',
+      label: 'Traceability',
       content: (
-        <ReviewList
+        <TraceabilityTable
+          criteria={view.criteria}
+          criteriaInferred={view.criteriaInferred}
           scenarios={view.scenarios}
-          onSelect={(stepId) => {
-            setSelected(stepId);
-            setTab('steps');
-          }}
+          onSelect={showStep}
         />
       ),
     },

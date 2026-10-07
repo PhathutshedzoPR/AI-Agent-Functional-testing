@@ -79,7 +79,7 @@ export class JUnitExporter implements IReportExporter {
       `<testsuites name="TestPilot" ${counts}>`,
       `  <testsuite name="${name}" ${counts} timestamp="${xmlEscape(view.startedAt ?? '')}">`,
       `    <properties>\n${properties}\n    </properties>`,
-      ...view.scenarios.map(testcase),
+      ...view.scenarios.map((scenario) => testcase(scenario)),
       '  </testsuite>',
       '</testsuites>',
       '',

@@ -91,7 +91,8 @@ describe('checkout validation', () => {
 
 describe('formatRand', () => {
   it('formats cents the South African way', () => {
-    expect(formatRand(7_000)).toBe('R 70,00');
-    expect(formatRand(123_450)).toBe('R 1 234,50');
+    // ICU versions differ on which no-break space they use, so compare the visible characters.
+    expect(formatRand(7_000).replace(/\s/g, ' ')).toBe('R 70,00');
+    expect(formatRand(123_450).replace(/\s/g, ' ')).toBe('R 1 234,50');
   });
 });

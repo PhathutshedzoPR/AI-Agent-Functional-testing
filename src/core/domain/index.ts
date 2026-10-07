@@ -49,6 +49,7 @@ export {
 } from './textMatching';
 export { narrateEvent } from './narrateEvent';
 export { applyRunEvent, projectRun } from './projectRun';
+export { traceCriteria, type CriterionVerdict, type TraceRow } from './traceCriteria';
 export {
   EMPTY_RUN_VIEW,
   EMPTY_STATS,

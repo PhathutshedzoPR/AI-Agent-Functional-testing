@@ -1,7 +1,9 @@
 import {
+  CRITERION_VERDICT_LABELS,
   Locator,
   RUN_STATUS_LABELS,
   STEP_STATUS_LABELS,
+  traceCriteria,
   type BugReport,
   type RunView,
 } from '@/core/domain';
@@ -40,6 +42,25 @@ function scenarioTable(view: RunView): string[] {
     ...view.scenarios.map(
       (s) =>
         `| ${mdEscape(s.title)} | ${s.kind} | ${mdEscape(s.criterion ?? '-')} | ${STEP_STATUS_LABELS[s.state]} |`,
+    ),
+    '',
+  ];
+}
+
+function traceability(view: RunView): string[] {
+  const rows = traceCriteria(view);
+  if (rows.length === 0) return [];
+  return [
+    '## Traceability',
+    '',
+    ...(view.criteriaInferred
+      ? ['The story had no acceptance criteria, so TestPilot proposed these.', '']
+      : []),
+    '| Criterion | Scenarios | Result |',
+    '|---|---|---|',
+    ...rows.map(
+      (row) =>
+        `| ${mdEscape(row.criterion ?? 'Not linked to a criterion')} | ${row.scenarios.map((s) => mdEscape(s.title)).join(', ') || '-'} | ${CRITERION_VERDICT_LABELS[row.verdict]} |`,
     ),
     '',
   ];
@@ -106,6 +127,7 @@ export class MarkdownExporter implements IReportExporter {
     const body = [
       ...header(view),
       ...scenarioTable(view),
+      ...traceability(view),
       ...bugs,
       ...needsReview(view),
       ...findings,

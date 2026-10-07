@@ -126,7 +126,7 @@ describe('assertText', () => {
 
     await expect(failure).rejects.toMatchObject({
       expected: 'status "Order total" to contain "R 70,00"',
-      actual: 'the amounts shown were R 35,00',
+      actual: 'the amounts shown were R 35,00',
     });
   });
 

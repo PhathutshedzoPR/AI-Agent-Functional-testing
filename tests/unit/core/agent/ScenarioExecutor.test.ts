@@ -91,7 +91,7 @@ describe('ScenarioExecutor', () => {
     expect(outcome.failure).toMatchObject({
       step: { id: 's3' },
       expected: 'the page to contain "R 70,00"',
-      actual: 'the amounts shown were R 35,00',
+      actual: 'the amounts shown were R 35,00',
     });
     expect(context.events.at(-1)).toEqual({
       type: 'scenario.finished',
@@ -206,9 +206,9 @@ describe('BugReporter', () => {
       title: 'Order two kotas: Total failed',
       severity: 'high',
       scenarioId: scenario.id,
-      stepsToReproduce: scenario.steps.slice(0, 3).map(describeStep),
+      stepsToReproduce: scenario.steps.slice(0, 3).map((step) => describeStep(step)),
       expected: 'The page to contain "R 70,00"',
-      actual: 'The amounts shown were R 35,00',
+      actual: 'The amounts shown were R 35,00',
       screenshotStepId: 's3',
       findings: [],
     });
@@ -245,7 +245,7 @@ describe('describeStep', () => {
         aStep({ action: 'assertHidden', target: add }),
         aStep({ action: 'assertUrl', target: null, value: '/confirmation' }),
         aStep({ action: 'assertValue', target: label, value: 'Soweto' }),
-      ].map(describeStep),
+      ].map((step) => describeStep(step)),
     ).toEqual([
       'Open /cart',
       'Tick button "Add to order"',
@@ -259,5 +259,58 @@ describe('describeStep', () => {
       'Check that the URL contains "/confirmation"',
       'Check that field labelled "Suburb" has the value "Soweto"',
     ]);
+  });
+});
+
+describe('ScenarioExecutor renames', () => {
+  const place = aRoleLocator('button', 'Place order');
+  const confirm = aRoleLocator('button', 'Confirm order');
+  const checkout = aScenario({
+    steps: [
+      aStep({ id: 'p1', action: 'click', target: place, intent: 'Place the order' }),
+      aStep({ id: 'p2', action: 'assertHidden', target: place, intent: 'Form is gone' }),
+    ],
+  });
+  const healing: Healing = {
+    from: place,
+    to: confirm,
+    method: 'llm',
+    strategy: 'llm',
+    reason: 'Renamed to Confirm order.',
+  };
+
+  it('applies a rename to later steps, so a renamed button is never hidden for free', async () => {
+    let repairs = 0;
+    const repairer: IStepRepairer = {
+      repair: () => {
+        repairs += 1;
+        return Promise.resolve(healing);
+      },
+    };
+    const { run } = executor(repairer);
+    // The order did not go through: "Confirm order" is still on the page.
+    const session = new FakeBrowserSession().show(confirm);
+
+    const outcome = await run.run(checkout, session, recordingContext());
+
+    expect(repairs).toBe(1);
+    expect(outcome.results.map((r) => r.status)).toEqual(['healed', 'failed']);
+    expect(outcome.failure?.expected).toBe('button "Confirm order" to be hidden');
+  });
+
+  it('marks reused renames for review and passes when the form really went away', async () => {
+    const repairer: IStepRepairer = { repair: () => Promise.resolve(healing) };
+    const { run } = executor(repairer);
+    const session = new FakeBrowserSession().show(confirm);
+    const click = session.click.bind(session);
+    session.click = async (target) => {
+      await click(target);
+      session.hide(confirm);
+    };
+
+    const outcome = await run.run(checkout, session, recordingContext());
+
+    expect(outcome.status).toBe('healed');
+    expect(outcome.results[1]?.healing).toMatchObject({ strategy: 'reused', to: confirm });
   });
 });

@@ -148,7 +148,7 @@ describe('a hand-written plan against Kota Express in real Chromium', () => {
     expect(outcome.failed?.step.intent).toBe('Total is R 70,00');
     expect(outcome.failed?.error).toBeInstanceOf(AssertionFailedError);
     expect((outcome.failed?.error as AssertionFailedError).actual).toBe(
-      'the amounts shown were R 35,00',
+      'the amounts shown were R 35,00',
     );
   });
 

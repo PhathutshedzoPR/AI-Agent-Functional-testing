@@ -148,6 +148,9 @@ export const STEP_STATUS_LABELS = {
   skipped: 'Skipped',
 } as const;
 
+/** Traceability results reuse the step words, plus one for a criterion no scenario checked. */
+export const CRITERION_VERDICT_LABELS = { ...STEP_STATUS_LABELS, untested: 'Not tested' } as const;
+
 export const RUN_STATUS_LABELS = {
   queued: 'Queued',
   running: 'Running',

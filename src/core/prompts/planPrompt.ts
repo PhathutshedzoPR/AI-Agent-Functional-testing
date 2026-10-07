@@ -61,7 +61,8 @@ Scenarios:
 - Every scenario runs in a fresh browser with empty storage, so start each one with a navigate step and repeat any setup it needs, such as adding items to a cart.
 - End every scenario with an assertion on the outcome a user would see.
 - Work out expected values from what the snapshots show. For example, if one item costs R 35,00, two of them cost R 70,00. Write rand amounts the way the site does, like "R 70,00".
-- Never assert text, headings or URLs from a page that is not in the snapshots, such as a confirmation page that only appears after a form is submitted. Its wording is unknown, so a guess would fail for the wrong reason.
+- A page that is not in the snapshots, such as a confirmation page that only appears after a form is submitted, has unknown wording. Never assert its headings, messages or URL: a guess would fail for the wrong reason.
+- On such a page you may assert a value carried over from a page you have seen, such as an amount, an item name or the customer's name, when a criterion says that page shows it. Use assertText with no target and the value exactly as the earlier page showed it, like "R 30,00".
 - To check that a form submission worked, assert that the form's submit button is now hidden (assertHidden). To check that a submission was refused, assert that the submit button is still visible (assertVisible). Do not guess error or success wording.
 - You may assert text that appears in the snapshots, and values you can work out from them, such as totals.
 - Use South African test data: names like Thandi Mokoena or Sipho Dlamini, cellphone numbers like 082 123 4567, Johannesburg street addresses.

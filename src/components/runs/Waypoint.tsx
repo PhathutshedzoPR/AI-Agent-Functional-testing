@@ -64,7 +64,8 @@ export function Waypoint({ step, index, total, selected, revealDelay, onSelect }
       aria-pressed={selected}
       onClick={() => onSelect(step.id)}
       className={cn(
-        'rounded-full p-1 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-signal',
+        // 32px for a mouse, 44px on a touch screen so a finger can hit one waypoint.
+        'rounded-full p-1 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-signal pointer-coarse:p-2.5',
         selected && 'bg-raised ring-2 ring-signal',
       )}
     >

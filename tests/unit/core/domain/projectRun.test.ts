@@ -178,7 +178,7 @@ describe('projectRun', () => {
   it('ignores duplicates and replays, and sorts out-of-order input', () => {
     const events = stamp(fullRun);
     const replayed = projectRun([...events].reverse());
-    const twice = events.reduce(applyRunEvent, view);
+    const twice = events.reduce((acc, event) => applyRunEvent(acc, event), view);
 
     expect(replayed).toEqual(view);
     expect(twice).toBe(view);

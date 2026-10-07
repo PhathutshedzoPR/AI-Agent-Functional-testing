@@ -34,18 +34,19 @@ export function StepList({ scenarios, selectedStepId, onSelect }: Props) {
                   aria-pressed={selectedStepId === step.id}
                   aria-label={`Step ${index + 1} of ${scenario.steps.length}, ${describeStep(step)}, ${step.state}`}
                   className={cn(
-                    'grid w-full grid-cols-[6.5rem_1fr_auto] items-center gap-3 rounded-lg px-3 py-2 text-left text-sm hover:bg-surface focus-visible:outline-2 focus-visible:outline-signal',
+                    'grid w-full grid-cols-[5.75rem_minmax(0,1fr)] items-center gap-x-3 gap-y-1 rounded-lg px-3 py-2 text-left text-sm hover:bg-surface focus-visible:outline-2 focus-visible:outline-signal sm:grid-cols-[6.5rem_minmax(0,1fr)_auto]',
                     selectedStepId === step.id && 'bg-surface ring-1 ring-signal',
                   )}
                 >
                   <StatusBadge state={step.state} />
-                  <span>
+                  <span className="[overflow-wrap:anywhere]">
                     {describeStep(step)}
                     {step.result?.error && (
                       <span className="mt-1 block text-failed">{step.result.error}</span>
                     )}
                   </span>
-                  <span className="tabular-nums text-muted">
+                  {/* On a phone the duration sits under the step instead of in a third column. */}
+                  <span className="col-start-2 whitespace-nowrap tabular-nums text-muted sm:col-start-auto">
                     {step.result && step.state !== 'skipped' ? `${step.result.durationMs} ms` : ''}
                   </span>
                 </button>

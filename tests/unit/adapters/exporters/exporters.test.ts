@@ -100,6 +100,14 @@ describe('MarkdownExporter', () => {
     );
   });
 
+  it('traces each criterion to its scenarios, including ones nothing tested', () => {
+    expect(md).toContain('## Traceability');
+    expect(md).toContain('| Total is right | - | Not tested |');
+    expect(md).toContain(
+      '| Not linked to a criterion | Order two \\<kotas\\> & "check" out, Never ran | Failed |',
+    );
+  });
+
   it('neutralises Markdown from the page so links and tables cannot be injected', () => {
     expect(mdEscape('[click](javascript:alert(1)) | ![x](y)\nnext')).toBe(
       '\\[click\\]\\(javascript:alert\\(1\\)\\) \\| \\!\\[x\\]\\(y\\) next',

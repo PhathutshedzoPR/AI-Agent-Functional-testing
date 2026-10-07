@@ -13,7 +13,7 @@ export class BugReporter {
     const { scenario, failure } = outcome;
     if (outcome.status !== 'failed' || !failure) return null;
     const failedAt = scenario.steps.findIndex((step) => step.id === failure.step.id);
-    const reproduce = scenario.steps.slice(0, failedAt + 1).map(describeStep);
+    const reproduce = scenario.steps.slice(0, failedAt + 1).map((step) => describeStep(step));
     return BugReport.create({
       id: this.ids.next(),
       title: `${scenario.title}: ${failure.step.intent} failed`,

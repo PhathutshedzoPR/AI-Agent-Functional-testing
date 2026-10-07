@@ -23,7 +23,7 @@ export function rebasePlan(plan: TestPlan, from: URL, to: URL, ids: IIdGenerator
     scenarios: plan.scenarios.map((scenario) => ({
       ...scenario,
       id: ids.next(),
-      steps: scenario.steps.map(move),
+      steps: scenario.steps.map((step) => move(step)),
     })),
   });
 }

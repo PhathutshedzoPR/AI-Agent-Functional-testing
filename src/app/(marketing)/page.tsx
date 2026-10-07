@@ -50,24 +50,24 @@ export default function LandingPage() {
 
   return (
     <div className="min-h-screen bg-paper text-ink">
-      <header className="mx-auto flex max-w-6xl items-center justify-between px-4 py-6">
+      <header className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-6">
         <Logo />
-        <nav aria-label="Main" className="flex items-center gap-6 text-sm font-semibold">
+        <nav aria-label="Main" className="flex items-center gap-4 text-sm font-semibold sm:gap-6">
           <a
             href="#how"
-            className="hover:underline focus-visible:outline-2 focus-visible:outline-forest"
+            className="hidden min-h-11 items-center hover:underline focus-visible:outline-2 focus-visible:outline-forest sm:inline-flex"
           >
             How it works
           </a>
           <Link
             href="/runs"
-            className="hover:underline focus-visible:outline-2 focus-visible:outline-forest"
+            className="hidden min-h-11 items-center hover:underline focus-visible:outline-2 focus-visible:outline-forest sm:inline-flex"
           >
             History
           </Link>
           <Link
             href="/runs/new"
-            className="rounded-full bg-forest px-4 py-2 text-paper focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-forest"
+            className="inline-flex min-h-11 items-center rounded-full bg-forest px-4 whitespace-nowrap text-paper focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-forest"
           >
             Open the dashboard
           </Link>
@@ -80,7 +80,8 @@ export default function LandingPage() {
             aria-hidden="true"
             className="hero-aurora absolute inset-0 -z-10 [mask-image:linear-gradient(to_bottom,black_60%,transparent)]"
           />
-          <div className="mx-auto grid max-w-6xl items-center gap-10 px-4 pt-10 pb-20 lg:grid-cols-[1.1fr_1fr]">
+          {/* minmax(0, ...) stops the wide flight path from stretching the column past the screen. */}
+          <div className="mx-auto grid max-w-6xl grid-cols-[minmax(0,1fr)] items-center gap-10 px-4 pt-10 pb-20 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,1fr)]">
             <div className="space-y-6">
               <h1 className="font-serif text-5xl leading-[1.05] sm:text-7xl">
                 A test pilot for your checkout.
