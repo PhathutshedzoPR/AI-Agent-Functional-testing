@@ -203,9 +203,12 @@ Done when: on `stable` a run streams steps with real screenshots and passes; on 
 Confirm the exact cut-off time with Sebaka, and ask a mentor whether commits after 7 Oct count. Aim to be ready by 17:00.
 
 - [x] `README.md` matches what exists: commands, env vars, a real screenshot of a run (save to `docs/images/`), the team section filled in.
-  - Team section still to fill in by the team.
+  - Team names and roles in their own "Team" section.
 - [x] CI green on `main`. Quality gate passing, or the remaining issues listed honestly in the README.
   - Green from commit 415b182: lint, typecheck, unit tests with the coverage gate, build, SonarQube Cloud scan and npm audit.
+  - The gate then failed on one reliability bug (S7727, a function passed straight to `reduce`); fixed in 09ddee5.
+- [ ] **HUMAN:** rotate the Gemini API key. It was pasted into chat sessions and sat in an unpushed commit before it was scrubbed. Create a new key in AI Studio, put it in `.env.local` only, then delete the old key.
+- [ ] **HUMAN:** Dependabot's pull requests were opened before the lockfile fix, so their CI fails. Comment `@dependabot recreate` on each, then merge the ones that go green.
 - [ ] `git tag submission-2026-10-07 && git push origin submission-2026-10-07`, then submit the repo link through Sebaka's form.
 
 ---
@@ -249,6 +252,8 @@ Goal: the design in CLAUDE.md section 9, wired to real data.
   - The hero replays a real recorded stable run (`src/app/(marketing)/_data/sample-run.json`); only its label was set to the dashboard name.
 - [ ] Empty, loading and error states. Check at 360px, keyboard only, and with a screen reader. Lighthouse accessibility at least 95 on the landing and run pages.
 - [ ] Smoke check: point TestPilot at its own landing page and fix anything it finds.
+- [ ] The application should be mobile friendly. TestPilot's own pages work on a phone at 360px and 390px: the sidebar becomes a top bar, the bento stacks in reading order (header, flight path, live browser, stats, feed, tabs), the flight path scrolls sideways inside its own container, tap targets are at least 44px, and the page never scrolls sideways. Check landing, new run, live run and history with Playwright's `iPhone 13` and `Pixel 7` profiles.
+- [ ] Test on phones, step 1 (mobile web): a "Device" choice on the new run page (Desktop, iPhone, Android) runs every scenario in a Playwright device profile (viewport, touch, user agent). The run header shows the device, and the exported spec carries it (`test.use({ ...devices['Pixel 7'] })`). Still a real browser and real verdicts; no new dependencies.
 
 Done when: a full run looks right on a projector-sized screen and on a phone.
 
@@ -260,6 +265,9 @@ Done when: a full run looks right on a projector-sized screen and on a phone.
 - [ ] SonarQube Cloud: 0 bugs, 0 vulnerabilities, code smells fixed, duplication under 3%, coverage at least 80% on new code. **HUMAN:** review each security hotspot in the SonarQube Cloud UI and mark it Safe with a reason, or fix it.
 - [ ] CI job `integration`: `npx playwright install --with-deps chromium`, build, start the app, run `npm run test:integration` with `LLM_PROVIDER=replay`.
 - [ ] CLI `scripts/run-agent.ts` using `createContainer`: `npm run agent -- --url <url> --story "<text>"` writes JUnit and Markdown to `./reports` and exits non-zero on failures. This proves the core runs outside Next.
+- [ ] Run history survives a restart: a `FileRunRepository` appends each run's events to `.data/runs/<runId>.jsonl` and rebuilds the view through `projectRun` on load. Swap it in at `createContainer`; nothing else changes.
+- [ ] Find the cause of the dev-only hydration warning on the shop's checkout page in the agent's browser and fix it (don't suppress it). Then drop the line from the README's limitations.
+- [ ] `Dockerfile` on `mcr.microsoft.com/playwright:v1.63.0-noble`: `npm ci`, build, `npm start`, `.data` as a volume. The backup laptop or a VM then runs the exact same build.
 - [ ] Final README pass: setup works from a clean clone on Windows and macOS or Linux.
 
 ---
@@ -268,12 +276,11 @@ Done when: a full run looks right on a projector-sized screen and on a phone.
 
 - [ ] Feature freeze at 16:00. Only bug fixes after that.
 - [ ] Demo settings: `AGENT_MAX_SCENARIOS=3`, every run under about 40 seconds. Do a warm-up run before going on stage.
+- [ ] Add the `replays:record` script that CLAUDE.md lists (it runs each suggestion story on each release with `LLM_RECORD=true`), then record the three stories that aren't recorded yet: bad cellphone number, delivery fee on the confirmation, every navigation link works. Then every suggestion card works offline.
 - [ ] Offline drill: Wi-Fi off, `LLM_PROVIDER=replay`, the whole script still works.
 - [ ] Record a backup screen capture of the full demo. Keep it on the laptop and a USB stick.
 - [ ] Rehearse three times with a timer. One person drives, one person talks.
 - [ ] Laptop: `npm run build && npm start`, notifications off, other apps closed, browser zoom 125%, charger packed, second laptop set up the same way.
-- [ ] The application should be able to test apk and ios application and so much more if possible.
-- [ ] The application should be mobile friendly
 
 ### Demo script (5 minutes, all live)
 
@@ -284,17 +291,32 @@ Done when: a full run looks right on a projector-sized screen and on a phone.
 | 1:30 to 2:45 | Same story on `redesign` | The developers renamed the buttons. A normal script would break here. Watch the detours: healed steps, each listed under "Needs review" with what changed. |
 | 2:45 to 4:00 | Same story on `buggy`, open the bug | A real bug: two kotas, but the total charges for one. Expected vs actual, steps to reproduce, the screenshot. Download JUnit and the Playwright spec: the team keeps the test. |
 | 4:00 to 4:40 | README scorecard and SonarQube Cloud badges | How we know it works: every seeded bug caught, no false failures on the stable release. The LLM proposes, Playwright decides, so a result on screen actually happened. |
-| 4:40 to 5:00 | Back to the dashboard | Who it's for and what's next (CI runs on every pull request, more targets). |
+| 4:40 to 5:00 | Back to the dashboard | Who it's for and what's next (CI runs on every pull request, phones: mobile web now, native Android and iOS apps next). |
+
+---
+
+## After the hackathon
+
+Each of these keeps rule zero: the LLM proposes, a real driver decides.
+
+- [ ] The application should be able to test apk and ios applications (step 2, native). Add an `IAppSession` port beside `IBrowserSession`, with an Appium 2 adapter: UiAutomator2 runs an `.apk` on an Android emulator, and XCUITest runs an iOS app in the simulator (needs macOS with Xcode). Map the native accessibility tree onto the same `Locator` model (role, label, text), so planning, healing, bug reports and exports work unchanged. Uploaded `.apk` and `.ipa` files run only in a throwaway emulator, never on the host.
+- [ ] Accessibility findings: run axe-core on every explored page and report WCAG violations as `Finding`s. The checks are deterministic, so the LLM still decides nothing.
+- [ ] Sites behind a login: a test account per target in server env, entered by a fixed sign-in step before each scenario. The credentials never reach the LLM, the screenshots' captions or the reports.
+- [ ] CI mode: a GitHub Action that runs TestPilot against a pull request's preview URL, uploads the JUnit XML and comments the bug list on the pull request.
+- [ ] API checks: record the JSON requests each scenario makes and assert their status and shape next to the UI steps.
+- [ ] Visual changes: compare each step's screenshot with the last passing run on the same target and list differences above a threshold under "Needs review", like heals.
 
 ---
 
 ## Cut list (cut from the top when behind)
 
-1. CLI
-2. History page
-3. Markdown export
-4. Traceability tab
-5. Landing page flight-path animation (use a static screenshot of a real run)
-6. CI integration job (run it locally instead)
+1. Device choice for mobile web (say it on stage as "next" instead)
+2. Dockerfile and file-backed run history
+3. CLI
+4. History page
+5. Markdown export
+6. Traceability tab
+7. Landing page flight-path animation (use a static screenshot of a real run)
+8. CI integration job (run it locally instead)
 
 Never cut: real browser execution, healing on `redesign`, bug reports on `buggy`, unit tests, the security rules, the README.

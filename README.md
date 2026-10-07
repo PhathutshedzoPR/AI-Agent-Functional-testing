@@ -156,12 +156,15 @@ Planned, not built yet: a command-line runner (`npm run agent`) for CI pipelines
 
 The first prototype (tag `v0-prototype`) was a single-file dashboard that sketched the product with simulated results. This version runs every test in a real browser.
 
-<!-- Team: add names and roles before submitting -->
-Tokollo Software Dev
+## Team
 
-Phathutshedzo Project Manager
+Built for the Sebaka Testing AI Hackathon 2026, functional testing track.
 
-Gundo Business Analysis
+| Name | Role |
+|---|---|
+| Tokollo | Software development |
+| Phathutshedzo | Project management |
+| Gundo | Business analysis |
 
 ## Licence
 
