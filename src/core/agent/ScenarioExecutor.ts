@@ -1,5 +1,6 @@
 import {
   Finding,
+  REUSED_HEAL_STRATEGY,
   type Locator,
   StepResult,
   type Healing,
@@ -129,7 +130,7 @@ export class ScenarioExecutor {
       await action.execute({ ...step, target: known.to }, stepContext);
       return {
         ...known,
-        strategy: 'reused',
+        strategy: REUSED_HEAL_STRATEGY,
         reason: `Same replacement as an earlier step. ${known.reason}`,
       };
     }

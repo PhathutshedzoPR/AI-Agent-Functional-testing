@@ -121,6 +121,8 @@ export const RUN_STATUSES = [
   'cancelled',
 ] as const;
 export const HEALING_METHODS = ['rule', 'llm'] as const;
+/** Strategy of a heal that reuses a replacement already found earlier in the same run. */
+export const REUSED_HEAL_STRATEGY = 'reused';
 export const FINDING_KINDS = [
   'console-error',
   'page-error',

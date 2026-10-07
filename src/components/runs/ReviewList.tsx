@@ -1,4 +1,15 @@
-import { Locator, describeStep, type ScenarioView } from '@/core/domain';
+import {
+  Locator,
+  REUSED_HEAL_STRATEGY,
+  describeStep,
+  type Healing,
+  type ScenarioView,
+} from '@/core/domain';
+
+function foundBy(healing: Healing): string {
+  if (healing.strategy === REUSED_HEAL_STRATEGY) return 'the replacement found earlier in this run';
+  return healing.method === 'rule' ? 'a rule, no LLM' : 'the LLM, then checked in the browser';
+}
 
 type Props = Readonly<{ scenarios: readonly ScenarioView[]; onSelect: (stepId: string) => void }>;
 
@@ -24,11 +35,7 @@ export function ReviewList({ scenarios, onSelect }: Props) {
             <dt className="text-muted">Now</dt>
             <dd className="font-mono">{Locator.describe(healing.to)}</dd>
             <dt className="text-muted">Found by</dt>
-            <dd>
-              {healing.method === 'rule'
-                ? 'a rule, no LLM'
-                : 'the LLM, then checked in the browser'}
-            </dd>
+            <dd>{foundBy(healing)}</dd>
             <dt className="text-muted">Why</dt>
             <dd>{healing.reason}</dd>
           </dl>
