@@ -18,7 +18,13 @@ export function AgentFeed({ items }: Readonly<{ items: readonly FeedItem[] }>) {
       <h2 id="feed-heading" className="mb-3 font-semibold">
         Agent feed
       </h2>
-      <ol aria-live="polite" className="max-h-80 space-y-2 overflow-y-auto">
+      {/* Focusable so keyboard users can scroll the feed (WCAG 2.1.1); it holds no controls. */}
+      <ol
+        aria-live="polite"
+        aria-label="Agent messages"
+        tabIndex={0}
+        className="max-h-80 space-y-2 overflow-y-auto rounded-lg focus-visible:outline-2 focus-visible:outline-signal"
+      >
         {items.length === 0 && <li className="text-muted">Waiting for take-off.</li>}
         {items.map((item) => (
           <li

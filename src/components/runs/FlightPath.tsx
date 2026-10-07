@@ -30,7 +30,16 @@ export function FlightPath({
   }
   let order = 0;
   return (
-    <ol className="space-y-4 overflow-x-auto pb-2">
+    // Read-only paths (the landing page) have no buttons inside, so the scroller itself takes
+    // focus to let keyboard users scroll it sideways (WCAG 2.1.1).
+    <ol
+      aria-label="Flight path"
+      tabIndex={onSelect ? undefined : 0}
+      className={cn(
+        'space-y-4 overflow-x-auto pb-2 focus-visible:outline-2',
+        tone === 'dark' ? 'focus-visible:outline-signal' : 'focus-visible:outline-forest',
+      )}
+    >
       {scenarios.map((scenario) => (
         <li key={scenario.id} className="min-w-max">
           <p

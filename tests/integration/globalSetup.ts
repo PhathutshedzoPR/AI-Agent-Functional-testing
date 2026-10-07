@@ -29,11 +29,20 @@ export default async function setup(project: TestProject): Promise<(() => void) 
     await runToCompletion(['build']);
   }
   const port = await findFreePort();
+  const baseUrl = `http://localhost:${port}`;
+  // Variables set here beat .env.local, so the app accepts its own spare port as origin and
+  // target, and always replays: tests never call a live model.
   const server = spawn(process.execPath, [NEXT_BIN, 'start', '--port', String(port)], {
     stdio: 'inherit',
-    env: process.env,
+    env: {
+      ...process.env,
+      APP_BASE_URL: baseUrl,
+      TARGET_MODE: 'allowlist',
+      TARGET_ALLOWLIST: `localhost:${port}`,
+      LLM_PROVIDER: 'replay',
+      LLM_RECORD: 'false',
+    },
   });
-  const baseUrl = `http://localhost:${port}`;
   await waitForServer(baseUrl, server);
   project.provide('baseUrl', baseUrl);
   return () => {

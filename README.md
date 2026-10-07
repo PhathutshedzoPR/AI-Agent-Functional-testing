@@ -145,9 +145,9 @@ An agent that opens whatever URL you give it, on a server, needs guard rails:
 |---|---|
 | `npm run dev` | Development server on port 3000 |
 | `npm run build`, then `npm start` | Production build and server (use this for the demo) |
-| `npm run check` | Lint, typecheck and unit tests (324 tests) |
+| `npm run check` | Lint, typecheck and unit tests (325 tests) |
 | `npm run test:coverage` | Unit tests with coverage for SonarQube Cloud |
-| `npm run test:integration` | Builds the app, starts it on a spare port and runs the agent against Kota Express in real Chromium, including the scorecard (every suggestion story on every release, replayed); the scorecard table lands in `.data/scorecard.md` |
+| `npm run test:integration` | Builds the app, starts it on a spare port and runs the agent against Kota Express in real Chromium, including the scorecard (every suggestion story on every release, replayed; the table lands in `.data/scorecard.md`) and an accessibility check of every page with axe-core (WCAG 2.1 AA) on a laptop and a phone |
 | `npm run replays:record` | The same scorecard with the live model from `.env.local`, saving every response to `fixtures/llm-replays`. Requests already recorded are answered from the recording, so only new ones use provider calls. Re-run it whenever a prompt changes |
 | `npm run format` | Prettier |
 
