@@ -42,7 +42,7 @@ npx playwright install chromium
 cp .env.example .env.local
 ```
 
-Put your provider, model and key in `.env.local` (we use `LLM_PROVIDER=google` with `LLM_MODEL=gemini-3.5-flash`), then:
+Put your provider, model and key in `.env.local` (we use `LLM_PROVIDER=google` with a Gemini Flash model such as `LLM_MODEL=gemini-3.6-flash`), then:
 
 ```bash
 npm run dev
@@ -52,7 +52,7 @@ Open http://localhost:3000 (use `localhost`, not `127.0.0.1`: writes must come f
 
 For the demo, use a production build: `npm run build` then `npm start`.
 
-No key? Set `LLM_PROVIDER=replay`. TestPilot then serves plans recorded in `fixtures/llm-replays` and the browser still runs every step for real. A replay only matches the exact story text and page content it was recorded with; record more by running with `LLM_RECORD=true` and a live provider.
+No key? Set `LLM_PROVIDER=replay`. TestPilot then serves plans recorded in `fixtures/llm-replays` and the browser still runs every step for real. A replay only matches the exact story text and page content it was recorded with; record more with `npm run replays:record` (needs a live provider key in `.env.local`).
 
 ### The demo in three runs
 
@@ -70,13 +70,20 @@ Testing a tester needs a site where you already know the right answers. Kota Exp
 
 ### What happened when we ran it
 
-We planned these runs live with `gemini-3.5-flash` on 6 October 2026 and recorded every model response in `fixtures/llm-replays`. The numbers below are from replaying those recordings (`LLM_PROVIDER=replay`) with the current code; the browser ran every step for real. Story: "order two Quarter Kotas and check out".
+The agent scorecard (`tests/integration/scorecard.test.ts`) runs each suggestion story on every release. Gemini planned these runs live on 7 October 2026 (`gemini-3.6-flash`) and every model response is recorded in `fixtures/llm-replays`. The table below comes from replaying those recordings with the current code, so the plans are the model's, while every click, check and screenshot happened in real Chromium. Redesign re-runs the plan made on stable, so it meets the renamed buttons the way an old test suite would.
 
-| Release | Result | Steps | LLM calls | Time |
-|---|---|---|---|---|
-| stable | Passed | 24 of 24 passed | 1 (plan) | 17 s |
-| buggy | Bugs found: cart total ignores quantity; Specials link returns 404 | 14 passed, 1 failed | 2 (plan, wording) | 20 s |
-| redesign (stable's plan, re-run) | Passed after healing | 13 passed, 11 healed (in Needs review), 0 failed | 2 (heals) | 25 s |
+| Story | Release | Result | Steps | Bug reported | Time |
+|---|---|---|---|---|---|
+| Order two kotas and check out | stable | Passed | 17 passed | none | 9 s |
+| | redesign | Passed after healing | 10 passed, 7 healed, 0 failed | none | 20 s |
+| | buggy | Bugs found | 15 passed, 1 failed | Cart total shows R 35,00 instead of R 70,00 for two Quarter Kotas | 14 s |
+| The confirmation shows the delivery fee | stable | Passed | 12 passed | none | 8 s |
+| | redesign | Passed after healing | 9 passed, 3 healed, 0 failed | none | 14 s |
+| | buggy | Bugs found | 11 passed, 1 failed | Delivery fee R 30,00 is not displayed on confirmation page | 15 s |
+
+On every buggy run the explorer also reported the Specials link returning 404. To prove a failure on buggy comes from a seeded bug and not from a bad plan, the scorecard re-runs buggy's own plan on stable, where it passes.
+
+Not scored yet: the free Gemini tier allows 20 requests per model per day, and we ran out mid-recording. "Checkout rejects a bad cellphone number" is recorded (with `gemini-3.7-flash`) on stable (passes) and buggy (catches the cellphone bug) but not its redesign heals; "Every navigation link works" is recorded on stable only. The scorecard lists both as to-do until `npm run replays:record` has saved them.
 
 On redesign, rules repaired the renamed "Add to bag" buttons; the LLM proposed "Proceed to payment" and "Confirm order", and each suggestion was checked in the browser before use. A rename found once is reused for the rest of the run, so later checks such as "the Confirm order button is gone" test the renamed control, not a button that no longer exists.
 
@@ -138,9 +145,10 @@ An agent that opens whatever URL you give it, on a server, needs guard rails:
 |---|---|
 | `npm run dev` | Development server on port 3000 |
 | `npm run build`, then `npm start` | Production build and server (use this for the demo) |
-| `npm run check` | Lint, typecheck and unit tests (308 tests) |
+| `npm run check` | Lint, typecheck and unit tests (323 tests) |
 | `npm run test:coverage` | Unit tests with coverage for SonarQube Cloud |
-| `npm run test:integration` | Builds the app, starts it on a spare port and runs the agent against Kota Express in real Chromium |
+| `npm run test:integration` | Builds the app, starts it on a spare port and runs the agent against Kota Express in real Chromium, including the scorecard (every suggestion story on every release, replayed); the scorecard table lands in `.data/scorecard.md` |
+| `npm run replays:record` | The same scorecard with the live model from `.env.local`, saving every response to `fixtures/llm-replays`. Re-run it whenever a prompt changes |
 | `npm run format` | Prettier |
 
 Planned, not built yet: a command-line runner (`npm run agent`) for CI pipelines.
@@ -152,7 +160,7 @@ Planned, not built yet: a command-line runner (`npm run agent`) for CI pipelines
 - It can't get past CAPTCHAs or two-factor logins.
 - Healing can hide a real change. That's why healed steps are listed for review instead of counted as clean passes.
 - Run history is kept in memory and is lost when the server restarts. Screenshots stay in `.data/artifacts`.
-- The planner cannot see pages that only appear after an action (such as the order confirmation), so it checks those outcomes indirectly, for example that the submit button is gone.
+- The planner cannot see pages that only appear after an action (such as the order confirmation). On those pages it checks only values it saw earlier, such as the delivery fee from checkout, never wording it would have to guess.
 - In development, Next.js sometimes reports a hydration warning on the shop's checkout page inside the agent's browser; it shows up as a console-error finding. Production builds don't report it.
 
 ## History

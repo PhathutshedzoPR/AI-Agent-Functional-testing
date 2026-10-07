@@ -208,8 +208,8 @@ Confirm the exact cut-off time with Sebaka, and ask a mentor whether commits aft
 - [x] CI green on `main`. Quality gate passing, or the remaining issues listed honestly in the README.
   - Green from commit 415b182: lint, typecheck, unit tests with the coverage gate, build, SonarQube Cloud scan and npm audit.
   - The gate then failed on one reliability bug (S7727, a function passed straight to `reduce`); fixed in 09ddee5.
-- [ ] **HUMAN:** rotate the Gemini API key. It was pasted into chat sessions and sat in an unpushed commit before it was scrubbed. Create a new key in AI Studio, put it in `.env.local` only, then delete the old key.
-- [ ] **HUMAN:** Dependabot's pull requests were opened before the lockfile fix, so their CI fails. Comment `@dependabot recreate` on each, then merge the ones that go green.
+- [x] **HUMAN:** rotate the Gemini API key. It was pasted into chat sessions and sat in an unpushed commit before it was scrubbed. Create a new key in AI Studio, put it in `.env.local` only, then delete the old key.
+- [x] **HUMAN:** Dependabot's pull requests were opened before the lockfile fix, so their CI fails. Comment `@dependabot recreate` on each, then merge the ones that go green.
 - [ ] `git tag submission-2026-10-07 && git push origin submission-2026-10-07`, then submit the repo link through Sebaka's form.
 
 ---
@@ -233,6 +233,7 @@ Goal: the redesign release passes by healing, and every run produces artefacts a
 - [x] Traceability: parse criteria from the story (bullets, numbered lines, Given/When/Then), keep criterion, scenarios and result together in the run view.
   - traceCriteria (core/domain) joins criteria to scenarios by normalised text and takes the worst result; untested criteria stay visible. Shown in a Traceability tab and the Markdown report.
 - [ ] Agent scorecard: `tests/integration/scorecard.test.ts` runs the suggestion stories on all three releases and asserts: no failures on `stable`; passes with at least one heal on `redesign`; every seeded bug found on `buggy`, with no other failures. Print a Markdown table and paste the real numbers into the README.
+  - Written and passing in replay for "Order two kotas" and "Delivery fee" (both catch their seeded bug, plus the Specials 404; README has the numbers). Each buggy plan is re-run on stable to prove its failure comes from the seeded bug. Cellphone and navigation stories are `it.todo` until recorded. A planner rule now lets plans check values carried over from seen pages (the delivery fee) on pages the explorer never saw, which is how the fee bug gets caught.
 
 Done when: the scorecard test passes in replay mode and the README shows its real numbers.
 
@@ -269,6 +270,7 @@ Done when: a full run looks right on a projector-sized screen and on a phone.
 - [ ] CLI `scripts/run-agent.ts` using `createContainer`: `npm run agent -- --url <url> --story "<text>"` writes JUnit and Markdown to `./reports` and exits non-zero on failures. This proves the core runs outside Next.
 - [ ] Run history survives a restart: a `FileRunRepository` appends each run's events to `.data/runs/<runId>.jsonl` and rebuilds the view through `projectRun` on load. Swap it in at `createContainer`; nothing else changes.
 - [ ] Find the cause of the dev-only hydration warning on the shop's checkout page in the agent's browser and fix it (don't suppress it). Then drop the line from the README's limitations.
+- [ ] Log why a run failed. `RunService` logs only unexpected errors, so an `LlmError` (a provider 503, say) reaches the client as "kept failing" with nothing in the server log. Log the code and the cause's message (never the request body or headers) at warn level.
 - [ ] `Dockerfile` on `mcr.microsoft.com/playwright:v1.63.0-noble`: `npm ci`, build, `npm start`, `.data` as a volume. The backup laptop or a VM then runs the exact same build.
 - [ ] Final README pass: setup works from a clean clone on Windows and macOS or Linux.
 
@@ -279,6 +281,7 @@ Done when: a full run looks right on a projector-sized screen and on a phone.
 - [ ] Feature freeze at 16:00. Only bug fixes after that.
 - [ ] Demo settings: `AGENT_MAX_SCENARIOS=3`, every run under about 40 seconds. Do a warm-up run before going on stage.
 - [ ] Add the `replays:record` script that CLAUDE.md lists (it runs each suggestion story on each release with `LLM_RECORD=true`), then record the three stories that aren't recorded yet: bad cellphone number, delivery fee on the confirmation, every navigation link works. Then every suggestion card works offline.
+  - Script added: `npm run replays:record` runs the scorecard with the live model and records it. On 7 Oct the free tier (20 requests per model per day) ran out after stories 1 and 3 (gemini-3.6-flash) and story 2 on stable and buggy plus story 4 on stable (gemini-3.7-flash). **To do after the daily reset:** record story 2 on redesign and story 4 on buggy and redesign, then add both titles to `RECORDED` in the scorecard.
 - [ ] Offline drill: Wi-Fi off, `LLM_PROVIDER=replay`, the whole script still works.
 - [ ] Record a backup screen capture of the full demo. Keep it on the laptop and a USB stick.
 - [ ] Rehearse three times with a timer. One person drives, one person talks.
