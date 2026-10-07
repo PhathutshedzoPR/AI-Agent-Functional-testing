@@ -5,6 +5,7 @@ import { useState, type SubmitEvent } from 'react';
 import { RELEASES, shopPath } from '@/app/demo-shop/_config/releases';
 import { RunResponseSchema, runApiPaths, type StartRunRequest } from '@/contracts';
 import { ApiRequestError, sendJson } from '@/lib/sendJson';
+import { buttonStyles } from '../ui';
 import { StoryComposer } from './StoryComposer';
 import { TargetPicker, type TargetChoice } from './TargetPicker';
 
@@ -63,11 +64,7 @@ export function NewRunForm({ appBaseUrl, allowCustomTargets }: Props) {
           {error}
         </p>
       )}
-      <button
-        type="submit"
-        disabled={starting}
-        className="rounded-full bg-signal px-6 py-3 font-semibold text-ink hover:brightness-95 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-signal disabled:opacity-60"
-      >
+      <button type="submit" disabled={starting} className={buttonStyles()}>
         {starting ? 'Starting run...' : 'Start run'}
       </button>
     </form>

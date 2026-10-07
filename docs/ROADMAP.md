@@ -245,7 +245,8 @@ Done when: the scorecard test passes in replay mode and the README shows its rea
 
 Goal: the design in CLAUDE.md section 9, wired to real data.
 
-- [ ] Tokens in `globals.css`, fonts through `next/font`, primitives in `components/ui` (cva variants), light and dark.
+- [x] Tokens in `globals.css`, fonts through `next/font`, primitives in `components/ui` (cva variants), light and dark.
+  - Tokens and next/font were in place; buttons now share one cva definition (components/ui/buttonStyles.ts: signal, forest and outline tones on light or dark surfaces, 44px tall, focus ring per surface) instead of six copied class strings. The unused stock shadcn button and @base-ui/react are gone.
 - [x] Brand: `Logo`, `Mascot` (idle, flying, worried).
 - [x] `FlightPath` and `Waypoint`: one row per scenario, solid, detour, break and hollow states, keyboard focus and labels, reduced-motion fallback.
   - Renames found by healing now carry through the rest of the run, so checks on a renamed control test the new control.

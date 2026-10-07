@@ -3,6 +3,7 @@ import { z } from 'zod';
 import { RELEASE_IDS, RELEASES, shopPath } from '@/app/demo-shop/_config/releases';
 import { Logo } from '@/components/brand/Logo';
 import { Mascot } from '@/components/brand/Mascot';
+import { buttonStyles } from '@/components/ui';
 import { FlightPath } from '@/components/runs/FlightPath';
 import { RunEventSchema, projectRun } from '@/core/domain';
 import sample from './_data/sample-run.json';
@@ -67,7 +68,7 @@ export default function LandingPage() {
           </Link>
           <Link
             href="/runs/new"
-            className="inline-flex min-h-11 items-center rounded-full bg-forest px-4 whitespace-nowrap text-paper focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-forest"
+            className={buttonStyles({ tone: 'forest', surface: 'light', size: 'sm' })}
           >
             Open the dashboard
           </Link>
@@ -93,14 +94,11 @@ export default function LandingPage() {
               <div className="flex flex-wrap gap-3">
                 <Link
                   href="/runs/new"
-                  className="rounded-full bg-signal px-6 py-3 font-semibold text-ink shadow-sm hover:brightness-95 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-forest"
+                  className={buttonStyles({ tone: 'signal', surface: 'light' })}
                 >
                   Run a test
                 </Link>
-                <a
-                  href="#sample"
-                  className="rounded-full border-2 border-forest px-6 py-3 font-semibold text-forest hover:bg-forest hover:text-paper focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-forest"
-                >
+                <a href="#sample" className={buttonStyles({ tone: 'outline', surface: 'light' })}>
                   See a sample run
                 </a>
               </div>

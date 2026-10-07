@@ -3,8 +3,10 @@
 import { useEffect, useState } from 'react';
 import { RunResponseSchema, runApiPaths } from '@/contracts';
 import { RUN_STATUS_LABELS, type RunView } from '@/core/domain';
+import { cn } from '@/lib/cn';
 import { formatDuration } from '@/lib/formatDuration';
 import { ApiRequestError, sendJson } from '@/lib/sendJson';
+import { buttonStyles } from '../ui';
 
 type Props = Readonly<{ runId: string; view: RunView }>;
 
@@ -63,7 +65,10 @@ export function RunHeader({ runId, view }: Props) {
           type="button"
           onClick={() => void stop()}
           disabled={stopping}
-          className="ml-auto rounded-full border border-control px-4 py-1.5 text-sm font-semibold hover:border-failed focus-visible:outline-2 focus-visible:outline-signal disabled:opacity-60"
+          className={cn(
+            buttonStyles({ tone: 'outline', size: 'sm' }),
+            'ml-auto hover:border-failed',
+          )}
         >
           {stopping ? 'Stopping...' : 'Stop run'}
         </button>

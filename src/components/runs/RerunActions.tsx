@@ -5,6 +5,7 @@ import { useState } from 'react';
 import { RELEASE_IDS, RELEASES, shopPath } from '@/app/demo-shop/_config/releases';
 import { RunResponseSchema, runApiPaths } from '@/contracts';
 import { ApiRequestError, sendJson } from '@/lib/sendJson';
+import { buttonStyles } from '../ui';
 
 type Props = Readonly<{ runId: string; appBaseUrl: string; currentUrl: string | null }>;
 
@@ -47,7 +48,7 @@ export function RerunActions({ runId, appBaseUrl, currentUrl }: Props) {
           type="button"
           disabled={busy}
           onClick={() => void rerun(release)}
-          className="rounded-full border border-control px-3 py-1 text-sm hover:border-signal focus-visible:outline-2 focus-visible:outline-signal disabled:opacity-60"
+          className={buttonStyles({ tone: 'outline', size: 'sm' })}
         >
           {RELEASES[release].name}
         </button>
