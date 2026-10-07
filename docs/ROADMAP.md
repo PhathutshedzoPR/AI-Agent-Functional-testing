@@ -230,7 +230,8 @@ Goal: the redesign release passes by healing, and every run produces artefacts a
   - The spec exporter reuses `toLocatorCalls`, so exported tests use the same locator chain the agent ran, with healed locators where a step healed. Text checks become case-insensitive regexes that accept any whitespace and any rand format, matching the agent's own rules. Strings go through `JSON.stringify`; comments are stripped of every JS line terminator, including U+2028 and U+2029.
 - [x] Test that proves the exported spec is real: export a passing `stable` run, run it with `npx playwright test` (add `@playwright/test` as a dev dependency) and expect it to pass.
   - Exported text checks allow zero whitespace between words, because Playwright reads `textContent`, where adjacent elements touch ("TotalR 70,00").
-- [ ] Traceability: parse criteria from the story (bullets, numbered lines, Given/When/Then), keep criterion, scenarios and result together in the run view.
+- [x] Traceability: parse criteria from the story (bullets, numbered lines, Given/When/Then), keep criterion, scenarios and result together in the run view.
+  - traceCriteria (core/domain) joins criteria to scenarios by normalised text and takes the worst result; untested criteria stay visible. Shown in a Traceability tab and the Markdown report.
 - [ ] Agent scorecard: `tests/integration/scorecard.test.ts` runs the suggestion stories on all three releases and asserts: no failures on `stable`; passes with at least one heal on `redesign`; every seeded bug found on `buggy`, with no other failures. Print a Markdown table and paste the real numbers into the README.
 
 Done when: the scorecard test passes in replay mode and the README shows its real numbers.

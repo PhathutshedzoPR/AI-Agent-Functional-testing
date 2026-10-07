@@ -22,7 +22,7 @@ Teams that do automate find their tests breaking every time a button is renamed 
 | **Receives** | A URL, and optionally a user story with acceptance criteria. |
 | **Decides** | Reads each page's accessibility tree, then plans happy-path, negative and edge-case scenarios. |
 | **Executes** | Runs every step in headless Chromium with Playwright and takes a screenshot after each one. When a button has been renamed, it finds it again and marks the step as healed so a person can check it. |
-| **Delivers** | A live dashboard, bug reports with expected and actual results, JUnit XML for CI, and a Playwright test file your team can keep. |
+| **Delivers** | A live dashboard, bug reports with expected and actual results, a traceability table (each acceptance criterion, the scenarios that test it and their result), JUnit XML for CI, a Markdown report and a Playwright test file your team can keep. |
 
 ## The AI proposes, Playwright decides
 
