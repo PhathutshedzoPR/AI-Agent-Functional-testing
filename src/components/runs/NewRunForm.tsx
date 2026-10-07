@@ -4,25 +4,31 @@ import { useRouter } from 'next/navigation';
 import { useState, type SubmitEvent } from 'react';
 import { RELEASES, shopPath } from '@/app/demo-shop/_config/releases';
 import { RunResponseSchema, runApiPaths, type StartRunRequest } from '@/contracts';
+import type { Device } from '@/core/domain';
 import { ApiRequestError, sendJson } from '@/lib/sendJson';
 import { buttonStyles } from '../ui';
+import { DevicePicker } from './DevicePicker';
 import { StoryComposer } from './StoryComposer';
 import { TargetPicker, type TargetChoice } from './TargetPicker';
 
 type Props = Readonly<{ appBaseUrl: string; allowCustomTargets: boolean }>;
 
-function requestFor(
-  target: TargetChoice,
-  customUrl: string,
-  appBaseUrl: string,
-  story: string,
-): StartRunRequest {
-  const trimmedStory = story.trim() || null;
-  if (target === 'custom') return { targetUrl: customUrl.trim(), story: trimmedStory };
+type Choices = Readonly<{
+  target: TargetChoice;
+  customUrl: string;
+  story: string;
+  device: Device;
+}>;
+
+function requestFor(choices: Choices, appBaseUrl: string): StartRunRequest {
+  const { target, device } = choices;
+  const story = choices.story.trim() || null;
+  if (target === 'custom') return { targetUrl: choices.customUrl.trim(), story, device };
   return {
     targetUrl: new URL(shopPath(target), appBaseUrl).href,
     targetLabel: `Kota Express (${RELEASES[target].name.toLowerCase()})`,
-    story: trimmedStory,
+    story,
+    device,
   };
 }
 
@@ -32,6 +38,7 @@ export function NewRunForm({ appBaseUrl, allowCustomTargets }: Props) {
   const [target, setTarget] = useState<TargetChoice>('stable');
   const [customUrl, setCustomUrl] = useState('');
   const [story, setStory] = useState('');
+  const [device, setDevice] = useState<Device>('desktop');
   const [error, setError] = useState<string | null>(null);
   const [starting, setStarting] = useState(false);
 
@@ -40,7 +47,7 @@ export function NewRunForm({ appBaseUrl, allowCustomTargets }: Props) {
     setStarting(true);
     setError(null);
     try {
-      const body = requestFor(target, customUrl, appBaseUrl, story);
+      const body = requestFor({ target, customUrl, story, device }, appBaseUrl);
       const { run } = await sendJson(runApiPaths.runs, body, RunResponseSchema);
       router.push(`/runs/${run.id}`);
     } catch (caught) {
@@ -58,6 +65,7 @@ export function NewRunForm({ appBaseUrl, allowCustomTargets }: Props) {
         onCustomUrlChange={setCustomUrl}
         allowCustom={allowCustomTargets}
       />
+      <DevicePicker value={device} onChange={setDevice} />
       <StoryComposer story={story} onChange={setStory} />
       {error && (
         <p role="alert" className="rounded-xl border border-failed p-3 text-sm">

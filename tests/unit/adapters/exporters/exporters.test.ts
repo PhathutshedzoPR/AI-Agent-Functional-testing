@@ -119,6 +119,19 @@ describe('MarkdownExporter', () => {
 describe('PlaywrightSpecExporter', () => {
   const spec = new PlaywrightSpecExporter().export(view).body;
 
+  it('runs a phone run on the same profile, in Chromium like TestPilot did', () => {
+    const phone = new PlaywrightSpecExporter().export({ ...view, device: 'iphone' }).body;
+
+    expect(phone).toContain("import { devices, expect, test } from '@playwright/test';");
+    expect(phone).toContain(
+      `test.use({ ...devices["iPhone 15"], defaultBrowserType: 'chromium' });`,
+    );
+    expect(spec).not.toContain('devices[');
+    expect(new MarkdownExporter().export({ ...view, device: 'android' }).body).toContain(
+      '- Screen: Android phone',
+    );
+  });
+
   it('generates a test per scenario with real Playwright calls', () => {
     expect(spec).toContain("import { expect, test } from '@playwright/test';");
     expect(spec).toContain('test.describe("Kota Express (buggy)", () => {');

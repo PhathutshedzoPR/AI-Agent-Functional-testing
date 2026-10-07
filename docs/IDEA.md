@@ -14,7 +14,7 @@ TestPilot is an AI agent that tests a website the way a QA analyst would. You gi
 |---|---|
 | Receives | A URL and an optional user story with acceptance criteria. |
 | Decides | Reads each page's accessibility tree (what a screen reader sees), then plans happy-path, negative and edge-case scenarios mapped to the criteria. |
-| Executes | Runs each step in Chromium with Playwright, screenshots it, and when a control has been renamed, finds it again (self-healing) and flags the step for review. |
+| Executes | Runs each step in Chromium with Playwright, on a desktop or a phone screen (iPhone or Android profile), screenshots it, and when a control has been renamed, finds it again (self-healing) and flags the step for review. |
 | Delivers | A live dashboard, bug reports with steps to reproduce, expected against actual and a screenshot, a traceability table, JUnit XML for CI, a Markdown report and a Playwright test file the team keeps. |
 
 ## What makes it different
@@ -40,4 +40,4 @@ Next.js 16 and TypeScript (strict), ports-and-adapters architecture with the age
 
 ## What's next
 
-Testing on phones (Playwright device profiles first, then native Android and iOS apps through Appium), accessibility checks with axe-core, sites behind a login, and a GitHub Action that runs TestPilot on every pull request.
+Native Android and iOS apps through Appium (phone screens in the browser already work), accessibility checks with axe-core, sites behind a login, and a GitHub Action that runs TestPilot on every pull request.

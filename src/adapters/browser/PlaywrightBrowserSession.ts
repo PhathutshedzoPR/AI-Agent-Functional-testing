@@ -162,7 +162,8 @@ export class PlaywrightBrowserSession implements IBrowserSession {
       .waitForLoadState('networkidle', { timeout: SCREENSHOT_SETTLE_MS })
       .catch(() => undefined); // a page that never goes quiet is captured as it is
     try {
-      return await this.page.screenshot({ type: 'jpeg', quality: JPEG_QUALITY });
+      // scale: 'css' keeps a phone's 3x screen from tripling every file's width and height.
+      return await this.page.screenshot({ type: 'jpeg', quality: JPEG_QUALITY, scale: 'css' });
     } catch (error) {
       throw toBrowserError(error, 'Taking a screenshot');
     }

@@ -43,6 +43,7 @@ const HANDLERS: { [T in RunEventType]: Handler<T> } = {
     targetLabel: e.targetLabel,
     story: e.story,
     replayed: e.replayed,
+    device: e.device,
     startedAt: e.at,
     limits: e.limits,
   }),

@@ -118,6 +118,7 @@ describe('a hand-written plan against Kota Express in real Chromium', () => {
       () => Promise.resolve([]),
     );
     browser = await new PlaywrightBrowserFactory(policy).launch({
+      device: 'desktop',
       headless: true,
       slowMoMs: 0,
       stepTimeoutMs: 5_000,

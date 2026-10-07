@@ -2,13 +2,15 @@
 
 import { useEffect, useState } from 'react';
 import { RunResponseSchema, runApiPaths } from '@/contracts';
-import { RUN_STATUS_LABELS, type RunView } from '@/core/domain';
+import { DEVICE_LABELS, RUN_STATUS_LABELS, type RunView } from '@/core/domain';
 import { cn } from '@/lib/cn';
 import { formatDuration } from '@/lib/formatDuration';
 import { ApiRequestError, sendJson } from '@/lib/sendJson';
 import { buttonStyles } from '../ui';
 
 type Props = Readonly<{ runId: string; view: RunView }>;
+
+const chip = 'rounded-full border border-control px-3 py-0.5 text-sm text-muted';
 
 function useElapsed(view: RunView): number | null {
   const [now, setNow] = useState(() => Date.now());
@@ -55,11 +57,8 @@ export function RunHeader({ runId, view }: Props) {
           LLM calls {view.llmCallsUsed}/{view.limits.maxLlmCalls}
         </p>
       )}
-      {view.replayed && (
-        <p className="rounded-full border border-control px-3 py-0.5 text-sm text-muted">
-          Replayed plan
-        </p>
-      )}
+      {view.replayed && <p className={chip}>Replayed plan</p>}
+      {view.device !== 'desktop' && <p className={chip}>{DEVICE_LABELS[view.device]} screen</p>}
       {canStop && (
         <button
           type="button"

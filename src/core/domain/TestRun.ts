@@ -1,10 +1,13 @@
 import { z } from 'zod';
 import { DomainError } from '../errors';
-import { INPUT_LIMITS, RUN_STATUSES } from './constants';
+import { DEVICES, INPUT_LIMITS, RUN_STATUSES } from './constants';
 import { parseDomain } from './parseDomain';
 
 export const RunStatusSchema = z.enum(RUN_STATUSES);
 export type RunStatus = z.infer<typeof RunStatusSchema>;
+
+export const DeviceSchema = z.enum(DEVICES);
+export type Device = z.infer<typeof DeviceSchema>;
 
 const FINAL_STATUSES: ReadonlySet<RunStatus> = new Set(['passed', 'failed', 'error', 'cancelled']);
 
@@ -15,6 +18,7 @@ export const TestRunSchema = z.object({
   story: z.string().max(INPUT_LIMITS.storyMaxChars).nullable(),
   status: RunStatusSchema,
   replayed: z.boolean(),
+  device: DeviceSchema.default('desktop'),
   createdAt: z.iso.datetime(),
   finishedAt: z.iso.datetime().nullable(),
 });

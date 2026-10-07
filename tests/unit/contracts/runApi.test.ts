@@ -41,6 +41,14 @@ describe('request schemas', () => {
     expect(StartRunRequestSchema.safeParse(body).success).toBe(false);
   });
 
+  it('accept a known device and refuse others', () => {
+    const base = { targetUrl: 'http://localhost:3000/demo-shop/stable' };
+
+    expect(StartRunRequestSchema.parse({ ...base, device: 'android' }).device).toBe('android');
+    expect(StartRunRequestSchema.parse(base).device).toBeUndefined();
+    expect(StartRunRequestSchema.safeParse({ ...base, device: 'tablet' }).success).toBe(false);
+  });
+
   it('only accept UUID ids and known export formats in routes', () => {
     expect(RunParamsSchema.safeParse({ runId: RUN }).success).toBe(true);
     expect(RunParamsSchema.safeParse({ runId: 'run-1' }).success).toBe(false);

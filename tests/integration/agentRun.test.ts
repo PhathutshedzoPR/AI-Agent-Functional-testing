@@ -1,4 +1,4 @@
-import { spawnSync } from 'node:child_process';
+import { spawnSync, type SpawnSyncReturns } from 'node:child_process';
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { createRequire } from 'node:module';
 import { join, resolve } from 'node:path';
@@ -129,9 +129,30 @@ function app() {
   );
 }
 
-describe('the agent end to end: real app, real Chromium, scripted plan', () => {
-  const { runs } = app();
+const { runs } = app();
 
+/** Writes a run's exported spec next to a minimal config and runs it, the way a team would. */
+async function runExportedSpec(runId: string): Promise<SpawnSyncReturns<string>> {
+  const spec = await runs.export(runId, 'spec');
+  const dir = resolve('.data', 'export-check', runId);
+  await mkdir(dir, { recursive: true });
+  await writeFile(join(dir, 'order.spec.ts'), spec.body);
+  await writeFile(
+    join(dir, 'playwright.config.mjs'),
+    "export default { testDir: '.', reporter: 'line', workers: 1, use: { headless: true } };",
+  );
+  const cli = require.resolve('@playwright/test/cli');
+  return spawnSync(
+    process.execPath,
+    [cli, 'test', '--config', join(dir, 'playwright.config.mjs')],
+    {
+      encoding: 'utf8',
+      timeout: 120_000,
+    },
+  );
+}
+
+describe('the agent end to end: real app, real Chromium, scripted plan', () => {
   it('passes on stable, with a real screenshot behind every step', async () => {
     const run = await runs.start({
       targetUrl: `${baseUrl}/demo-shop/stable`,
@@ -199,25 +220,31 @@ describe('the agent end to end: real app, real Chromium, scripted plan', () => {
   it('exports a Playwright spec that passes when the team runs it', async () => {
     const run = await runs.start({ targetUrl: `${baseUrl}/demo-shop/stable` });
     await runToEnd(runs, run.id);
-    const spec = await runs.export(run.id, 'spec');
-    const dir = resolve('.data', 'export-check', run.id);
-    await mkdir(dir, { recursive: true });
-    await writeFile(join(dir, 'order.spec.ts'), spec.body);
-    await writeFile(
-      join(dir, 'playwright.config.mjs'),
-      "export default { testDir: '.', reporter: 'line', workers: 1, use: { headless: true } };",
-    );
+    const result = await runExportedSpec(run.id);
 
-    const cli = require.resolve('@playwright/test/cli');
-    const result = spawnSync(
-      process.execPath,
-      [cli, 'test', '--config', join(dir, 'playwright.config.mjs')],
-      {
-        encoding: 'utf8',
-        timeout: 120_000,
-      },
-    );
+    expect(result.stdout).toContain('1 passed');
+    expect(result.status).toBe(0);
+  });
 
+  it('runs the stable plan on an Android screen, and its spec passes on that screen too', async () => {
+    const stable = await runs.start({ targetUrl: `${baseUrl}/demo-shop/stable` });
+    await runToEnd(runs, stable.id);
+    const phone = await runs.start({
+      targetUrl: `${baseUrl}/demo-shop/stable`,
+      reusePlanFrom: stable.id,
+      device: 'android',
+    });
+    const view = await runToEnd(runs, phone.id);
+    const firstStep = view.scenarios[0]?.steps[0];
+    const jpeg = await readFile(join('.data', 'artifacts', phone.id, `${firstStep?.id}.jpg`));
+
+    expect(view).toMatchObject({ device: 'android', status: 'passed' });
+    expect(view.stats.failed).toBe(0);
+    // JPEG width sits in the SOF0 frame header: the screenshot is the phone's 412 CSS pixels wide.
+    const sof = jpeg.indexOf(Buffer.from([0xff, 0xc0]));
+    expect(jpeg.readUInt16BE(sof + 7)).toBe(412);
+
+    const result = await runExportedSpec(phone.id);
     expect(result.stdout).toContain('1 passed');
     expect(result.status).toBe(0);
   });

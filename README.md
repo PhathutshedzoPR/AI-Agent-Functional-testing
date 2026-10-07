@@ -21,7 +21,7 @@ Teams that do automate find their tests breaking every time a button is renamed 
 |---|---|
 | **Receives** | A URL, and optionally a user story with acceptance criteria. |
 | **Decides** | Reads each page's accessibility tree, then plans happy-path, negative and edge-case scenarios. |
-| **Executes** | Runs every step in headless Chromium with Playwright and takes a screenshot after each one. When a button has been renamed, it finds it again and marks the step as healed so a person can check it. |
+| **Executes** | Runs every step in headless Chromium with Playwright, on a desktop screen or an iPhone or Android phone screen, and takes a screenshot after each one. When a button has been renamed, it finds it again and marks the step as healed so a person can check it. |
 | **Delivers** | A live dashboard, bug reports with expected and actual results, a traceability table (each acceptance criterion, the scenarios that test it and their result), JUnit XML for CI, a Markdown report and a Playwright test file your team can keep. |
 
 ## The AI proposes, Playwright decides
@@ -59,6 +59,8 @@ No key? Set `LLM_PROVIDER=replay`. TestPilot then serves plans recorded in `fixt
 1. **Stable:** pick Kota Express (stable) and "Order two kotas and check out". Every step passes.
 2. **Redesign:** when the stable run finishes, click **Run this plan on Redesign**. The same plan meets renamed buttons; the flight path shows each healed step as a detour, and **Needs review** lists what changed.
 3. **Buggy:** start a fresh run on Kota Express (buggy) with the same story. TestPilot reports the cart-total bug with steps to reproduce, expected against actual, and the screenshot, and flags the Specials link that returns 404. Download the JUnit XML or the Playwright test from **Export**.
+
+Optional, if there is time: on any finished run, **Or on another screen: iPhone** re-runs the same plan on an iPhone screen (touch, user agent and all), and its exported Playwright test runs on that screen too.
 
 ## Kota Express
 
@@ -145,7 +147,7 @@ An agent that opens whatever URL you give it, on a server, needs guard rails:
 |---|---|
 | `npm run dev` | Development server on port 3000 |
 | `npm run build`, then `npm start` | Production build and server (use this for the demo) |
-| `npm run check` | Lint, typecheck and unit tests (325 tests) |
+| `npm run check` | Lint, typecheck and unit tests (333 tests) |
 | `npm run test:coverage` | Unit tests with coverage for SonarQube Cloud |
 | `npm run test:integration` | Builds the app, starts it on a spare port and runs the agent against Kota Express in real Chromium, including the scorecard (every suggestion story on every release, replayed; the table lands in `.data/scorecard.md`) and an accessibility check of every page with axe-core (WCAG 2.1 AA) on a laptop and a phone |
 | `npm run replays:record` | The same scorecard with the live model from `.env.local`, saving every response to `fixtures/llm-replays`. Requests already recorded are answered from the recording, so only new ones use provider calls. Re-run it whenever a prompt changes |

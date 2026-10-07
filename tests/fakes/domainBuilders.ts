@@ -82,6 +82,7 @@ export function aRun(overrides: Partial<TestRun> = {}): TestRun {
     story: null,
     status: 'queued',
     replayed: false,
+    device: 'desktop',
     createdAt: '2026-10-06T08:00:00.000Z',
     finishedAt: null,
     ...overrides,

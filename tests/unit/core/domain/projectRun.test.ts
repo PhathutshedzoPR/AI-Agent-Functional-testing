@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import {
   EMPTY_RUN_VIEW,
+  RunEventSchema,
   applyRunEvent,
   narrateEvent,
   projectRun,
@@ -40,6 +41,7 @@ const started: RunEventPayload = {
   type: 'run.started',
   targetUrl: 'http://localhost:3000/demo-shop/buggy',
   targetLabel: 'Kota Express (buggy)',
+  device: 'desktop',
   story: 'Order two kotas',
   replayed: true,
   limits: { maxPages: 5, maxScenarios: 4, maxSteps: 12, maxLlmCalls: 12 },
@@ -126,6 +128,25 @@ describe('projectRun', () => {
       activeStepId: null,
     });
     expect(view.limits?.maxLlmCalls).toBe(12);
+  });
+
+  it('keeps the screen the run used, reading older runs as desktop', () => {
+    const [phone] = stamp([{ ...started, device: 'iphone' }]);
+    // Shaped like the landing page's recorded run, from before runs had a device.
+    const old = RunEventSchema.parse({
+      type: 'run.started',
+      runId: RUN_ID,
+      seq: 1,
+      at: '2026-10-06T08:00:00.000Z',
+      targetUrl: 'http://localhost:3000/demo-shop/stable',
+      targetLabel: 'Kota Express (stable)',
+      story: null,
+      replayed: true,
+      limits: { maxPages: 5, maxScenarios: 4, maxSteps: 12, maxLlmCalls: 12 },
+    });
+
+    expect(phone && projectRun([phone]).device).toBe('iphone');
+    expect(projectRun([old]).device).toBe('desktop');
   });
 
   it('lays out every planned step and its result', () => {

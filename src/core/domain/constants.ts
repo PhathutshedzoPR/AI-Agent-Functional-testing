@@ -121,6 +121,14 @@ export const RUN_STATUSES = [
   'cancelled',
 ] as const;
 export const HEALING_METHODS = ['rule', 'llm'] as const;
+
+/** Screens a run can use. Phones are emulated in Chromium: their screen, touch and user agent. */
+export const DEVICES = ['desktop', 'iphone', 'android'] as const;
+export const DEVICE_LABELS = {
+  desktop: 'Desktop',
+  iphone: 'iPhone',
+  android: 'Android phone',
+} as const;
 /** Strategy of a heal that reuses a replacement already found earlier in the same run. */
 export const REUSED_HEAL_STRATEGY = 'reused';
 export const FINDING_KINDS = [

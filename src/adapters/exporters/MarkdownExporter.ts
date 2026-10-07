@@ -1,5 +1,6 @@
 import {
   CRITERION_VERDICT_LABELS,
+  DEVICE_LABELS,
   Locator,
   RUN_STATUS_LABELS,
   STEP_STATUS_LABELS,
@@ -24,6 +25,7 @@ function header(view: RunView): string[] {
     '',
     `- Result: ${RUN_STATUS_LABELS[view.status]}`,
     `- Target: ${mdEscape(view.targetUrl ?? '')}`,
+    `- Screen: ${DEVICE_LABELS[view.device]}`,
     `- Started: ${view.startedAt ?? 'not started'}`,
     `- Duration: ${duration}`,
     `- Plan: ${view.replayed ? 'replayed from a recording' : 'planned live by the LLM'}`,

@@ -50,6 +50,7 @@ export function sampleRunEvents(
       type: 'run.started',
       targetUrl: 'http://localhost:3000/demo-shop/buggy',
       targetLabel: overrides.label ?? 'Kota Express (buggy)',
+      device: 'desktop',
       story: 'Order two kotas',
       replayed: true,
       limits: { maxPages: 5, maxScenarios: 4, maxSteps: 12, maxLlmCalls: 12 },

@@ -4,7 +4,7 @@ import type { PlanStep } from './PlanStep';
 import type { RunLimits, SafeError } from './RunEvent';
 import type { Scenario, ScenarioStatus } from './Scenario';
 import type { StepResult, StepStatus } from './StepResult';
-import type { RunStatus } from './TestRun';
+import type { Device, RunStatus } from './TestRun';
 
 export type StepState = 'pending' | 'running' | StepStatus;
 export type ScenarioState = 'pending' | 'running' | ScenarioStatus;
@@ -34,6 +34,7 @@ export type RunView = Readonly<{
   targetLabel: string | null;
   story: string | null;
   replayed: boolean;
+  device: Device;
   startedAt: string | null;
   finishedAt: string | null;
   durationMs: number | null;
@@ -63,6 +64,7 @@ export const EMPTY_RUN_VIEW: RunView = {
   targetLabel: null,
   story: null,
   replayed: false,
+  device: 'desktop',
   startedAt: null,
   finishedAt: null,
   durationMs: null,

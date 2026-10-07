@@ -1,4 +1,4 @@
-import { Finding, type BugReport, type RunLimits, type TestPlan } from '../domain';
+import { Finding, type BugReport, type Device, type RunLimits, type TestPlan } from '../domain';
 import type {
   IBrowser,
   IBrowserFactory,
@@ -22,6 +22,7 @@ export type AgentSettings = Readonly<
 export type AgentRequest = Readonly<{
   targetLabel: string;
   story: string | null;
+  device: Device;
   /** A saved plan to run instead of exploring and planning (already rebased onto `start`). */
   savedPlan: TestPlan | null;
 }>;
@@ -58,6 +59,7 @@ export class TestAgent {
       targetLabel: request.targetLabel,
       story: request.story,
       replayed: llm.replayed,
+      device: request.device,
       limits: {
         maxPages: settings.maxPages,
         maxScenarios: settings.maxScenarios,
@@ -66,7 +68,7 @@ export class TestAgent {
       },
     });
     const budgeted = new BudgetedLanguageModel(llm, settings.maxLlmCalls, context.emit);
-    const browser = await this.deps.browsers.launch(settings);
+    const browser = await this.deps.browsers.launch({ ...settings, device: request.device });
     // Stopping a run closes the browser, so a step that is waiting fails at once.
     const stop = (): void => {
       void browser.close().catch(() => undefined); // the finally block below closes it again

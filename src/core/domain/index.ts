@@ -38,7 +38,14 @@ export {
 } from './Scenario';
 export { StepResult, StepResultSchema, StepStatusSchema, type StepStatus } from './StepResult';
 export { TestPlan, TestPlanSchema } from './TestPlan';
-export { RunStatusSchema, TestRun, TestRunSchema, type RunStatus } from './TestRun';
+export {
+  DeviceSchema,
+  RunStatusSchema,
+  TestRun,
+  TestRunSchema,
+  type Device,
+  type RunStatus,
+} from './TestRun';
 export {
   canonicaliseAmounts,
   findRandAmounts,

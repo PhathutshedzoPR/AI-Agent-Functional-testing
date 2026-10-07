@@ -85,6 +85,13 @@ describe('RunService', () => {
     expect(await runs.list()).toHaveLength(1);
   });
 
+  it('keeps the screen a run asked for, desktop by default', async () => {
+    const { runs } = service();
+
+    expect((await runs.start({ ...START, device: 'iphone' })).device).toBe('iphone');
+    expect((await runs.start(START)).device).toBe('desktop');
+  });
+
   it('knows which runs it still has', async () => {
     const { runs } = service();
     const queued = await runs.start(START);

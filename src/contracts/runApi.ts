@@ -1,5 +1,11 @@
 import { z } from 'zod';
-import { EXPORT_FORMATS, INPUT_LIMITS, RunEventSchema, TestRunSchema } from '@/core/domain';
+import {
+  DeviceSchema,
+  EXPORT_FORMATS,
+  INPUT_LIMITS,
+  RunEventSchema,
+  TestRunSchema,
+} from '@/core/domain';
 
 /** Request and response shapes of /api/runs, shared by the route handlers and the browser. */
 
@@ -8,6 +14,7 @@ export const StartRunRequestSchema = z.object({
   targetLabel: z.string().trim().min(1).max(80).optional(),
   story: z.string().trim().max(INPUT_LIMITS.storyMaxChars).nullable().optional(),
   reusePlanFrom: z.uuid().nullable().optional(),
+  device: DeviceSchema.optional(),
 });
 export type StartRunRequest = z.infer<typeof StartRunRequestSchema>;
 

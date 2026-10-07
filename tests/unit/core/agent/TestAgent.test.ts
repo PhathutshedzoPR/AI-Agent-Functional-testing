@@ -9,9 +9,24 @@ import { SequentialIdGenerator } from '../../../fakes/SequentialIdGenerator';
 import { aPlan, aScenario, aStep } from '../../../fakes/domainBuilders';
 import { recordingContext } from '../../../fakes/recordingContext';
 
-const request = { targetLabel: 'Kota Express (stable)', story: 'Order a kota', savedPlan: null };
+const request = {
+  targetLabel: 'Kota Express (stable)',
+  story: 'Order a kota',
+  device: 'desktop' as const,
+  savedPlan: null,
+};
 
 describe('TestAgent', () => {
+  it('opens every page on the requested screen and says so in run.started', async () => {
+    const { agent, browsers, llm } = agentHarness();
+    const context = recordingContext();
+
+    await agent.run({ ...request, device: 'android' }, llm, context);
+
+    expect(browsers.launches.map((launch) => launch.device)).toEqual(['android']);
+    expect(context.events[0]).toMatchObject({ type: 'run.started', device: 'android' });
+  });
+
   it('explores, plans, executes and reports, in that order', async () => {
     const { agent, browsers, llm } = agentHarness();
     const context = recordingContext();
@@ -23,7 +38,7 @@ describe('TestAgent', () => {
     expect(types.slice(0, 4)).toEqual(['run.started', 'explore.page', 'llm.called', 'plan.ready']);
     expect(types.at(-1)).toBe('run.finished');
     expect(types).not.toContain('bug.reported');
-    expect(browsers.launches).toEqual([SETTINGS]);
+    expect(browsers.launches).toEqual([{ ...SETTINGS, device: 'desktop' }]);
     expect(browsers.sessions.every((session) => session.closed)).toBe(true);
     expect(browsers.closed).toBeGreaterThanOrEqual(1);
   });

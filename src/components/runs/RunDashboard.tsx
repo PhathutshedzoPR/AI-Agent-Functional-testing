@@ -139,7 +139,7 @@ export function RunDashboard({ runId, appBaseUrl }: Props) {
       </section>
       <div className="grid gap-5 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
         <section aria-label="Live browser" className={cn(panel, 'print:hidden')}>
-          <LiveBrowser runId={runId} step={shown} />
+          <LiveBrowser runId={runId} step={shown} device={view.device} />
         </section>
         <div className="space-y-5">
           <dl className="grid grid-cols-2 gap-3">
@@ -171,7 +171,12 @@ export function RunDashboard({ runId, appBaseUrl }: Props) {
         <RunTabs tabs={tabs} active={tab} onChange={setTab} />
       </section>
       {finished && view.scenarios.length > 0 && (
-        <RerunActions runId={runId} appBaseUrl={appBaseUrl} currentUrl={view.targetUrl} />
+        <RerunActions
+          runId={runId}
+          appBaseUrl={appBaseUrl}
+          currentUrl={view.targetUrl}
+          device={view.device}
+        />
       )}
     </div>
   );

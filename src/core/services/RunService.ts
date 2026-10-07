@@ -3,6 +3,7 @@ import type { TestAgent } from '../agent/TestAgent';
 import {
   TestRun,
   projectRun,
+  type Device,
   type ExportFormat,
   type RunEvent,
   type RunStatus,
@@ -29,6 +30,7 @@ export type StartRunInput = Readonly<{
   targetUrl: string;
   targetLabel?: string;
   story?: string | null;
+  device?: Device;
   /** Re-run the plan of this earlier run instead of planning afresh. */
   reusePlanFrom?: string | null;
 }>;
@@ -69,6 +71,7 @@ export class RunService {
       story: input.story ?? null,
       status: 'queued',
       replayed: this.deps.llm.replayed,
+      device: input.device ?? 'desktop',
       createdAt: this.deps.clock.now().toISOString(),
       finishedAt: null,
     });
@@ -143,7 +146,12 @@ export class RunService {
     const emitter = this.emitterFor(run.id, 0);
     try {
       await this.transition(run.id, 'running');
-      const request = { targetLabel: run.targetLabel, story: run.story, savedPlan };
+      const request = {
+        targetLabel: run.targetLabel,
+        story: run.story,
+        device: run.device,
+        savedPlan,
+      };
       const context = { runId: run.id, start, emit: emitter.emit, signal };
       await this.transition(run.id, await this.deps.agent.run(request, this.deps.llm, context));
     } catch (error) {

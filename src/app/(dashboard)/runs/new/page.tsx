@@ -15,7 +15,8 @@ export default function NewRunPage() {
         <p className="rounded-xl border border-divider bg-raised p-4 text-sm text-muted">
           Replay mode: plans come from recorded Gemini responses, and the browser still runs every
           step for real. The suggested stories are recorded for Stable and Buggy. To see healing,
-          run a story on Stable, then choose Run this plan on Redesign.
+          run a story on Stable, then choose Run this plan on Redesign. Any finished run can also be
+          re-run on a phone screen.
         </p>
       )}
       <NewRunForm appBaseUrl={env.APP_BASE_URL} allowCustomTargets={env.TARGET_MODE === 'public'} />

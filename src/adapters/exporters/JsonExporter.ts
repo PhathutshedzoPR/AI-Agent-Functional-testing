@@ -16,6 +16,7 @@ export class JsonExporter implements IReportExporter {
       targetLabel: view.targetLabel,
       story: view.story,
       replayed: view.replayed,
+      device: view.device,
       startedAt: view.startedAt,
       finishedAt: view.finishedAt,
       durationMs: view.durationMs,

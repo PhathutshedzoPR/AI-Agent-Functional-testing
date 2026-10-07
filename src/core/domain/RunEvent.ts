@@ -4,6 +4,7 @@ import { FindingSchema } from './Finding';
 import { ScenarioStatusSchema } from './Scenario';
 import { StepResultSchema } from './StepResult';
 import { TestPlanSchema } from './TestPlan';
+import { DeviceSchema } from './TestRun';
 
 export const RunLimitsSchema = z.object({
   maxPages: z.number().int().positive(),
@@ -33,6 +34,8 @@ export const RunEventSchema = z.discriminatedUnion('type', [
     targetLabel: z.string(),
     story: z.string().nullable(),
     replayed: z.boolean(),
+    // Runs recorded before phones were supported ran on a desktop screen.
+    device: DeviceSchema.default('desktop'),
     limits: RunLimitsSchema,
   }),
   eventSchema('explore.page', { url: z.string(), title: z.string() }),
