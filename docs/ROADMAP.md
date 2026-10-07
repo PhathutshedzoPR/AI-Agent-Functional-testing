@@ -211,7 +211,7 @@ Confirm the exact cut-off time with Sebaka, and ask a mentor whether commits aft
 - [x] **HUMAN:** rotate the Gemini API key. It was pasted into chat sessions and sat in an unpushed commit before it was scrubbed. Create a new key in AI Studio, put it in `.env.local` only, then delete the old key.
   - Rotated by the team on 7 Oct; the new key lives only in `.env.local`.
 - [x] **HUMAN:** Dependabot's pull requests were opened before the lockfile fix, so their CI fails. Comment `@dependabot recreate` on each, then merge the ones that go green.
-  - Handled without comments: the React 19.3 update from #1 is on `main` (Dependabot closes #1 when it sees that), and `dependabot.yml` now holds majors for `@types/node` (we run Node 22) and `eslint` (its plugins first), so #2 and #3 can simply be closed.
+  - All three merged by the team on 7 Oct (React 19.3, ESLint 10, `@types/node` 26). Lint, typecheck, unit and integration tests pass on the merged versions.
 - [ ] `git tag submission-2026-10-07 && git push origin submission-2026-10-07`, then submit the repo link through Sebaka's form.
 
 ---
