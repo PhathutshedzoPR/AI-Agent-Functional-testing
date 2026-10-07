@@ -2,7 +2,7 @@ import Link from 'next/link';
 import { Logo } from '@/components/brand/Logo';
 
 const navLink =
-  'rounded-lg px-3 py-2 text-sm font-semibold text-muted hover:bg-raised hover:text-text focus-visible:outline-2 focus-visible:outline-signal';
+  'inline-flex min-h-11 items-center rounded-lg px-3 text-sm font-semibold text-muted hover:bg-raised hover:text-text focus-visible:outline-2 focus-visible:outline-signal';
 
 /** Dark app shell with a sidebar for the dashboard pages. */
 export default function DashboardLayout({ children }: Readonly<LayoutProps<'/'>>) {
