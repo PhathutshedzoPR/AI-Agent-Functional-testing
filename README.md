@@ -4,7 +4,10 @@ TestPilot tests websites the way a QA analyst would. Give it a URL and a user st
 
 We're building it for the [Sebaka Testing AI Hackathon 2026](https://sebakasouthafrica.co.za/ai-agent-challenge.html), functional testing track.
 
-<!-- SonarQube Cloud badges go here after the first scan: quality gate, coverage, security rating -->
+[![CI](https://github.com/PhathutshedzoPR/AI-Agent-Functional-testing/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/PhathutshedzoPR/AI-Agent-Functional-testing/actions/workflows/ci.yml)
+[![Quality gate](https://sonarcloud.io/api/project_badges/measure?project=PhathutshedzoPR_AI-Agent-Functional-testing&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=PhathutshedzoPR_AI-Agent-Functional-testing)
+[![Coverage](https://sonarcloud.io/api/project_badges/measure?project=PhathutshedzoPR_AI-Agent-Functional-testing&metric=coverage)](https://sonarcloud.io/component_measures?id=PhathutshedzoPR_AI-Agent-Functional-testing&metric=coverage)
+[![Security rating](https://sonarcloud.io/api/project_badges/measure?project=PhathutshedzoPR_AI-Agent-Functional-testing&metric=security_rating)](https://sonarcloud.io/component_measures?id=PhathutshedzoPR_AI-Agent-Functional-testing&metric=security_rating)
 
 ## The problem
 

@@ -32,7 +32,8 @@ Goal: an empty but production-shaped repo, green CI, SonarQube Cloud connected.
   - Actions pinned to current majors (checkout v7, setup-node v7, sonarqube-scan-action v8). The scan step is skipped until `SONAR_TOKEN` exists, so CI can go green first.
 - [x] **HUMAN (repo owner):** sign in to sonarcloud.io with GitHub, import the repo, set **Administration > Analysis Method > Automatic Analysis: off**, generate a token, add it as the GitHub secret `SONAR_TOKEN`, then copy the organization and project keys into `sonar-project.properties`.
 - [x] **HUMAN:** create an API key (Google AI Studio for Gemini, or Anthropic/OpenAI), pick a current model ID, put both in `.env.local`. Never commit it.
-- [ ] After the first green scan, add the quality gate, coverage and security rating badges to the top of `README.md`.
+- [x] After the first green scan, add the quality gate, coverage and security rating badges to the top of `README.md`.
+  - CI, quality gate, coverage and security rating badges at the top of the README; the gate passes from 09ddee5.
 
 Done when: `npm run check` and `npm run build` pass locally, and the CI run on `main` is green with an analysis visible in SonarQube Cloud.
 
