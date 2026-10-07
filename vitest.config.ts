@@ -6,6 +6,13 @@ const fromRoot = (path: string): string => fileURLToPath(new URL(path, import.me
 // Folders held to the 80% gate (CLAUDE.md section 5). UI and wiring are covered by integration tests.
 const COVERED_FOLDERS = ['src/core', 'src/adapters', 'src/server', 'src/contracts', 'src/lib'];
 const GATE = { lines: 80, functions: 80, branches: 80, statements: 80 };
+// Integration tests share one built app and a real Chromium, so they run one file at a time.
+const AGAINST_RUNNING_APP = {
+  globalSetup: ['tests/integration/globalSetup.ts'],
+  fileParallelism: false,
+  testTimeout: 120_000,
+  hookTimeout: 120_000,
+};
 
 export default defineConfig({
   resolve: {
@@ -44,10 +51,18 @@ export default defineConfig({
         test: {
           name: 'integration',
           include: ['tests/integration/**/*.test.ts'],
-          globalSetup: ['tests/integration/globalSetup.ts'],
-          fileParallelism: false,
-          testTimeout: 120_000,
-          hookTimeout: 120_000,
+          ...AGAINST_RUNNING_APP,
+        },
+      },
+      {
+        extends: true,
+        test: {
+          // npm run replays:record: the scorecard with the live model from .env.local, saving
+          // every response to fixtures/llm-replays.
+          name: 'record',
+          include: ['tests/integration/scorecard.test.ts'],
+          env: { SCORECARD_RECORD: 'true' },
+          ...AGAINST_RUNNING_APP,
         },
       },
     ],

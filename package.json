@@ -16,6 +16,7 @@
     "test:watch": "vitest --project unit",
     "test:coverage": "vitest run --project unit --coverage",
     "test:integration": "vitest run --project integration",
+    "replays:record": "vitest run --project record",
     "check": "npm run lint && tsc --noEmit && npm test",
     "format": "prettier --write .",
     "format:check": "prettier --check ."

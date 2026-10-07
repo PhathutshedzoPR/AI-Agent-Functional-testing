@@ -2,14 +2,14 @@ import { spawnSync } from 'node:child_process';
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { createRequire } from 'node:module';
 import { join, resolve } from 'node:path';
-import { describe, expect, inject, it, vi } from 'vitest';
-import { TestRun, projectRun, type RunView } from '@/core/domain';
+import { describe, expect, inject, it } from 'vitest';
 import type { LlmRequest } from '@/core/ports';
 import type { PlanOutput } from '@/core/prompts';
 import { createContainer } from '@/server/createContainer';
 import { parseEnv } from '@/server/env';
 import { createLogger } from '@/server/logger';
 import { FakeLanguageModel } from '../fakes/FakeLanguageModel';
+import { runToEnd } from './runToEnd';
 
 const baseUrl = inject('baseUrl');
 const require = createRequire(import.meta.url);
@@ -127,17 +127,6 @@ function app() {
     createLogger(() => undefined),
     { llm },
   );
-}
-
-async function runToEnd(runs: ReturnType<typeof app>['runs'], runId: string): Promise<RunView> {
-  await vi.waitFor(
-    async () => {
-      const { run } = await runs.get(runId);
-      if (!TestRun.isFinal(run.status)) throw new Error('still running');
-    },
-    { timeout: 110_000, interval: 250 },
-  );
-  return projectRun((await runs.get(runId)).events);
 }
 
 describe('the agent end to end: real app, real Chromium, scripted plan', () => {
