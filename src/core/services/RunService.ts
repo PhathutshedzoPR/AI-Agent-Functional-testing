@@ -85,6 +85,11 @@ export class RunService {
     return { run, events: await this.deps.repository.events(runId) };
   }
 
+  /** Runs live only as long as the repository keeps them (in memory, until a restart). */
+  async exists(runId: string): Promise<boolean> {
+    return (await this.deps.repository.get(runId)) !== null;
+  }
+
   list(limit = 50): Promise<readonly TestRun[]> {
     return this.deps.repository.list(limit);
   }

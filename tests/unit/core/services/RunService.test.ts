@@ -85,6 +85,14 @@ describe('RunService', () => {
     expect(await runs.list()).toHaveLength(1);
   });
 
+  it('knows which runs it still has', async () => {
+    const { runs } = service();
+    const queued = await runs.start(START);
+
+    expect(await runs.exists(queued.id)).toBe(true);
+    expect(await runs.exists('00000000-0000-4000-8000-00000000dead')).toBe(false);
+  });
+
   it('labels a run from its URL when no label is given', async () => {
     const { runs } = service();
 
