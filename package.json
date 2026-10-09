@@ -17,6 +17,7 @@
     "test:coverage": "vitest run --project unit --coverage",
     "test:integration": "vitest run --project integration",
     "replays:record": "vitest run --project record",
+    "agent": "tsx scripts/run-agent.ts",
     "check": "npm run lint && tsc --noEmit && npm test",
     "format": "prettier --write .",
     "format:check": "prettier --check ."
