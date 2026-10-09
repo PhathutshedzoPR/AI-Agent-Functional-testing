@@ -63,6 +63,18 @@ LLM_FALLBACKS=nvidia:moonshotai/kimi-k3,openrouter:nvidia/nemotron-3-super-120b-
 
 No key? Set `LLM_PROVIDER=replay`. TestPilot then serves plans recorded in `fixtures/llm-replays` and the browser still runs every step for real. A replay only matches the exact story text and page content it was recorded with; record more with `npm run replays:record` (needs a live provider key in `.env.local`).
 
+### Hosting it
+
+The `Dockerfile` builds on Playwright's image, so Chromium comes with it. Any host that runs a container all the time with about 1 GB of memory works; we use [Railway](https://railway.com) (deploy from the GitHub repo, builder: Dockerfile). Generate a public domain in the service's settings, then set these variables, with your domain in place of `testpilot.up.railway.app`:
+
+```ini
+LLM_PROVIDER=replay
+APP_BASE_URL=https://testpilot.up.railway.app
+TARGET_ALLOWLIST=testpilot.up.railway.app,demo.playwright.dev
+```
+
+The host sets `PORT` and `next start` listens on it. Replay mode needs no API keys; for a live model, add the provider, model and key as variables, never in the image. Run history lives in `/app/.data` and starts empty after each deploy unless you mount a volume there.
+
 ### The demo in three runs
 
 1. **Stable:** pick Kota Express (stable) and "Order two kotas and check out". Every step passes.
