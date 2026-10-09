@@ -58,3 +58,13 @@ jobs:
           if [ -f .data/scorecard.md ]; then
             { echo '## Agent scorecard'; echo; cat .data/scorecard.md; } >> "$GITHUB_STEP_SUMMARY"
           fi
+      # A failure on the runner can depend on its speed, so keep each run's events and screenshots.
+      - name: Keep the runs when a check fails
+        if: failure()
+        uses: actions/upload-artifact@v7
+        with:
+          name: integration-runs
+          path: |
+            .data/integration
+            .data/scorecard.md
+          retention-days: 7

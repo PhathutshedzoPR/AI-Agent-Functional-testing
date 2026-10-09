@@ -74,6 +74,16 @@ function bugText(view: RunView): string {
   return view.bugs.flatMap((bug) => [bug.title, bug.expected, bug.actual]).join('\n');
 }
 
+// Expecting this to be empty (rather than a failed count of 0) makes a CI log name the step and
+// its error, so a failure on the runner can be read without its run files.
+function failedSteps(view: RunView): string[] {
+  return view.scenarios.flatMap((scenario) =>
+    scenario.steps
+      .filter((step) => step.state === 'failed')
+      .map((step) => `${scenario.title} / ${step.intent}: ${step.result?.error ?? 'no error'}`),
+  );
+}
+
 // The explorer visits every navigation link, so each buggy run should report the missing page.
 const missingPageFound = (view: RunView): boolean =>
   view.findings.some((f) => f.kind === 'broken-link' && f.url.endsWith('/specials'));
@@ -110,17 +120,17 @@ describe('agent scorecard (recorded plans, real Chromium)', () => {
       const stable = await run(story, 'stable');
       rows.push({ story: title, release: 'stable', view: stable });
       expect(stable.error).toBeNull();
-      expect(stable.stats.failed).toBe(0);
+      expect(failedSteps(stable)).toEqual([]);
 
       const redesign = await run(story, 'redesign', stable.runId ?? undefined);
       rows.push({ story: title, release: 'redesign (stable plan)', view: redesign });
-      expect(redesign.stats.failed).toBe(0);
+      expect(failedSteps(redesign)).toEqual([]);
 
       // Planned afresh on the redesign, the agent reads the new names itself: nothing to heal.
       const planned = await run(story, 'redesign');
       rows.push({ story: title, release: 'redesign (planned fresh)', view: planned });
       expect(planned.error).toBeNull();
-      expect(planned.stats.failed).toBe(0);
+      expect(failedSteps(planned)).toEqual([]);
 
       const buggy = await run(story, 'buggy');
       rows.push({ story: title, release: 'buggy', view: buggy });
@@ -131,7 +141,7 @@ describe('agent scorecard (recorded plans, real Chromium)', () => {
       // The releases differ only by the seeded bugs, so buggy's own plan must pass on stable:
       // anything that failed on buggy was caused by a seeded bug, not by the plan.
       const crossCheck = await run(story, 'stable', buggy.runId ?? undefined);
-      expect(crossCheck.stats.failed).toBe(0);
+      expect(failedSteps(crossCheck)).toEqual([]);
     },
     STORY_TIMEOUT_MS,
   );
