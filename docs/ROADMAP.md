@@ -295,6 +295,7 @@ Done when: a full run looks right on a projector-sized screen and on a phone.
 
 - [ ] Feature freeze at 16:00. Only bug fixes after that.
 - [ ] Demo settings: `AGENT_MAX_SCENARIOS=3`, every run under about 40 seconds. Do a warm-up run before going on stage.
+  - Do not change AGENT_MAX_SCENARIOS or the other AGENT_* limits: they are part of every planning prompt, so replay would no longer find the recordings. Runs already take 4 to 30 s each in replay (see the scorecard).
 - [x] Add the `replays:record` script that CLAUDE.md lists (it runs each suggestion story on each release with `LLM_RECORD=true`), then record the three stories that aren't recorded yet: bad cellphone number, delivery fee on the confirmation, every navigation link works. Then every suggestion card works offline.
   - All four suggestion stories recorded for every release (fresh redesign plans too), plus Playwright's TodoMVC demo.
   - Script added: `npm run replays:record` runs the scorecard with the live model and records it. On 7 Oct the free tier (20 requests per model per day) ran out after stories 1 and 3 (gemini-3.6-flash) and story 2 on stable and buggy plus story 4 on stable (gemini-3.7-flash). **To do after the daily reset:** record story 2 on redesign and story 4 on buggy and redesign, then add both titles to `RECORDED` in the scorecard.
