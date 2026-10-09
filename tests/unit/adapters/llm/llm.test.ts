@@ -202,11 +202,11 @@ describe('ReplayLanguageModel heal fallback', () => {
   });
 
   const HealSchema = z.object({ to: z.string() });
-  const heal = (page: string): LlmRequest<typeof HealSchema> => ({
+  const heal = (page: string, step = 'Place the order'): LlmRequest<typeof HealSchema> => ({
     purpose: 'heal',
     system: 's',
     prompt: [
-      'Step: click - Place the order',
+      `Step: click - ${step}`,
       'Broken locator: {"value":"Place order"} (button "Place order")',
       'Problem: gone',
       '<page_snapshot path="/demo-shop/redesign/checkout" title="Checkout">',
@@ -217,13 +217,23 @@ describe('ReplayLanguageModel heal fallback', () => {
     temperature: 0,
   });
 
-  it('replays a heal for the same step, locator and page when page details shifted', async () => {
+  it('replays a heal for the same broken locator and page, whatever the page state', async () => {
     const store = new ReplayStore(dir);
     const recorded = heal('- textbox "Full name": Thandi');
     await store.write(ReplayStore.key(recorded), { ...recorded, output: { to: 'Confirm order' } });
 
     await expect(
       new ReplayLanguageModel(store).generateObject(heal('- textbox "Full name": Sipho')),
+    ).resolves.toEqual({ to: 'Confirm order' });
+  });
+
+  it('serves another plan the same repair, since its step is worded differently', async () => {
+    const store = new ReplayStore(dir);
+    const recorded = heal('- form', 'Place the order');
+    await store.write(ReplayStore.key(recorded), { ...recorded, output: { to: 'Confirm order' } });
+
+    await expect(
+      new ReplayLanguageModel(store).generateObject(heal('- form', 'Submit the checkout form')),
     ).resolves.toEqual({ to: 'Confirm order' });
   });
 
