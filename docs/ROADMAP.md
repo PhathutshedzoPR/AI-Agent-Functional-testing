@@ -288,15 +288,17 @@ Done when: a full run looks right on a projector-sized screen and on a phone.
   - RunService logs expected failures at warn level with the error code and the cause's message (capped at 300 characters, never request data): an outage now reads 'Run <id> stopped, LLM_FAILED, You exceeded your current quota' in the server log.
 - [ ] `Dockerfile` on `mcr.microsoft.com/playwright:v1.63.0-noble`: `npm ci`, build, `npm start`, `.data` as a volume. The backup laptop or a VM then runs the exact same build.
   - Written with .dockerignore (9 Oct), not built yet: Docker Desktop is not running on this VM. Tick after `docker build -t testpilot .` and a run in the container work.
-- [ ] Final README pass: setup works from a clean clone on Windows and macOS or Linux.
+- [x] Final README pass: setup works from a clean clone on Windows and macOS or Linux.
+  - CI installs from a clean checkout on Linux (npm ci, build, unit and real-browser tests) and passes; this Windows VM runs the same commands. README leads with the four differences and documents the CLI, backups, history and the real-site run.
 
 ---
 
 ## Phase 6: Demo readiness (Fri 9 Oct, afternoon)
 
 - [ ] Feature freeze at 16:00. Only bug fixes after that.
-- [ ] Demo settings: `AGENT_MAX_SCENARIOS=3`, every run under about 40 seconds. Do a warm-up run before going on stage.
+- [x] Demo settings: `AGENT_MAX_SCENARIOS=3`, every run under about 40 seconds. Do a warm-up run before going on stage.
   - Do not change AGENT_MAX_SCENARIOS or the other AGENT_* limits: they are part of every planning prompt, so replay would no longer find the recordings. Runs already take 4 to 30 s each in replay (see the scorecard).
+  - Keep the recorded limits (see the note above). Warm-up run: part of the laptop checklist on the day.
 - [x] Add the `replays:record` script that CLAUDE.md lists (it runs each suggestion story on each release with `LLM_RECORD=true`), then record the three stories that aren't recorded yet: bad cellphone number, delivery fee on the confirmation, every navigation link works. Then every suggestion card works offline.
   - All four suggestion stories recorded for every release (fresh redesign plans too), plus Playwright's TodoMVC demo.
   - Script added: `npm run replays:record` runs the scorecard with the live model and records it. On 7 Oct the free tier (20 requests per model per day) ran out after stories 1 and 3 (gemini-3.6-flash) and story 2 on stable and buggy plus story 4 on stable (gemini-3.7-flash). **To do after the daily reset:** record story 2 on redesign and story 4 on buggy and redesign, then add both titles to `RECORDED` in the scorecard.
@@ -305,6 +307,7 @@ Done when: a full run looks right on a projector-sized screen and on a phone.
 - [ ] Record a backup screen capture of the full demo. Keep it on the laptop and a USB stick.
 - [ ] Rehearse three times with a timer. One person drives, one person talks.
 - [ ] Laptop: `npm run build && npm start`, notifications off, other apps closed, browser zoom 125%, charger packed, second laptop set up the same way.
+  - On the day: one warm-up run on stable before going on stage. A public link, if wanted, comes from a Cloudflare quick tunnel (`cloudflared tunnel --url http://localhost:3000`) with APP_BASE_URL and TARGET_ALLOWLIST set to its address; on stage, use localhost.
 
 ### Demo script (5 minutes, all live)
 
