@@ -311,10 +311,9 @@ Done when: a full run looks right on a projector-sized screen and on a phone.
 
 ### Demo script (5 minutes, all live)
 
-Lead with what last year's winners did not show (real results, story to running tests, proof, tests you keep). Self-healing won 1st place last year, so it is a supporting moment here, not the headline.
+The script, presenter notes, fallbacks and likely judge questions live in [DEMO.md](DEMO.md). It leads with what last year's winners did not show (real results, story to running tests, proof, tests you keep); self-healing is a supporting moment.
 
-| Time | Show | Say |
-|---|---|---|
+---|---|---|
 | 0:00 to 0:30 | Landing page | Small teams test checkout by hand, and their scripts break whenever the UI changes. TestPilot turns a plain user story into tests that run in a real browser, and every result on screen actually happened. |
 | 0:30 to 1:45 | New run on Kota Express `buggy`, "Order two kotas and check out", "Start run" | Receives a URL and a story; decides by reading each page; the plan appears with each acceptance criterion. Real screenshots arrive. It fails: two kotas, but the total charges for one. Open the bug: steps to reproduce, expected against actual, the screenshot. Traceability tab: which criterion failed. |
 | 1:45 to 2:30 | "Run this plan on Stable" in the summary under the header | Is it the shop or the test? The same plan passes on the stable release, so the failure was a real bug, not a bad plan. That is the check our scorecard runs for every seeded bug. |

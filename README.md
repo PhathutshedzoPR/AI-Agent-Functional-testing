@@ -2,7 +2,7 @@
 
 Write a user story. TestPilot turns it into tests, runs them in a real browser, tells you what broke with screenshots and steps to reproduce, and hands you a Playwright test file your team keeps.
 
-We're building it for the [Sebaka Testing AI Hackathon 2026](https://sebakasouthafrica.co.za/ai-agent-challenge.html), functional testing track. The idea on one page: [docs/IDEA.md](docs/IDEA.md).
+We're building it for the [Sebaka Testing AI Hackathon 2026](https://sebakasouthafrica.co.za/ai-agent-challenge.html), functional testing track. The idea on one page: [docs/IDEA.md](docs/IDEA.md). The demo script and presenter notes: [docs/DEMO.md](docs/DEMO.md).
 
 [![CI](https://github.com/PhathutshedzoPR/AI-Agent-Functional-testing/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/PhathutshedzoPR/AI-Agent-Functional-testing/actions/workflows/ci.yml)
 [![Quality gate](https://sonarcloud.io/api/project_badges/measure?project=PhathutshedzoPR_AI-Agent-Functional-testing&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=PhathutshedzoPR_AI-Agent-Functional-testing)
