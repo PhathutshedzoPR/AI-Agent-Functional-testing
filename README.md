@@ -35,7 +35,7 @@ Teams that do automate find their tests breaking every time a button is renamed 
 
 ## Try it
 
-You need Node 22 or newer and an API key for Gemini, Claude or OpenAI. A run makes only a handful of model calls, so Gemini's free tier is enough to try it.
+You need Node 22 or newer and an API key for Gemini, Claude, OpenAI, OpenRouter or NVIDIA. A run makes only a handful of model calls, so a free tier is enough to try it.
 
 ```bash
 git clone https://github.com/PhathutshedzoPR/AI-Agent-Functional-testing.git testpilot
@@ -54,6 +54,12 @@ npm run dev
 Open http://localhost:3000 (use `localhost`, not `127.0.0.1`: writes must come from `APP_BASE_URL`), click **Run a test**, pick Kota Express and a suggested story, and click **Start run**.
 
 For the demo, use a production build: `npm run build` then `npm start`.
+
+Free tiers get busy (Gemini's allows 20 requests per model per day and sometimes answers "high demand"), so list backups in `LLM_FALLBACKS`. TestPilot asks them in order when the main model fails and logs which one answered. We use NVIDIA's Kimi K3 and then OpenRouter's free Nemotron 3 Super; both planned Kota Express runs that caught the cart-total bug and passed cleanly on stable:
+
+```ini
+LLM_FALLBACKS=nvidia:moonshotai/kimi-k3,openrouter:nvidia/nemotron-3-super-120b-a12b:free
+```
 
 No key? Set `LLM_PROVIDER=replay`. TestPilot then serves plans recorded in `fixtures/llm-replays` and the browser still runs every step for real. A replay only matches the exact story text and page content it was recorded with; record more with `npm run replays:record` (needs a live provider key in `.env.local`).
 

@@ -2,10 +2,11 @@ import { mkdtemp, readdir, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { APICallError } from 'ai';
-import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { z } from 'zod';
 import {
   AiSdkLanguageModel,
+  FallbackLanguageModel,
   RecordingLanguageModel,
   ReplayLanguageModel,
   ReplayStore,
@@ -14,6 +15,7 @@ import {
 } from '@/adapters/llm';
 import { LlmError } from '@/core/errors';
 import type { LlmRequest } from '@/core/ports';
+import { FakeLanguageModel } from '../../../fakes/FakeLanguageModel';
 import { mockAiModel } from '../../../fakes/mockAiModel';
 
 const Schema = z.object({ summary: z.string(), count: z.number() });
@@ -187,6 +189,66 @@ describe('createLanguageModel', () => {
     expect(
       createLanguageModel({ ...base, provider: 'google', record: true, keys: { google: 'k' } }),
     ).toBeInstanceOf(RecordingLanguageModel);
+    for (const provider of ['openrouter', 'nvidia'] as const) {
+      expect(createLanguageModel({ ...base, provider, keys: { [provider]: 'k' } })).toBeInstanceOf(
+        AiSdkLanguageModel,
+      );
+    }
+  });
+
+  it('chains backups after the main model', () => {
+    const chained = createLanguageModel({
+      ...base,
+      provider: 'google',
+      fallbacks: [{ provider: 'nvidia', model: 'moonshotai/kimi-k3' }],
+      keys: { google: 'k', nvidia: 'n' },
+    });
+
+    expect(chained).toBeInstanceOf(FallbackLanguageModel);
+  });
+});
+
+describe('FallbackLanguageModel', () => {
+  const down = new FakeLanguageModel();
+  const answering = new FakeLanguageModel().answer('plan', { summary: 'Backup', count: 2 });
+
+  it('asks the next model when one fails, and says which answered', async () => {
+    const onFallback = vi.fn();
+    const chain = new FallbackLanguageModel(
+      [
+        { name: 'google gemini', model: down },
+        { name: 'nvidia kimi', model: answering },
+      ],
+      onFallback,
+    );
+
+    await expect(chain.generateObject(request)).resolves.toEqual({ summary: 'Backup', count: 2 });
+    expect(onFallback).toHaveBeenCalledWith('google gemini', 'nvidia kimi', expect.any(LlmError));
+    expect(chain.replayed).toBe(false);
+  });
+
+  it('throws the last failure when every model fails', async () => {
+    const chain = new FallbackLanguageModel([
+      { name: 'a', model: down },
+      { name: 'b', model: down },
+    ]);
+
+    await expect(chain.generateObject(request)).rejects.toThrow(/No fake answer for plan/);
+    await expect(new FallbackLanguageModel([]).generateObject(request)).rejects.toThrow(
+      /No language model is configured/,
+    );
+  });
+
+  it('lets a bug in our own code surface instead of trying the next model', async () => {
+    const broken = new FakeLanguageModel().answer('plan', () => {
+      throw new TypeError('bug');
+    });
+    const chain = new FallbackLanguageModel([
+      { name: 'a', model: broken },
+      { name: 'b', model: answering },
+    ]);
+
+    await expect(chain.generateObject(request)).rejects.toThrow(TypeError);
   });
 });
 

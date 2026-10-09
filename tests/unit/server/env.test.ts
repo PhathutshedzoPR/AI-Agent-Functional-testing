@@ -51,6 +51,34 @@ describe('parseEnv', () => {
     expect(env.LLM_PROVIDER).toBe('openai');
   });
 
+  it('reads backup models as provider:model, keeping colons inside model ids', () => {
+    const env = parseEnv({
+      ...BASE,
+      LLM_PROVIDER: 'google',
+      LLM_MODEL: 'm',
+      GOOGLE_GENERATIVE_AI_API_KEY: 'g',
+      NVIDIA_API_KEY: 'n',
+      OPENROUTER_API_KEY: 'o',
+      LLM_FALLBACKS: ' nvidia:moonshotai/kimi-k3 , openrouter:nvidia/nemotron:free ,',
+    });
+
+    expect(env.LLM_FALLBACKS).toEqual([
+      { provider: 'nvidia', model: 'moonshotai/kimi-k3' },
+      { provider: 'openrouter', model: 'nvidia/nemotron:free' },
+    ]);
+  });
+
+  it("needs each backup's key, a known provider and a model", () => {
+    const live = { ...BASE, LLM_PROVIDER: 'openrouter', LLM_MODEL: 'm', OPENROUTER_API_KEY: 'o' };
+
+    expect(() => parseEnv({ ...live, LLM_FALLBACKS: 'nvidia:moonshotai/kimi-k3' })).toThrow(
+      /NVIDIA_API_KEY: required for the nvidia fallback/,
+    );
+    expect(() => parseEnv({ ...live, LLM_FALLBACKS: 'mistral:large' })).toThrow(/LLM_FALLBACKS/);
+    expect(() => parseEnv({ ...live, LLM_FALLBACKS: 'openrouter' })).toThrow(/LLM_FALLBACKS/);
+    expect(parseEnv(live).LLM_FALLBACKS).toEqual([]);
+  });
+
   it('rejects recording in replay mode', () => {
     expect(() => parseEnv({ ...BASE, LLM_RECORD: 'true' })).toThrow(/LLM_RECORD/);
   });

@@ -1,4 +1,9 @@
 export { AiSdkLanguageModel } from './AiSdkLanguageModel';
+export {
+  FallbackLanguageModel,
+  type FallbackListener,
+  type NamedModel,
+} from './FallbackLanguageModel';
 export { createLanguageModel, type LanguageModelSettings } from './createLanguageModel';
 export { RecordingLanguageModel } from './RecordingLanguageModel';
 export { ReplayLanguageModel } from './ReplayLanguageModel';

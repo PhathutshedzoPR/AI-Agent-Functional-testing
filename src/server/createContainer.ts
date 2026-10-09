@@ -64,7 +64,7 @@ export function createContainer(
     bus: new InMemoryEventBus(),
     queue: new RunQueue((error) => logError('A queued run failed outside its own handling', error)),
     agent: buildAgent(env, policy, shared),
-    llm: overrides.llm ?? buildLanguageModel(env),
+    llm: overrides.llm ?? buildLanguageModel(env, logger),
     policy,
     exporters: createDefaultExporters(),
     runTimeoutMs: env.AGENT_RUN_TIMEOUT_MS,
@@ -129,16 +129,22 @@ function buildAgent(env: Env, policy: ITargetPolicy, { clock, ids, artifacts }: 
   });
 }
 
-function buildLanguageModel(env: Env): ILanguageModel {
+function buildLanguageModel(env: Env, logger: Logger): ILanguageModel {
   return createLanguageModel({
     provider: env.LLM_PROVIDER,
     model: env.LLM_MODEL,
+    fallbacks: env.LLM_FALLBACKS,
     record: env.LLM_RECORD,
     replayDir: env.LLM_REPLAY_DIR,
     keys: {
       google: env.GOOGLE_GENERATIVE_AI_API_KEY,
       anthropic: env.ANTHROPIC_API_KEY,
       openai: env.OPENAI_API_KEY,
+      openrouter: env.OPENROUTER_API_KEY,
+      nvidia: env.NVIDIA_API_KEY,
     },
+    // Which backup answered, and why the one before it did not; never the request itself.
+    onFallback: (from, to, error) =>
+      logger.warn('Language model fallback', { from, to, code: error.code, reason: error.message }),
   });
 }
