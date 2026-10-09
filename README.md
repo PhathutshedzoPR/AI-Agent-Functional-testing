@@ -163,7 +163,7 @@ An agent that opens whatever URL you give it, on a server, needs guard rails:
 |---|---|
 | `npm run dev` | Development server on port 3000 |
 | `npm run build`, then `npm start` | Production build and server (use this for the demo) |
-| `npm run check` | Lint, typecheck and unit tests (333 tests) |
+| `npm run check` | Lint, typecheck and unit tests (372 tests) |
 | `npm run test:coverage` | Unit tests with coverage for SonarQube Cloud |
 | `npm run test:integration` | Builds the app, starts it on a spare port and runs the agent against Kota Express in real Chromium, including the scorecard (every suggestion story on every release, replayed; the table lands in `.data/scorecard.md`) and an accessibility check of every page with axe-core (WCAG 2.1 AA) on a laptop and a phone |
 | `npm run agent -- --url <url> [--story "<text>"] [--device desktop|iphone|android]` | The agent from the terminal: narrates the run, writes JUnit XML and Markdown to `./reports`, exits 1 on failures |

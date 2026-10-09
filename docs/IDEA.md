@@ -38,7 +38,7 @@ Every buggy run also reports the Specials link returning 404.
 
 ## Built to last
 
-Next.js 16 and TypeScript (strict), ports-and-adapters architecture with the agent core free of framework code, Playwright, the Vercel AI SDK with Gemini, Zod validation on every input and every model response, 324 unit tests, SonarQube Cloud quality gate passing, and CI on every push. The agent never leaves the target's site, treats page content as data rather than instructions, and checks every browser request, redirects included, against its target policy.
+Next.js 16 and TypeScript (strict), ports-and-adapters architecture with the agent core free of framework code, Playwright, the Vercel AI SDK with Gemini, Zod validation on every input and every model response, 372 unit tests and 31 real-browser integration tests, SonarQube Cloud quality gate passing, and CI on every push. The agent never leaves the target's site, treats page content as data rather than instructions, and checks every browser request, redirects included, against its target policy.
 
 ## What's next
 
