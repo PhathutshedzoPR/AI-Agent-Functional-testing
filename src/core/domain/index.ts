@@ -55,6 +55,8 @@ export {
   valueEquals,
 } from './textMatching';
 export { narrateEvent } from './narrateEvent';
+export { plural } from './plural';
+export { summariseRun, type RunSummaryText } from './summariseRun';
 export { applyRunEvent, projectRun } from './projectRun';
 export { traceCriteria, type CriterionVerdict, type TraceRow } from './traceCriteria';
 export {

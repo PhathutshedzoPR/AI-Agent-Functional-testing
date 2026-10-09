@@ -9,9 +9,9 @@ import { ApiRequestError, sendJson } from '@/lib/sendJson';
 import { buttonStyles } from '../ui';
 import { DevicePicker } from './DevicePicker';
 import { StoryComposer } from './StoryComposer';
-import { TargetPicker, type TargetChoice } from './TargetPicker';
+import { TargetPicker, type CustomHosts, type TargetChoice } from './TargetPicker';
 
-type Props = Readonly<{ appBaseUrl: string; allowCustomTargets: boolean }>;
+type Props = Readonly<{ appBaseUrl: string; customHosts: CustomHosts }>;
 
 type Choices = Readonly<{
   target: TargetChoice;
@@ -33,7 +33,7 @@ function requestFor(choices: Choices, appBaseUrl: string): StartRunRequest {
 }
 
 /** Choose a target, say what to test, start the run. */
-export function NewRunForm({ appBaseUrl, allowCustomTargets }: Props) {
+export function NewRunForm({ appBaseUrl, customHosts }: Props) {
   const router = useRouter();
   const [target, setTarget] = useState<TargetChoice>('stable');
   const [customUrl, setCustomUrl] = useState('');
@@ -63,7 +63,7 @@ export function NewRunForm({ appBaseUrl, allowCustomTargets }: Props) {
         onChange={setTarget}
         customUrl={customUrl}
         onCustomUrlChange={setCustomUrl}
-        allowCustom={allowCustomTargets}
+        customHosts={customHosts}
       />
       <DevicePicker value={device} onChange={setDevice} />
       <StoryComposer story={story} onChange={setStory} />

@@ -2,6 +2,7 @@ import Image from 'next/image';
 import { runApiPaths } from '@/contracts';
 import { describeStep, type Device, type StepView } from '@/core/domain';
 import { cn } from '@/lib/cn';
+import { StatusBadge } from './StatusBadge';
 
 type Props = Readonly<{ runId: string; step: StepView | null; device: Device }>;
 
@@ -11,6 +12,16 @@ const SCREEN = {
   iphone: { width: 393, height: 659 },
   android: { width: 412, height: 839 },
 } as const;
+
+// Each status glows in its own colour (globals.css step-glow).
+const GLOW: Readonly<Record<StepView['state'], string>> = {
+  pending: '',
+  running: '',
+  passed: 'glow-passed',
+  healed: 'glow-healed',
+  failed: 'glow-failed',
+  skipped: '',
+};
 
 /** The real screenshot taken after the selected (or latest) step. */
 export function LiveBrowser({ runId, step, device }: Props) {
@@ -26,6 +37,7 @@ export function LiveBrowser({ runId, step, device }: Props) {
   const caption = describeStep(step);
   return (
     <figure className="space-y-2">
+      {/* Keyed by step, so each new screenshot plays the glow once (CLAUDE.md s9: motion on events). */}
       {/* unoptimized: private per-run JPEGs from our own API, served as they are. */}
       <Image
         unoptimized
@@ -35,12 +47,15 @@ export function LiveBrowser({ runId, step, device }: Props) {
         width={screen.width}
         height={screen.height}
         // A phone screenshot is tall and narrow; centre it at a readable height instead of full width.
+        key={step.id}
         className={cn(
-          'rounded-xl border border-divider',
+          'step-glow rounded-xl border border-divider',
+          GLOW[step.state],
           phone ? 'mx-auto max-h-[36rem] w-auto' : 'w-full',
         )}
       />
-      <figcaption className="text-sm text-muted">
+      <figcaption className="flex flex-wrap items-center gap-x-2 gap-y-1 text-sm text-muted">
+        <StatusBadge state={step.state} />
         {caption}
         {step.result.url && <span className="ml-2 font-mono text-xs">{step.result.url}</span>}
       </figcaption>

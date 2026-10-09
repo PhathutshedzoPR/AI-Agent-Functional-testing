@@ -10,9 +10,9 @@ import { BugCard } from './BugCard';
 import { ExportMenu } from './ExportMenu';
 import { FlightPath } from './FlightPath';
 import { LiveBrowser } from './LiveBrowser';
-import { RerunActions } from './RerunActions';
 import { ReviewList } from './ReviewList';
 import { RunHeader } from './RunHeader';
+import { RunSummary } from './RunSummary';
 import { RunTabs } from './RunTabs';
 import { StepList } from './StepList';
 import { TraceabilityTable } from './TraceabilityTable';
@@ -113,6 +113,7 @@ export function RunDashboard({ runId, appBaseUrl }: Props) {
   return (
     <div className="space-y-5">
       <RunHeader runId={runId} view={view} />
+      <RunSummary runId={runId} view={view} appBaseUrl={appBaseUrl} />
       {stream === 'lost' && (
         <p role="alert" className="text-sm text-failed">
           Lost the live connection. Reload the page to pick up where it left off.
@@ -170,14 +171,6 @@ export function RunDashboard({ runId, appBaseUrl }: Props) {
       <section aria-label="Run details" className={panel}>
         <RunTabs tabs={tabs} active={tab} onChange={setTab} />
       </section>
-      {finished && view.scenarios.length > 0 && (
-        <RerunActions
-          runId={runId}
-          appBaseUrl={appBaseUrl}
-          currentUrl={view.targetUrl}
-          device={view.device}
-        />
-      )}
     </div>
   );
 }

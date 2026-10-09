@@ -1,10 +1,9 @@
 import { Locator } from './Locator';
+import { plural } from './plural';
 import type { RunEvent } from './RunEvent';
 import type { FeedTone, RunView } from './RunView';
 
 type Line = Readonly<{ text: string; tone: FeedTone }> | null;
-
-const plural = (count: number, noun: string): string => `${count} ${noun}${count === 1 ? '' : 's'}`;
 
 const pathOf = (url: string): string => {
   try {

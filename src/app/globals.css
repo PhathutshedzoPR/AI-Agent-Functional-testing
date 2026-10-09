@@ -183,8 +183,35 @@
   animation: waypoint-reveal 0.35s ease-out both;
 }
 
+/* A new screenshot glows once in its step's status colour, where the verdict happened. */
+@keyframes step-glow {
+  from {
+    box-shadow: 0 0 0 4px var(--glow);
+  }
+  to {
+    box-shadow: 0 0 0 0 transparent;
+  }
+}
+
+.step-glow {
+  animation: step-glow 1.1s ease-out;
+}
+
+.glow-passed {
+  --glow: var(--color-passed);
+}
+
+.glow-healed {
+  --glow: var(--color-healed);
+}
+
+.glow-failed {
+  --glow: var(--color-failed);
+}
+
 @media (prefers-reduced-motion: reduce) {
-  .waypoint-reveal {
+  .waypoint-reveal,
+  .step-glow {
     animation: none;
   }
 }
