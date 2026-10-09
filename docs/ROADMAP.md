@@ -279,7 +279,8 @@ Done when: a full run looks right on a projector-sized screen and on a phone.
 - [ ] CLI `scripts/run-agent.ts` using `createContainer`: `npm run agent -- --url <url> --story "<text>"` writes JUnit and Markdown to `./reports` and exits non-zero on failures. This proves the core runs outside Next.
 - [ ] Run history survives a restart: a `FileRunRepository` appends each run's events to `.data/runs/<runId>.jsonl` and rebuilds the view through `projectRun` on load. Swap it in at `createContainer`; nothing else changes.
 - [ ] Find the cause of the dev-only hydration warning on the shop's checkout page in the agent's browser and fix it (don't suppress it). Then drop the line from the README's limitations.
-- [ ] Log why a run failed. `RunService` logs only unexpected errors, so an `LlmError` (a provider 503, say) reaches the client as "kept failing" with nothing in the server log. Log the code and the cause's message (never the request body or headers) at warn level.
+- [x] Log why a run failed. `RunService` logs only unexpected errors, so an `LlmError` (a provider 503, say) reaches the client as "kept failing" with nothing in the server log. Log the code and the cause's message (never the request body or headers) at warn level.
+  - RunService logs expected failures at warn level with the error code and the cause's message (capped at 300 characters, never request data): an outage now reads 'Run <id> stopped, LLM_FAILED, You exceeded your current quota' in the server log.
 - [ ] `Dockerfile` on `mcr.microsoft.com/playwright:v1.63.0-noble`: `npm ci`, build, `npm start`, `.data` as a volume. The backup laptop or a VM then runs the exact same build.
 - [ ] Final README pass: setup works from a clean clone on Windows and macOS or Linux.
 
@@ -299,8 +300,19 @@ Done when: a full run looks right on a projector-sized screen and on a phone.
 
 ### Demo script (5 minutes, all live)
 
+Lead with what last year's winners did not show (real results, story to running tests, proof, tests you keep). Self-healing won 1st place last year, so it is a supporting moment here, not the headline.
+
 | Time | Show | Say |
 |---|---|---|
+| 0:00 to 0:30 | Landing page | Small teams test checkout by hand, and their scripts break whenever the UI changes. TestPilot turns a plain user story into tests that run in a real browser, and every result on screen actually happened. |
+| 0:30 to 1:45 | New run on Kota Express `buggy`, "Order two kotas and check out", "Start run" | Receives a URL and a story; decides by reading each page; the plan appears with each acceptance criterion. Real screenshots arrive. It fails: two kotas, but the total charges for one. Open the bug: steps to reproduce, expected against actual, the screenshot. Traceability tab: which criterion failed. |
+| 1:45 to 2:30 | "Run this plan on Stable" | Is it the shop or the test? The same plan passes on the stable release, so the failure was a real bug, not a bad plan. That is the check our scorecard runs for every seeded bug. |
+| 2:30 to 3:10 | Export tab: download the Playwright test; "Or on another screen: iPhone" | The team keeps this test; it runs with `npx playwright test`. The same plan on an iPhone screen, touch and all. |
+| 3:10 to 3:50 | "Run this plan on Redesign", Needs review tab | The developers renamed the buttons. The run still passes, and it lists every repair for a person to check, because a repair can hide a regression. |
+| 3:50 to 4:40 | README scorecard and badges | How we know it works: every suggested story on every release, each seeded bug caught, no false failures. SonarQube quality gate, 340+ tests, accessibility checked. |
+| 4:40 to 5:00 | Back to the dashboard | Who it's for, and what's next: native Android and iOS apps (the same locator model maps to Android UiSelector and iOS XCUIElementType), CI on every pull request. |
+
+---|---|---|
 | 0:00 to 0:30 | Landing page | Who has the problem: small teams test checkout by hand before every release, and their test scripts break whenever a button is renamed. |
 | 0:30 to 1:30 | New run on Kota Express `stable`, click "Order two kotas and check out", "Start run" | The agent receives a URL and a story, decides what to test, and executes it in a real browser. Point at the plan appearing and real screenshots arriving. Optional: run headed with slow-mo so the room sees Chromium move. |
 | 1:30 to 2:45 | Same story on `redesign` | The developers renamed the buttons. A normal script would break here. Watch the detours: healed steps, each listed under "Needs review" with what changed. |

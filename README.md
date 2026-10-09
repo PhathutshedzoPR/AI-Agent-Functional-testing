@@ -1,6 +1,6 @@
 # TestPilot
 
-TestPilot tests websites the way a QA analyst would. Give it a URL and a user story. It opens a real browser, works out what to test, clicks through the flows and tells you what broke, with screenshots and the steps to reproduce it.
+Write a user story. TestPilot turns it into tests, runs them in a real browser, tells you what broke with screenshots and steps to reproduce, and hands you a Playwright test file your team keeps.
 
 We're building it for the [Sebaka Testing AI Hackathon 2026](https://sebakasouthafrica.co.za/ai-agent-challenge.html), functional testing track. The idea on one page: [docs/IDEA.md](docs/IDEA.md).
 
@@ -8,6 +8,15 @@ We're building it for the [Sebaka Testing AI Hackathon 2026](https://sebakasouth
 [![Quality gate](https://sonarcloud.io/api/project_badges/measure?project=PhathutshedzoPR_AI-Agent-Functional-testing&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=PhathutshedzoPR_AI-Agent-Functional-testing)
 [![Coverage](https://sonarcloud.io/api/project_badges/measure?project=PhathutshedzoPR_AI-Agent-Functional-testing&metric=coverage)](https://sonarcloud.io/component_measures?id=PhathutshedzoPR_AI-Agent-Functional-testing&metric=coverage)
 [![Security rating](https://sonarcloud.io/api/project_badges/measure?project=PhathutshedzoPR_AI-Agent-Functional-testing&metric=security_rating)](https://sonarcloud.io/component_measures?id=PhathutshedzoPR_AI-Agent-Functional-testing&metric=security_rating)
+
+## What makes it different
+
+1. **Every result is real.** The AI only proposes: plans, element suggestions and bug titles. Every pass or fail is a Playwright check on the real page, every screenshot a real capture, every timing measured. Nothing in the app is simulated, and a replayed plan is labelled as one.
+2. **A user story becomes tests that run.** TestPilot reads the acceptance criteria in your story, plans happy-path, negative and edge-case scenarios for each one, runs them, and shows which criterion passed or failed in a traceability table.
+3. **Proven on bugs we planted.** A scorecard runs every suggested story on three releases of our demo shop and checks that each seeded bug is caught. To prove a failure comes from the bug and not from a bad plan, the buggy release's plan is run again on the stable release, where it must pass. [The numbers](#what-happened-when-we-ran-it).
+4. **Tests you keep.** Every run exports a Playwright test built from the exact locators the agent used. Our integration tests run that file with `npx playwright test`, on a desktop and on a phone screen, and it passes.
+
+It also repairs tests when a button is renamed, but it never hides it: each repair is checked in the browser and listed under **Needs review**, because a repair can mask a real regression.
 
 ## The problem
 
@@ -23,12 +32,6 @@ Teams that do automate find their tests breaking every time a button is renamed 
 | **Decides** | Reads each page's accessibility tree, then plans happy-path, negative and edge-case scenarios. |
 | **Executes** | Runs every step in headless Chromium with Playwright, on a desktop screen or an iPhone or Android phone screen, and takes a screenshot after each one. When a button has been renamed, it finds it again and marks the step as healed so a person can check it. |
 | **Delivers** | A live dashboard, bug reports with expected and actual results, a traceability table (each acceptance criterion, the scenarios that test it and their result), JUnit XML for CI, a Markdown report and a Playwright test file your team can keep. |
-
-## The AI proposes, Playwright decides
-
-The language model plans the tests and suggests how to find elements. It never decides whether a test passed. Every pass or fail comes from a real assertion in a real browser, every screenshot is a real capture, and every timing is measured.
-
-If TestPilot shows you a result, it happened.
 
 ## Try it
 
@@ -72,20 +75,21 @@ Testing a tester needs a site where you already know the right answers. Kota Exp
 
 ### What happened when we ran it
 
-The agent scorecard (`tests/integration/scorecard.test.ts`) runs each suggestion story on every release. Gemini planned these runs live on 7 October 2026 (`gemini-3.6-flash`) and every model response is recorded in `fixtures/llm-replays`. The table below comes from replaying those recordings with the current code, so the plans are the model's, while every click, check and screenshot happened in real Chromium. Redesign re-runs the plan made on stable, so it meets the renamed buttons the way an old test suite would.
+The agent scorecard (`tests/integration/scorecard.test.ts`) runs each suggestion story on every release. Gemini planned these runs live on 7 and 9 October 2026 (Gemini 3.6 and 3.7 Flash), and every model response is recorded in `fixtures/llm-replays`. The table comes from replaying those recordings with the current code: the plans are the model's, while every click, check and screenshot happened in real Chromium.
 
-| Story | Release | Result | Steps | Bug reported | Time |
-|---|---|---|---|---|---|
-| Order two kotas and check out | stable | Passed | 17 passed | none | 9 s |
-| | redesign | Passed after healing | 10 passed, 7 healed, 0 failed | none | 20 s |
-| | buggy | Bugs found | 15 passed, 1 failed | Cart total shows R 35,00 instead of R 70,00 for two Quarter Kotas | 14 s |
-| The confirmation shows the delivery fee | stable | Passed | 12 passed | none | 8 s |
-| | redesign | Passed after healing | 9 passed, 3 healed, 0 failed | none | 14 s |
-| | buggy | Bugs found | 11 passed, 1 failed | Delivery fee R 30,00 is not displayed on confirmation page | 15 s |
+| Story | Stable | Redesign, old plan | Redesign, planned fresh | Buggy |
+|---|---|---|---|---|
+| Order two kotas and check out | 17 passed | 10 passed, 7 repaired | 16 passed | Caught: cart total shows R 35,00 instead of R 70,00 |
+| Checkout rejects a bad cellphone number | 23 passed | 15 passed, 8 repaired | 22 passed | Caught: a cellphone number with letters is accepted |
+| The confirmation shows the delivery fee | 12 passed | 9 passed, 3 repaired | 11 passed | Caught: the confirmation shows the wrong delivery fee |
+| Every navigation link works | 12 passed | 12 passed | 12 passed | Caught: the Specials link leads to a missing page (404) |
 
-On every buggy run the explorer also reported the Specials link returning 404. To prove a failure on buggy comes from a seeded bug and not from a bad plan, the scorecard re-runs buggy's own plan on stable, where it passes.
+Every seeded bug is caught, and nothing fails anywhere else. Two checks make that mean something:
 
-Not scored yet: the free Gemini tier allows 20 requests per model per day, and we ran out mid-recording. "Checkout rejects a bad cellphone number" is recorded (with `gemini-3.7-flash`) on stable (passes) and buggy (catches the cellphone bug) but not its redesign heals; "Every navigation link works" is recorded on stable only. The scorecard lists both as to-do until `npm run replays:record` has saved them.
+- **No false failures.** Each buggy plan is run again on stable, where it passes, so every failure on buggy comes from the seeded bug and not from a bad plan.
+- **Old plan and fresh plan.** "Old plan" re-runs the plan made on stable, the way an existing test suite meets a redesign; TestPilot repairs the renamed buttons and lists each repair for review. "Planned fresh" lets the agent read the redesign itself: it uses the new names and needs no repairs.
+
+A link that leads to a missing page fails its step even when the app shows the page after a 200 response: after each step, TestPilot asks the site for the address the browser landed on, and a 404, 410 or 5xx answer is a failure.
 
 On redesign, rules repaired the renamed "Add to bag" buttons; the LLM proposed "Proceed to payment" and "Confirm order", and each suggestion was checked in the browser before use. A rename found once is reused for the rest of the run, so later checks such as "the Confirm order button is gone" test the renamed control, not a button that no longer exists.
 
@@ -150,10 +154,17 @@ An agent that opens whatever URL you give it, on a server, needs guard rails:
 | `npm run check` | Lint, typecheck and unit tests (333 tests) |
 | `npm run test:coverage` | Unit tests with coverage for SonarQube Cloud |
 | `npm run test:integration` | Builds the app, starts it on a spare port and runs the agent against Kota Express in real Chromium, including the scorecard (every suggestion story on every release, replayed; the table lands in `.data/scorecard.md`) and an accessibility check of every page with axe-core (WCAG 2.1 AA) on a laptop and a phone |
+| `npm run agent -- --url <url> [--story "<text>"] [--device desktop|iphone|android]` | The agent from the terminal: narrates the run, writes JUnit XML and Markdown to `./reports`, exits 1 on failures |
 | `npm run replays:record` | The same scorecard with the live model from `.env.local`, saving every response to `fixtures/llm-replays`. Requests already recorded are answered from the recording, so only new ones use provider calls. Re-run it whenever a prompt changes |
 | `npm run format` | Prettier |
 
-Planned, not built yet: a command-line runner (`npm run agent`) for CI pipelines.
+Run the agent without the web UI, for a terminal or a CI pipeline. It narrates the run, writes JUnit XML and a Markdown report to `./reports`, and exits with 1 when a test fails:
+
+```bash
+npm run agent -- --url http://localhost:3000/demo-shop/buggy --story "Order two kotas and check out" --device iphone
+```
+
+The target must be allowed by `TARGET_MODE` and `TARGET_ALLOWLIST`, and the demo shop must be running (`npm start`) to test it. With `LLM_PROVIDER=replay`, pass a suggested story exactly as written in `src/components/runs/storySuggestions.ts`; any other story needs a live model.
 
 ## Limitations
 
@@ -161,7 +172,7 @@ Planned, not built yet: a command-line runner (`npm run agent`) for CI pipelines
 - One run at a time. Others wait in a queue.
 - It can't get past CAPTCHAs or two-factor logins.
 - Healing can hide a real change. That's why healed steps are listed for review instead of counted as clean passes.
-- Run history is kept in memory and is lost when the server restarts. Screenshots stay in `.data/artifacts`.
+- Run history and screenshots are kept on the server's disk under `.data`, not in a shared database, so each machine has its own history. A run that was going when the server stopped is marked as stopped when it comes back.
 - The planner cannot see pages that only appear after an action (such as the order confirmation). On those pages it checks only values it saw earlier, such as the delivery fee from checkout, never wording it would have to guess.
 - In development, Next.js sometimes reports a hydration warning on the shop's checkout page inside the agent's browser; it shows up as a console-error finding. Production builds don't report it.
 

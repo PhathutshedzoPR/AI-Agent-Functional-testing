@@ -6,10 +6,21 @@ import {
   STEP_STATUS_LABELS,
   traceCriteria,
   type BugReport,
+  type Device,
   type RunView,
 } from '@/core/domain';
 import type { ExportedReport, IReportExporter } from '@/core/ports';
+import { DEVICE_PROFILE_NAMES, deviceContextOptions } from '../browser/deviceProfiles';
 import { reportFileName } from './reportFileName';
+
+/** The screen the run used, with its size, so a reader can reproduce it exactly. */
+function screenOf(device: Device): string {
+  const viewport = deviceContextOptions(device).viewport;
+  const size = viewport ? `${viewport.width} x ${viewport.height}` : 'default size';
+  return device === 'desktop'
+    ? `Desktop (${size})`
+    : `${DEVICE_LABELS[device]} (${size}, Playwright's ${DEVICE_PROFILE_NAMES[device]} profile in Chromium)`;
+}
 
 /** Neutralises Markdown in text that came from the site under test (links, images, tables). */
 export function mdEscape(text: string): string {
@@ -25,7 +36,7 @@ function header(view: RunView): string[] {
     '',
     `- Result: ${RUN_STATUS_LABELS[view.status]}`,
     `- Target: ${mdEscape(view.targetUrl ?? '')}`,
-    `- Screen: ${DEVICE_LABELS[view.device]}`,
+    `- Screen: ${screenOf(view.device)}`,
     `- Started: ${view.startedAt ?? 'not started'}`,
     `- Duration: ${duration}`,
     `- Plan: ${view.replayed ? 'replayed from a recording' : 'planned live by the LLM'}`,

@@ -128,7 +128,7 @@ describe('PlaywrightSpecExporter', () => {
     );
     expect(spec).not.toContain('devices[');
     expect(new MarkdownExporter().export({ ...view, device: 'android' }).body).toContain(
-      '- Screen: Android phone',
+      "- Screen: Android phone (412 x 839, Playwright's Pixel 7 profile in Chromium)",
     );
   });
 

@@ -19,11 +19,13 @@ TestPilot is an AI agent that tests a website the way a QA analyst would. You gi
 
 ## What makes it different
 
-1. **The AI proposes, the browser decides.** The language model only writes plans, suggests replacement locators and words bug titles. Every pass or fail comes from a Playwright check on the real page, every screenshot is real and every duration is measured. Nothing is simulated.
-2. **Healing that admits what it did.** A renamed button is found again by rules first and the model second, and the browser confirms the replacement before it is used. Healed steps are shown as detours on the flight path and listed under "Needs review", because a heal can hide a real regression.
-3. **Tests you keep.** Each run exports a Playwright spec built from the same locators the agent used, including the healed ones. Our integration tests run that exported file with `npx playwright test` and it passes.
-4. **Proof, not a demo trick.** A scorecard runs each suggested story on three releases of our demo shop (stable, a redesign with renamed buttons, and a release with seeded bugs). To prove a failure comes from a real bug and not a bad plan, the buggy release's plan is re-run on stable, where it passes.
-5. **A flight recorder you can follow.** Each run is drawn as a flight path: scenarios are routes, steps are waypoints, heals are detours and failures break the line.
+1. **Every result is real.** The language model only writes plans, suggests element locators and words bug titles. Every pass or fail comes from a Playwright check on the real page, every screenshot is real and every duration is measured. Nothing is simulated.
+2. **A user story becomes tests that run.** The acceptance criteria in a plain story become happy-path, negative and edge-case scenarios that run in the browser, and a traceability table shows which criterion passed or failed.
+3. **Proven on bugs we planted.** A scorecard runs each suggested story on three releases of our demo shop (stable, a redesign with renamed buttons, and a release with seeded bugs) and checks each seeded bug is caught. To prove a failure comes from the bug and not a bad plan, the buggy release's plan is re-run on stable, where it passes.
+4. **Tests you keep.** Each run exports a Playwright spec built from the same locators the agent used. Our integration tests run that exported file with `npx playwright test`, on a desktop and on a phone screen, and it passes.
+5. **A flight recorder you can follow.** Each run is drawn as a flight path: scenarios are routes, steps are waypoints, repairs are detours and failures break the line.
+
+When a button is renamed, TestPilot repairs the step (rules first, the model second, confirmed in the browser) but never hides it: repaired steps are listed under "Needs review", because a repair can mask a real regression.
 
 ## Results so far (real runs, replayed in real Chromium)
 
