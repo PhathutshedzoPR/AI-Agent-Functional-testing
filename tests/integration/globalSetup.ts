@@ -41,6 +41,8 @@ export default async function setup(project: TestProject): Promise<(() => void) 
       TARGET_ALLOWLIST: `localhost:${port}`,
       LLM_PROVIDER: 'replay',
       LLM_RECORD: 'false',
+      // The suites start more runs a minute than a person would; the limiter has its own tests.
+      RATE_LIMIT_RUNS_PER_MINUTE: '1000',
     },
   });
   await waitForServer(baseUrl, server);

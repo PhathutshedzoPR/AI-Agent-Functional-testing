@@ -1,9 +1,8 @@
 import { AxeBuilder } from '@axe-core/playwright';
 import { chromium, type Browser } from 'playwright';
-import { afterAll, beforeAll, describe, expect, inject, it, vi } from 'vitest';
-import { RunResponseSchema, RunSnapshotResponseSchema, runApiPaths } from '@/contracts';
-import { TestRun } from '@/core/domain';
+import { afterAll, beforeAll, describe, expect, inject, it } from 'vitest';
 import { STORY_SUGGESTIONS } from '@/components/runs/storySuggestions';
+import { finishedRunOverHttp } from './httpRuns';
 
 /**
  * TestPilot's own pages checked with axe-core (the engine behind Lighthouse's accessibility
@@ -15,25 +14,6 @@ const VIEWPORTS = { laptop: { width: 1280, height: 800 }, phone: { width: 360, h
 
 let browser: Browser;
 let runPath = '';
-
-async function finishedRun(): Promise<string> {
-  const story = STORY_SUGGESTIONS[0]?.story ?? null;
-  const response = await fetch(new URL(runApiPaths.runs, baseUrl), {
-    method: 'POST',
-    headers: { 'content-type': 'application/json', origin: baseUrl },
-    body: JSON.stringify({ targetUrl: `${baseUrl}/demo-shop/buggy`, story }),
-  });
-  const { run } = RunResponseSchema.parse(await response.json());
-  await vi.waitFor(
-    async () => {
-      const snapshot = await fetch(new URL(runApiPaths.run(run.id), baseUrl));
-      const { run: current } = RunSnapshotResponseSchema.parse(await snapshot.json());
-      if (!TestRun.isFinal(current.status)) throw new Error('still running');
-    },
-    { timeout: 110_000, interval: 500 },
-  );
-  return `/runs/${run.id}`;
-}
 
 async function violations(path: string, viewport: keyof typeof VIEWPORTS): Promise<string[]> {
   const context = await browser.newContext({ viewport: VIEWPORTS[viewport] });
@@ -50,7 +30,11 @@ async function violations(path: string, viewport: keyof typeof VIEWPORTS): Promi
 describe('accessibility of TestPilot pages (axe-core, WCAG 2.1 AA)', () => {
   beforeAll(async () => {
     browser = await chromium.launch();
-    runPath = await finishedRun();
+    const { run } = await finishedRunOverHttp(baseUrl, {
+      targetUrl: `${baseUrl}/demo-shop/buggy`,
+      story: STORY_SUGGESTIONS[0]?.story ?? null,
+    });
+    runPath = `/runs/${run.id}`;
   }, 120_000);
 
   afterAll(async () => {

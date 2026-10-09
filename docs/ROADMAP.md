@@ -272,7 +272,8 @@ Done when: a full run looks right on a projector-sized screen and on a phone.
 
 ## Phase 5: Hardening and proof (Fri 9 Oct, morning)
 
-- [ ] Walk CLAUDE.md section 4 item by item. Add a test for each guard that doesn't have one yet.
+- [x] Walk CLAUDE.md section 4 item by item. Add a test for each guard that doesn't have one yet.
+  - Every rule has a test. New: tests/unit/sourceRules.test.ts fails the build on dangerouslySetInnerHTML, eval/new Function, Math.random, MD5/SHA-1, NEXT_PUBLIC_, console.log, http:// literals or silenced rules (each rule proven against an example); tests/integration/httpSecurity.test.ts checks the real server over HTTP: hardening headers, cross-origin and no-origin starts refused, blocked targets (other hosts, our own /api, credentials in the URL, file:), id validation and path tricks, the story cap, and screenshots served as image/jpeg with nosniff.
 - [ ] SonarQube Cloud: 0 bugs, 0 vulnerabilities, code smells fixed, duplication under 3%, coverage at least 80% on new code. **HUMAN:** review each security hotspot in the SonarQube Cloud UI and mark it Safe with a reason, or fix it.
 - [ ] CI job `integration`: `npx playwright install --with-deps chromium`, build, start the app, run `npm run test:integration` with `LLM_PROVIDER=replay`.
 - [ ] CLI `scripts/run-agent.ts` using `createContainer`: `npm run agent -- --url <url> --story "<text>"` writes JUnit and Markdown to `./reports` and exits non-zero on failures. This proves the core runs outside Next.
