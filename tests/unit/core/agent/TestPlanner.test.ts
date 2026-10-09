@@ -131,11 +131,12 @@ describe('TestPlanner', () => {
     );
   });
 
-  it('drops invalid steps and scenarios with nothing left, and says why', async () => {
+  it('sets aside any scenario with an invalid step, and says why', async () => {
     const llm = modelAnswering({
       summary: 's',
       criteria: [],
       scenarios: [
+        scenario('Good', [step({}), assertTotal]),
         scenario('Bad step', [step({ action: 'click', target: null }), step({}), assertTotal]),
         scenario('Hopeless', [step({ target: null }), step({ action: 'assertUrl', value: null })]),
       ],
@@ -147,12 +148,15 @@ describe('TestPlanner', () => {
       pages: PAGES,
     });
 
-    expect(plan.scenarios.map((s) => s.title)).toEqual(['Bad step']);
+    // Running "Bad step" without its first click would test something else and could fail
+    // for the wrong reason, so it does not run at all.
+    expect(plan.scenarios.map((s) => s.title)).toEqual(['Good']);
     expect(warnings).toEqual([
       'Bad step: Dropped step "Add a Quarter Kota": a click step needs a target.',
+      'Set aside scenario "Bad step": with a step missing it could fail for the wrong reason.',
       'Hopeless: Dropped step "Add a Quarter Kota": a click step needs a target.',
       'Hopeless: Dropped step "Add a Quarter Kota": a assertUrl step needs a value.',
-      'Dropped scenario "Hopeless": none of its steps can run.',
+      'Set aside scenario "Hopeless": with a step missing it could fail for the wrong reason.',
     ]);
   });
 

@@ -97,12 +97,18 @@ export class TestPlanner {
         `"${title}" had ${raw.length} steps; only the first ${this.limits.maxSteps} run.`,
       );
     }
-    const accepted = raw.slice(0, this.limits.maxSteps).flatMap((step) => {
-      const built = this.steps.build(step, start);
-      if (built.ok) return [built.step];
-      warnings.push(`${title}: ${built.warning}`);
-      return [];
-    });
+    const built = raw.slice(0, this.limits.maxSteps).map((step) => this.steps.build(step, start));
+    const accepted = built.flatMap((result) => (result.ok ? [result.step] : []));
+    const rejected = built.flatMap((result) => (result.ok ? [] : [result.warning]));
+    // Running the rest of a scenario without one of its steps tests something else and can fail
+    // for the wrong reason (a to-do never ticked is never "completed"), so it does not run at all.
+    if (rejected.length > 0) {
+      warnings.push(
+        ...rejected.map((warning) => `${title}: ${warning}`),
+        `Set aside scenario "${title}": with a step missing it could fail for the wrong reason.`,
+      );
+      return null;
+    }
     if (!accepted.some((step) => step.action !== 'navigate')) {
       warnings.push(`Dropped scenario "${title}": none of its steps can run.`);
       return null;
