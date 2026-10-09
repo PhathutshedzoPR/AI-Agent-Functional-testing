@@ -37,7 +37,8 @@ function targetCall(locator: Locator): LocatorCall {
       return {
         method: 'getByRole',
         role: locator.role ?? 'generic',
-        name: locator.value,
+        // A nameless role locator matches by role alone.
+        name: locator.value === '' ? null : locator.value,
         exact: locator.exact,
       };
     case 'testId':

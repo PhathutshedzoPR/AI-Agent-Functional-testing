@@ -40,14 +40,20 @@ const STRATEGY_NOUNS: Readonly<Record<Exclude<LocatorStrategy, 'role'>, string>>
   testId: 'test id',
 };
 
+const roleSubject = (role: string, name: string): string =>
+  name.length > 0 ? `${role} "${name}"` : role;
+
 export const Locator = {
   /** Validates and normalises a locator. Throws DomainError when it can't be used. */
   create(input: unknown): Locator {
     const parsed = parseDomain(LocatorSchema, input, 'locator');
     const value = parsed.value.trim();
-    if (value.length === 0 || value.length > INPUT_LIMITS.locatorValueMaxChars) {
+    // A control with no accessible name (a to-do's own checkbox, say) is found by role alone,
+    // usually narrowed by its container; every other strategy needs text to match.
+    const nameless = value.length === 0 && parsed.by === 'role';
+    if ((value.length === 0 && !nameless) || value.length > INPUT_LIMITS.locatorValueMaxChars) {
       throw new DomainError(
-        `A locator value must be 1 to ${INPUT_LIMITS.locatorValueMaxChars} characters.`,
+        `A locator value must be 1 to ${INPUT_LIMITS.locatorValueMaxChars} characters (only a role locator may leave it empty).`,
       );
     }
     if (parsed.by === 'role' && parsed.role === null) {
@@ -72,7 +78,7 @@ export const Locator = {
   describe(locator: Locator): string {
     const subject =
       locator.by === 'role'
-        ? `${locator.role ?? 'element'} "${locator.value}"`
+        ? roleSubject(locator.role ?? 'element', locator.value)
         : `${STRATEGY_NOUNS[locator.by]} "${locator.value}"`;
     return locator.within
       ? `${subject} in ${locator.within.role} "${locator.within.hasText}"`

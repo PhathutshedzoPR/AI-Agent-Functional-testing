@@ -179,6 +179,10 @@ describe('PlaywrightSpecExporter', () => {
     expect(locatorCode(aRoleLocator('link', 'Cart'))).toBe(
       'page.getByRole("link", { name: "Cart", exact: false })',
     );
+    const toggle = aRoleLocator('checkbox', '', { within: { role: 'listitem', hasText: 'Milk' } });
+    expect(locatorCode(toggle)).toBe(
+      'page.getByRole("listitem").filter({ hasText: "Milk" }).getByRole("checkbox")',
+    );
   });
 });
 

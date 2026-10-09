@@ -31,7 +31,7 @@ describe('Locator.create', () => {
   });
 
   it.each([
-    ['an empty value', aRoleLocator('button', '   ')],
+    ['an empty label', { by: 'label', value: '   ', role: null, exact: false, within: null }],
     ['a role locator without a role', aRoleLocator(null, 'Add to order')],
     [
       'an empty scope',
@@ -41,6 +41,15 @@ describe('Locator.create', () => {
     ['a CSS strategy', { ...aRoleLocator('button', 'Add'), by: 'css' }],
   ])('rejects %s', (_label, input) => {
     expect(() => Locator.create(input)).toThrow(DomainError);
+  });
+
+  it('accepts a control with no name, found by role inside its container', () => {
+    const toggle = Locator.create(
+      aRoleLocator('checkbox', ' ', { within: { role: 'listitem', hasText: 'First task' } }),
+    );
+
+    expect(toggle.value).toBe('');
+    expect(Locator.describe(toggle)).toBe('checkbox in listitem "First task"');
   });
 
   it('lists every schema problem in the error details', () => {
