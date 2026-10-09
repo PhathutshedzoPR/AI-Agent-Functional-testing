@@ -26,6 +26,11 @@ export interface IBrowserSession {
   /** Opens a URL and returns the HTTP status of the main response, or null when there is none. */
   goto(url: string): Promise<number | null>;
   currentUrl(): string;
+  /**
+   * The HTTP status the current page's address answers with when requested again, or null when
+   * unknown. Single-page apps render a missing page after a 200 fetch, so this asks the site.
+   */
+  pageStatus(): Promise<number | null>;
   snapshot(maxChars: number): Promise<PageSnapshot>;
   /** Absolute URLs of the visible links on the page, in document order. */
   links(): Promise<string[]>;

@@ -9,12 +9,18 @@ import {
   type ScenarioStatus,
 } from '../domain';
 import { AppError, AssertionFailedError, RunCancelledError } from '../errors';
-import type { IArtifactStore, IBrowserSession, IClock, IIdGenerator } from '../ports';
+import type { IArtifactStore, IBrowserSession, IClock, IIdGenerator, RawFinding } from '../ports';
 import type { ActionRegistry } from './actions';
+import { landedOnErrorPage } from './errorPage';
 import type { ExecutionContext } from './RunContext';
 
 /** What one step needs besides itself: the page and the run. */
-type StepRun = Readonly<{ session: IBrowserSession; context: ExecutionContext }>;
+type StepRun = Readonly<{
+  session: IBrowserSession;
+  context: ExecutionContext;
+  /** Addresses already asked for their status in this scenario, so each is asked once. */
+  checkedPages: Set<string>;
+}>;
 
 const locatorKey = (locator: Locator): string => JSON.stringify(locator);
 
@@ -63,7 +69,7 @@ export class ScenarioExecutor {
     const results: StepResult[] = [];
     const findings: Finding[] = [];
     let failure: StepFailure | null = null;
-    const run: StepRun = { session, context };
+    const run: StepRun = { session, context, checkedPages: new Set() };
 
     for (const step of scenario.steps) {
       if (failure) {
@@ -73,9 +79,9 @@ export class ScenarioExecutor {
         continue;
       }
       RunCancelledError.throwIfAborted(context.signal);
-      const { result, error } = await this.runStep(scenario, step, run);
+      const { result, error, raw } = await this.runStep(scenario, step, run);
       results.push(result);
-      findings.push(...(await this.recordFindings(scenario, step, session, context)));
+      findings.push(...(await this.recordFindings(scenario, step, raw, context)));
       if (error) failure = describeFailure(step, error);
     }
 
@@ -88,7 +94,7 @@ export class ScenarioExecutor {
     scenario: Scenario,
     step: PlanStep,
     run: StepRun,
-  ): Promise<{ result: StepResult; error: AppError | null }> {
+  ): Promise<{ result: StepResult; error: AppError | null; raw: RawFinding[] }> {
     const { session, context } = run;
     await context.emit({ type: 'step.started', scenarioId: scenario.id, stepId: step.id });
     const started = this.deps.clock.monotonicMs();
@@ -104,6 +110,9 @@ export class ScenarioExecutor {
     }
     const durationMs = Math.max(0, Math.round(this.deps.clock.monotonicMs() - started));
     const screenshot = await this.capture(context.runId, step.id, session);
+    // Collected after the screenshot, which waits for the page to settle, so its responses are in.
+    const raw = session.drainFindings();
+    error ??= await landedOnErrorPage(session, run.checkedPages);
     const result = StepResult.create({
       stepId: step.id,
       scenarioId: scenario.id,
@@ -115,7 +124,7 @@ export class ScenarioExecutor {
       healing,
     });
     await context.emit({ type: 'step.finished', result });
-    return { result, error };
+    return { result, error, raw };
   }
 
   private async execute(step: PlanStep, run: StepRun): Promise<Healing | null> {
@@ -164,10 +173,10 @@ export class ScenarioExecutor {
   private async recordFindings(
     scenario: Scenario,
     step: PlanStep,
-    session: IBrowserSession,
+    drained: readonly RawFinding[],
     context: ExecutionContext,
   ): Promise<Finding[]> {
-    const findings = session.drainFindings().map((raw) =>
+    const findings = drained.map((raw) =>
       Finding.create({
         ...raw,
         id: this.deps.ids.next(),

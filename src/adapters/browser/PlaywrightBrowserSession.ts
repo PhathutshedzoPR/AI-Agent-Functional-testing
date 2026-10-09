@@ -40,6 +40,22 @@ export class PlaywrightBrowserSession implements IBrowserSession {
     return this.page.url();
   }
 
+  async pageStatus(): Promise<number | null> {
+    if (!/^https?:/.test(this.page.url())) return null;
+    try {
+      // Fixed code with no model input: the page asks its own origin for its own address, the way
+      // a reload would, so the request guard still sees it. Redirects count as fine (status 0).
+      const status = await this.page.evaluate(async () => {
+        const response = await fetch(location.href, { redirect: 'manual', cache: 'no-store' });
+        return response.status;
+      });
+      return status > 0 ? status : null;
+    } catch {
+      // The page's own policy refused the request, or it navigated away: the status is unknown.
+      return null;
+    }
+  }
+
   async links(): Promise<string[]> {
     try {
       // A fixed function of ours, never model-provided code (CLAUDE.md section 4, item 4).

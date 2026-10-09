@@ -74,6 +74,10 @@ export class FakeBrowserSession implements IBrowserSession {
     return this.url;
   }
 
+  pageStatus(): Promise<number | null> {
+    return Promise.resolve(this.statuses.get(this.url) ?? 200);
+  }
+
   snapshot(maxChars: number): Promise<PageSnapshot> {
     return Promise.resolve({
       url: this.url,

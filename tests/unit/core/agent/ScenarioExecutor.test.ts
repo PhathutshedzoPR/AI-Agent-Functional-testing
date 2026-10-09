@@ -123,6 +123,26 @@ describe('ScenarioExecutor', () => {
     expect(context.events.filter((e) => e.type === 'finding')).toHaveLength(1);
   });
 
+  it('fails the step that lands on a page whose address answers 404', async () => {
+    const { run } = executor();
+    const session = new FakeBrowserSession('http://localhost:3000/demo-shop/buggy');
+    session.statuses.set('http://localhost:3000/demo-shop/buggy/specials', 404);
+    const linkCheck = aScenario({
+      steps: [
+        aStep({ id: 'm', action: 'navigate', target: null, value: '/demo-shop/buggy' }),
+        aStep({ id: 'x', action: 'navigate', target: null, value: '/demo-shop/buggy/specials' }),
+      ],
+    });
+
+    const outcome = await run.run(linkCheck, session, recordingContext());
+
+    expect(outcome.results.map((result) => result.status)).toEqual(['passed', 'failed']);
+    expect(outcome.failure).toMatchObject({
+      expected: '/demo-shop/buggy/specials to load',
+      actual: 'the server answered 404 for it',
+    });
+  });
+
   it('retries once with a repaired locator and marks the step healed', async () => {
     const healing: Healing = { from: add, to: bag, method: 'rule', strategy: 's', reason: 'r' };
     const repairer: IStepRepairer = { repair: () => Promise.resolve(healing) };
