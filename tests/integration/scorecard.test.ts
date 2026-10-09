@@ -7,6 +7,7 @@ import { createContainer } from '@/server/createContainer';
 import { parseEnv } from '@/server/env';
 import { createLogger } from '@/server/logger';
 import { runToEnd } from './runToEnd';
+import { INTEGRATION_DATA_DIR } from './testData';
 
 /**
  * The agent scorecard: each suggestion story on every release, planned by the recorded LLM
@@ -47,16 +48,6 @@ const TARGET_BUG: Readonly<Record<string, RegExp>> = {
   'Every navigation link works': /\bspecials\b/i, // specialsPageMissing
 };
 
-// Stories whose LLM responses are in fixtures/llm-replays for all three releases. The free
-// Gemini tier allows 20 calls per model per day, so stories get recorded over several days;
-// add a title here once `npm run replays:record` has saved it.
-const RECORDED = new Set([
-  'Order two kotas and check out',
-  'The confirmation shows the delivery fee',
-]);
-const scored = STORY_SUGGESTIONS.filter((s) => recording || RECORDED.has(s.title));
-const pending = STORY_SUGGESTIONS.filter((s) => !scored.includes(s));
-
 type Row = Readonly<{ story: string; release: string; view: RunView }>;
 const rows: Row[] = [];
 
@@ -64,6 +55,7 @@ const { runs } = createContainer(
   parseEnv({
     APP_BASE_URL: baseUrl,
     TARGET_ALLOWLIST: new URL(baseUrl).host,
+    DATA_DIR: INTEGRATION_DATA_DIR,
     ...llmSettings(),
   }),
   createLogger(() => undefined),
@@ -108,8 +100,9 @@ describe('agent scorecard (recorded plans, real Chromium)', () => {
     await writeFile(join('.data', 'scorecard.md'), `${markdown()}\n`);
   });
 
-  it.each(scored.map((s) => [s.title, s.story] as const))(
-    '%s: passes on stable and redesign, fails on buggy only because of a seeded bug',
+  // Every suggestion story is recorded for every release; a new one needs npm run replays:record.
+  it.each(STORY_SUGGESTIONS.map((s) => [s.title, s.story] as const))(
+    '%s: passes on stable and redesign (old plan or fresh), fails on buggy only by a seeded bug',
     async (title, story) => {
       const target = TARGET_BUG[title];
       expect(target, `no target bug listed for "${title}"`).toBeDefined();
@@ -122,6 +115,12 @@ describe('agent scorecard (recorded plans, real Chromium)', () => {
       const redesign = await run(story, 'redesign', stable.runId ?? undefined);
       rows.push({ story: title, release: 'redesign (stable plan)', view: redesign });
       expect(redesign.stats.failed).toBe(0);
+
+      // Planned afresh on the redesign, the agent reads the new names itself: nothing to heal.
+      const planned = await run(story, 'redesign');
+      rows.push({ story: title, release: 'redesign (planned fresh)', view: planned });
+      expect(planned.error).toBeNull();
+      expect(planned.stats.failed).toBe(0);
 
       const buggy = await run(story, 'buggy');
       rows.push({ story: title, release: 'buggy', view: buggy });
@@ -137,12 +136,8 @@ describe('agent scorecard (recorded plans, real Chromium)', () => {
     STORY_TIMEOUT_MS,
   );
 
-  it('heals at least once on redesign', () => {
-    const redesigned = rows.filter((row) => row.release.startsWith('redesign'));
+  it('heals at least once when an old plan meets the redesign', () => {
+    const redesigned = rows.filter((row) => row.release === 'redesign (stable plan)');
     expect(redesigned.some((row) => row.view.stats.healed > 0)).toBe(true);
   });
-
-  for (const story of pending) {
-    it.todo(`${story.title}: not recorded yet (npm run replays:record)`);
-  }
 });
