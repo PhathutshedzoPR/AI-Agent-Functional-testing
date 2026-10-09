@@ -97,6 +97,12 @@ On redesign, rules repaired the renamed "Add to bag" buttons; the LLM proposed "
 
 The automated proof lives in `tests/integration`: a hand-written plan and a scripted-plan agent run against the real app in real Chromium (stable passes, buggy fails at the cart total, redesign passes by healing), and an exported Playwright spec that passes with `npx playwright test`.
 
+## On a real website
+
+TestPilot is not tied to our shop. On [Playwright's TodoMVC demo](https://demo.playwright.dev/todomvc/), a public app made for practising test automation, with the story "As a busy person I want to keep a to-do list" and three acceptance criteria, Gemini planned three scenarios and every check passed: 17 steps in 30 seconds, with one repair listed for review (the plan asked for "the checkbox"; TestPilot narrowed it to the one inside that to-do and confirmed it in the browser). The run is recorded, so it replays with the same plan; the site itself still needs internet.
+
+That first real-site run also caught two weaknesses in TestPilot, both fixed: a control with no accessible name could not be targeted, and a scenario that lost a step still ran and reported false bugs. Now a scenario with an invalid step is set aside and its criterion shows as not tested.
+
 ## How it's built
 
 ```mermaid

@@ -234,7 +234,8 @@ Goal: the redesign release passes by healing, and every run produces artefacts a
   - Exported text checks allow zero whitespace between words, because Playwright reads `textContent`, where adjacent elements touch ("TotalR 70,00").
 - [x] Traceability: parse criteria from the story (bullets, numbered lines, Given/When/Then), keep criterion, scenarios and result together in the run view.
   - traceCriteria (core/domain) joins criteria to scenarios by normalised text and takes the worst result; untested criteria stay visible. Shown in a Traceability tab and the Markdown report.
-- [ ] Agent scorecard: `tests/integration/scorecard.test.ts` runs the suggestion stories on all three releases and asserts: no failures on `stable`; passes with at least one heal on `redesign`; every seeded bug found on `buggy`, with no other failures. Print a Markdown table and paste the real numbers into the README.
+- [x] Agent scorecard: `tests/integration/scorecard.test.ts` runs the suggestion stories on all three releases and asserts: no failures on `stable`; passes with at least one heal on `redesign`; every seeded bug found on `buggy`, with no other failures. Print a Markdown table and paste the real numbers into the README.
+  - 9 Oct: all four stories on stable, redesign (old plan and planned fresh) and buggy, from recordings: every seeded bug caught (cart total, cellphone letters, delivery fee, Specials 404), no false failures. Two agent fixes came out of it: URL checks now move with a re-run plan, and a step that lands on a missing page fails even when a single-page app answered 200.
   - Written and passing in replay for "Order two kotas" and "Delivery fee" (both catch their seeded bug, plus the Specials 404; README has the numbers). Each buggy plan is re-run on stable to prove its failure comes from the seeded bug. Cellphone and navigation stories are `it.todo` until recorded. A planner rule now lets plans check values carried over from seen pages (the delivery fee) on pages the explorer never saw, which is how the fee bug gets caught.
 
 Done when: the scorecard test passes in replay mode and the README shows its real numbers.
@@ -274,14 +275,18 @@ Done when: a full run looks right on a projector-sized screen and on a phone.
 
 - [x] Walk CLAUDE.md section 4 item by item. Add a test for each guard that doesn't have one yet.
   - Every rule has a test. New: tests/unit/sourceRules.test.ts fails the build on dangerouslySetInnerHTML, eval/new Function, Math.random, MD5/SHA-1, NEXT_PUBLIC_, console.log, http:// literals or silenced rules (each rule proven against an example); tests/integration/httpSecurity.test.ts checks the real server over HTTP: hardening headers, cross-origin and no-origin starts refused, blocked targets (other hosts, our own /api, credentials in the URL, file:), id validation and path tricks, the story cap, and screenshots served as image/jpeg with nosniff.
-- [ ] SonarQube Cloud: 0 bugs, 0 vulnerabilities, code smells fixed, duplication under 3%, coverage at least 80% on new code. **HUMAN:** review each security hotspot in the SonarQube Cloud UI and mark it Safe with a reason, or fix it.
+- [x] SonarQube Cloud: 0 bugs, 0 vulnerabilities, code smells fixed, duplication under 3%, coverage at least 80% on new code. **HUMAN:** review each security hotspot in the SonarQube Cloud UI and mark it Safe with a reason, or fix it.
 - [ ] CI job `integration`: `npx playwright install --with-deps chromium`, build, start the app, run `npm run test:integration` with `LLM_PROVIDER=replay`.
-- [ ] CLI `scripts/run-agent.ts` using `createContainer`: `npm run agent -- --url <url> --story "<text>"` writes JUnit and Markdown to `./reports` and exits non-zero on failures. This proves the core runs outside Next.
-- [ ] Run history survives a restart: a `FileRunRepository` appends each run's events to `.data/runs/<runId>.jsonl` and rebuilds the view through `projectRun` on load. Swap it in at `createContainer`; nothing else changes.
+  - Written in ci.yml (9 Oct); it also prints the scorecard on the run page. Tick once it is green on GitHub after the next push.
+- [x] CLI `scripts/run-agent.ts` using `createContainer`: `npm run agent -- --url <url> --story "<text>"` writes JUnit and Markdown to `./reports` and exits non-zero on failures. This proves the core runs outside Next.
+  - npm run agent narrates, writes JUnit and Markdown, exits 1 on failures; --story-file for multi-line stories (npm on Windows cuts arguments at a line break). Used to run TestPilot on Playwright's TodoMVC demo: 17 steps passed, one repair.
+- [x] Run history survives a restart: a `FileRunRepository` appends each run's events to `.data/runs/<runId>.jsonl` and rebuilds the view through `projectRun` on load. Swap it in at `createContainer`; nothing else changes.
+  - FileRunRepository: memory plus .data/runs (JSON per run, append-only event log); an interrupted run is marked stopped on start. Integration tests use .data/integration.
 - [ ] Find the cause of the dev-only hydration warning on the shop's checkout page in the agent's browser and fix it (don't suppress it). Then drop the line from the README's limitations.
 - [x] Log why a run failed. `RunService` logs only unexpected errors, so an `LlmError` (a provider 503, say) reaches the client as "kept failing" with nothing in the server log. Log the code and the cause's message (never the request body or headers) at warn level.
   - RunService logs expected failures at warn level with the error code and the cause's message (capped at 300 characters, never request data): an outage now reads 'Run <id> stopped, LLM_FAILED, You exceeded your current quota' in the server log.
 - [ ] `Dockerfile` on `mcr.microsoft.com/playwright:v1.63.0-noble`: `npm ci`, build, `npm start`, `.data` as a volume. The backup laptop or a VM then runs the exact same build.
+  - Written with .dockerignore (9 Oct), not built yet: Docker Desktop is not running on this VM. Tick after `docker build -t testpilot .` and a run in the container work.
 - [ ] Final README pass: setup works from a clean clone on Windows and macOS or Linux.
 
 ---
@@ -290,7 +295,8 @@ Done when: a full run looks right on a projector-sized screen and on a phone.
 
 - [ ] Feature freeze at 16:00. Only bug fixes after that.
 - [ ] Demo settings: `AGENT_MAX_SCENARIOS=3`, every run under about 40 seconds. Do a warm-up run before going on stage.
-- [ ] Add the `replays:record` script that CLAUDE.md lists (it runs each suggestion story on each release with `LLM_RECORD=true`), then record the three stories that aren't recorded yet: bad cellphone number, delivery fee on the confirmation, every navigation link works. Then every suggestion card works offline.
+- [x] Add the `replays:record` script that CLAUDE.md lists (it runs each suggestion story on each release with `LLM_RECORD=true`), then record the three stories that aren't recorded yet: bad cellphone number, delivery fee on the confirmation, every navigation link works. Then every suggestion card works offline.
+  - All four suggestion stories recorded for every release (fresh redesign plans too), plus Playwright's TodoMVC demo.
   - Script added: `npm run replays:record` runs the scorecard with the live model and records it. On 7 Oct the free tier (20 requests per model per day) ran out after stories 1 and 3 (gemini-3.6-flash) and story 2 on stable and buggy plus story 4 on stable (gemini-3.7-flash). **To do after the daily reset:** record story 2 on redesign and story 4 on buggy and redesign, then add both titles to `RECORDED` in the scorecard.
   - The recorder now answers any request it already recorded from the recording, so `replays:record` spends provider calls only on what is missing. Still missing: a fresh plan for each story on redesign (a fresh redesign run in replay mode stops with a message that says what to do), story 2 on redesign and story 4 on buggy and redesign.
 - [ ] Offline drill: Wi-Fi off, `LLM_PROVIDER=replay`, the whole script still works.
@@ -306,9 +312,10 @@ Lead with what last year's winners did not show (real results, story to running 
 |---|---|---|
 | 0:00 to 0:30 | Landing page | Small teams test checkout by hand, and their scripts break whenever the UI changes. TestPilot turns a plain user story into tests that run in a real browser, and every result on screen actually happened. |
 | 0:30 to 1:45 | New run on Kota Express `buggy`, "Order two kotas and check out", "Start run" | Receives a URL and a story; decides by reading each page; the plan appears with each acceptance criterion. Real screenshots arrive. It fails: two kotas, but the total charges for one. Open the bug: steps to reproduce, expected against actual, the screenshot. Traceability tab: which criterion failed. |
-| 1:45 to 2:30 | "Run this plan on Stable" | Is it the shop or the test? The same plan passes on the stable release, so the failure was a real bug, not a bad plan. That is the check our scorecard runs for every seeded bug. |
+| 1:45 to 2:30 | "Run this plan on Stable" in the summary under the header | Is it the shop or the test? The same plan passes on the stable release, so the failure was a real bug, not a bad plan. That is the check our scorecard runs for every seeded bug. |
 | 2:30 to 3:10 | Export tab: download the Playwright test; "Or on another screen: iPhone" | The team keeps this test; it runs with `npx playwright test`. The same plan on an iPhone screen, touch and all. |
 | 3:10 to 3:50 | "Run this plan on Redesign", Needs review tab | The developers renamed the buttons. The run still passes, and it lists every repair for a person to check, because a repair can hide a regression. |
+| Optional, only with Wi-Fi (30 s, take it from the scorecard slot) | New run: "Or try a real site made for practice: Playwright's TodoMVC demo", Start run | It is not tied to our shop: a public app it has never seen, planned from a plain story and run for real. |
 | 3:50 to 4:40 | README scorecard and badges | How we know it works: every suggested story on every release, each seeded bug caught, no false failures. SonarQube quality gate, 340+ tests, accessibility checked. |
 | 4:40 to 5:00 | Back to the dashboard | Who it's for, and what's next: native Android and iOS apps (the same locator model maps to Android UiSelector and iOS XCUIElementType), CI on every pull request. |
 
