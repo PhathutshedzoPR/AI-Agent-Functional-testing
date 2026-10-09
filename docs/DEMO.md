@@ -30,6 +30,7 @@ Optional, only with Wi-Fi and if time allows (take it from the scorecard slot): 
 ## If something goes wrong
 
 - **A run fails to start or hangs:** press **Stop run**, then start the same story again. Still stuck: switch to the backup recording and keep talking over it.
+- **"This server only takes runs started from ...":** TestPilot is open at a different address from `APP_BASE_URL` (for example localhost while the public tunnel is live). Use the link the page shows, or set `APP_BASE_URL` to the address you are using and restart.
 - **"No recorded plan for this story":** you started a story that is not recorded on that release. Use the suggested story text exactly, or reach Redesign with **Run this plan on Redesign**.
 - **The laptop dies:** second laptop, set up the same way, or the backup recording.
 - **Wi-Fi is down:** nothing changes in replay mode. Skip the TodoMVC moment.

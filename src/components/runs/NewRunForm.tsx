@@ -8,6 +8,7 @@ import type { Device } from '@/core/domain';
 import { ApiRequestError, sendJson } from '@/lib/sendJson';
 import { buttonStyles } from '../ui';
 import { DevicePicker } from './DevicePicker';
+import { OtherAddressNotice } from './OtherAddressNotice';
 import { SamplePicker } from './SamplePicker';
 import type { SampleSite } from './sampleSites';
 import { StoryComposer } from './StoryComposer';
@@ -66,6 +67,7 @@ export function NewRunForm({ appBaseUrl, customHosts }: Props) {
 
   return (
     <form onSubmit={(event) => void submit(event)} className="space-y-8">
+      <OtherAddressNotice appBaseUrl={appBaseUrl} path="/runs/new" />
       <TargetPicker
         value={target}
         onChange={setTarget}

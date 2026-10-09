@@ -100,7 +100,10 @@ describe('withApiHandler', () => {
 
     expect(foreign.status).toBe(403);
     expect(missing.status).toBe(403);
-    expect((await errorOf(foreign)).code).toBe('FORBIDDEN');
+    expect(await errorOf(foreign)).toEqual({
+      code: 'FORBIDDEN',
+      message: `This server only takes runs started from ${APP}. Open TestPilot there and try again.`,
+    });
   });
 
   it('rate-limits per client and says when to retry', async () => {
