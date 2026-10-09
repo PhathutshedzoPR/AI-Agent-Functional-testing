@@ -1,0 +1,12 @@
+# Built or installed inside the image instead.
+node_modules
+.next
+# Local run data, reports and test output.
+.data
+reports
+coverage
+test-results
+# Secrets stay on the host and come in through --env-file at run time.
+.env*
+!.env.example
+.git

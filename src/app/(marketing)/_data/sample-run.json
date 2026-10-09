@@ -1,0 +1,764 @@
+{
+  "recordedAt": "2026-10-06T13:07:44.715Z",
+  "recordedOn": "a laptop running Kota Express locally",
+  "model": "gemini-3.5-flash",
+  "events": [
+    {
+      "runId": "3bc7dbdc-bde5-4bef-88f7-855eeb689afa",
+      "seq": 1,
+      "at": "2026-10-06T13:07:44.721Z",
+      "type": "run.started",
+      "targetUrl": "http://localhost:3000/demo-shop/stable",
+      "targetLabel": "Kota Express (stable)",
+      "story": "As a hungry customer I want to order two Quarter Kotas and check out.\n- The cart total is twice the price of one Quarter Kota\n- Checking out with valid details shows the order confirmation",
+      "replayed": false,
+      "limits": {
+        "maxPages": 5,
+        "maxScenarios": 4,
+        "maxSteps": 12,
+        "maxLlmCalls": 12
+      }
+    },
+    {
+      "runId": "3bc7dbdc-bde5-4bef-88f7-855eeb689afa",
+      "seq": 2,
+      "at": "2026-10-06T13:07:47.565Z",
+      "type": "explore.page",
+      "url": "http://localhost:3000/demo-shop/stable",
+      "title": "Kota Express"
+    },
+    {
+      "runId": "3bc7dbdc-bde5-4bef-88f7-855eeb689afa",
+      "seq": 3,
+      "at": "2026-10-06T13:07:49.487Z",
+      "type": "explore.page",
+      "url": "http://localhost:3000/demo-shop/stable/specials",
+      "title": "Specials | Kota Express"
+    },
+    {
+      "runId": "3bc7dbdc-bde5-4bef-88f7-855eeb689afa",
+      "seq": 4,
+      "at": "2026-10-06T13:07:51.206Z",
+      "type": "explore.page",
+      "url": "http://localhost:3000/demo-shop/stable/cart",
+      "title": "Your order | Kota Express"
+    },
+    {
+      "runId": "3bc7dbdc-bde5-4bef-88f7-855eeb689afa",
+      "seq": 5,
+      "at": "2026-10-06T13:07:52.938Z",
+      "type": "explore.page",
+      "url": "http://localhost:3000/demo-shop/stable/checkout",
+      "title": "Checkout | Kota Express"
+    },
+    {
+      "runId": "3bc7dbdc-bde5-4bef-88f7-855eeb689afa",
+      "seq": 6,
+      "at": "2026-10-06T13:07:53.018Z",
+      "type": "llm.called",
+      "purpose": "plan",
+      "used": 1,
+      "max": 12
+    },
+    {
+      "runId": "3bc7dbdc-bde5-4bef-88f7-855eeb689afa",
+      "seq": 7,
+      "at": "2026-10-06T13:07:59.024Z",
+      "type": "plan.ready",
+      "plan": {
+        "summary": "Check ordering two Quarter Kotas, verifying the cart total, and completing checkout with valid details.",
+        "scenarios": [
+          {
+            "id": "aa6abfc8-c947-41ae-9821-890f767587d8",
+            "title": "Order two Quarter Kotas and verify cart total",
+            "kind": "happy",
+            "criterion": "The cart total is twice the price of one Quarter Kota",
+            "priority": "high",
+            "steps": [
+              {
+                "id": "2759f76f-4d62-4e00-85a1-bcab6406cb92",
+                "action": "navigate",
+                "target": null,
+                "value": "/demo-shop/stable",
+                "intent": "Go to the menu page"
+              },
+              {
+                "id": "66ae99e8-9d56-4220-a151-1ddd0fc344ff",
+                "action": "click",
+                "target": {
+                  "by": "role",
+                  "value": "Add to order",
+                  "role": "button",
+                  "exact": true,
+                  "within": {
+                    "role": "article",
+                    "hasText": "Quarter Kota"
+                  }
+                },
+                "value": null,
+                "intent": "Add first Quarter Kota to order"
+              },
+              {
+                "id": "cd390571-bab5-4647-a2a9-859154602e4e",
+                "action": "click",
+                "target": {
+                  "by": "role",
+                  "value": "Add to order",
+                  "role": "button",
+                  "exact": true,
+                  "within": {
+                    "role": "article",
+                    "hasText": "Quarter Kota"
+                  }
+                },
+                "value": null,
+                "intent": "Add second Quarter Kota to order"
+              },
+              {
+                "id": "b272a21f-f8a6-4cc3-b73f-cb14a1c107e5",
+                "action": "click",
+                "target": {
+                  "by": "role",
+                  "value": "Cart",
+                  "role": "link",
+                  "exact": true,
+                  "within": null
+                },
+                "value": null,
+                "intent": "Go to the cart"
+              },
+              {
+                "id": "893017fc-a4b2-442a-8d98-61bcbf117a2d",
+                "action": "click",
+                "target": {
+                  "by": "role",
+                  "value": "Checkout",
+                  "role": "link",
+                  "exact": true,
+                  "within": null
+                },
+                "value": null,
+                "intent": "Proceed to checkout"
+              },
+              {
+                "id": "908a3e51-3950-4b32-8b2a-fa17456f4d49",
+                "action": "assertText",
+                "target": {
+                  "by": "role",
+                  "value": "Order summary",
+                  "role": "complementary",
+                  "exact": true,
+                  "within": null
+                },
+                "value": "R 70,00",
+                "intent": "Verify that the items total is twice the price of one Quarter Kota (R 35,00 * 2 = R 70,00)"
+              }
+            ]
+          },
+          {
+            "id": "bc950f27-0c33-469c-92a3-5bf07839fc47",
+            "title": "Checkout with valid details",
+            "kind": "happy",
+            "criterion": "Checking out with valid details shows the order confirmation",
+            "priority": "high",
+            "steps": [
+              {
+                "id": "26685d50-9d66-4cf1-9818-8197310883bc",
+                "action": "navigate",
+                "target": null,
+                "value": "/demo-shop/stable",
+                "intent": "Go to the menu page"
+              },
+              {
+                "id": "87ca4d98-d324-4dbd-b396-0f1df7069aac",
+                "action": "click",
+                "target": {
+                  "by": "role",
+                  "value": "Add to order",
+                  "role": "button",
+                  "exact": true,
+                  "within": {
+                    "role": "article",
+                    "hasText": "Quarter Kota"
+                  }
+                },
+                "value": null,
+                "intent": "Add Quarter Kota to order"
+              },
+              {
+                "id": "f6c2bd30-a2d3-483e-a000-e93aef5c79a6",
+                "action": "click",
+                "target": {
+                  "by": "role",
+                  "value": "Cart",
+                  "role": "link",
+                  "exact": true,
+                  "within": null
+                },
+                "value": null,
+                "intent": "Go to the cart"
+              },
+              {
+                "id": "35afe90c-f6b8-462b-b390-70ab4f547830",
+                "action": "click",
+                "target": {
+                  "by": "role",
+                  "value": "Checkout",
+                  "role": "link",
+                  "exact": true,
+                  "within": null
+                },
+                "value": null,
+                "intent": "Proceed to checkout"
+              },
+              {
+                "id": "70fb91c4-e102-4ec3-b72e-0a5c09ce590a",
+                "action": "fill",
+                "target": {
+                  "by": "role",
+                  "value": "Full name",
+                  "role": "textbox",
+                  "exact": true,
+                  "within": null
+                },
+                "value": "Thandi Mokoena",
+                "intent": "Enter full name"
+              },
+              {
+                "id": "1feb722a-5091-4ceb-aa4e-b0d6940db572",
+                "action": "fill",
+                "target": {
+                  "by": "role",
+                  "value": "Cellphone number",
+                  "role": "textbox",
+                  "exact": true,
+                  "within": null
+                },
+                "value": "082 123 4567",
+                "intent": "Enter cellphone number"
+              },
+              {
+                "id": "fb986ed9-8c10-4890-bfd2-e373830ab564",
+                "action": "fill",
+                "target": {
+                  "by": "role",
+                  "value": "Email address",
+                  "role": "textbox",
+                  "exact": true,
+                  "within": null
+                },
+                "value": "thandi@example.co.za",
+                "intent": "Enter email address"
+              },
+              {
+                "id": "27a9d2e7-03da-4b37-83fe-16a59aae9bcb",
+                "action": "fill",
+                "target": {
+                  "by": "role",
+                  "value": "Street address",
+                  "role": "textbox",
+                  "exact": true,
+                  "within": null
+                },
+                "value": "123 Albertina Sisulu Rd",
+                "intent": "Enter street address"
+              },
+              {
+                "id": "eb3ba9ce-8d66-45b4-93fd-b9c35e2c03b8",
+                "action": "select",
+                "target": {
+                  "by": "role",
+                  "value": "Suburb",
+                  "role": "combobox",
+                  "exact": true,
+                  "within": null
+                },
+                "value": "Braamfontein",
+                "intent": "Select suburb"
+              },
+              {
+                "id": "2bad4c7a-eab7-41e0-8e56-3a290f99c69d",
+                "action": "click",
+                "target": {
+                  "by": "role",
+                  "value": "Place order",
+                  "role": "button",
+                  "exact": true,
+                  "within": null
+                },
+                "value": null,
+                "intent": "Submit the order"
+              },
+              {
+                "id": "a258f9fc-e80f-4e54-b708-d598173e707f",
+                "action": "assertHidden",
+                "target": {
+                  "by": "role",
+                  "value": "Place order",
+                  "role": "button",
+                  "exact": true,
+                  "within": null
+                },
+                "value": null,
+                "intent": "Verify that the checkout form is submitted successfully (button is hidden)"
+              }
+            ]
+          }
+        ]
+      },
+      "warnings": [],
+      "criteria": [
+        "The cart total is twice the price of one Quarter Kota",
+        "Checking out with valid details shows the order confirmation"
+      ],
+      "criteriaInferred": false
+    },
+    {
+      "runId": "3bc7dbdc-bde5-4bef-88f7-855eeb689afa",
+      "seq": 8,
+      "at": "2026-10-06T13:07:59.180Z",
+      "type": "scenario.started",
+      "scenarioId": "aa6abfc8-c947-41ae-9821-890f767587d8"
+    },
+    {
+      "runId": "3bc7dbdc-bde5-4bef-88f7-855eeb689afa",
+      "seq": 9,
+      "at": "2026-10-06T13:07:59.182Z",
+      "type": "step.started",
+      "scenarioId": "aa6abfc8-c947-41ae-9821-890f767587d8",
+      "stepId": "2759f76f-4d62-4e00-85a1-bcab6406cb92"
+    },
+    {
+      "runId": "3bc7dbdc-bde5-4bef-88f7-855eeb689afa",
+      "seq": 10,
+      "at": "2026-10-06T13:08:00.928Z",
+      "type": "step.finished",
+      "result": {
+        "stepId": "2759f76f-4d62-4e00-85a1-bcab6406cb92",
+        "scenarioId": "aa6abfc8-c947-41ae-9821-890f767587d8",
+        "status": "passed",
+        "durationMs": 1542,
+        "url": "http://localhost:3000/demo-shop/stable",
+        "screenshot": true,
+        "error": null,
+        "healing": null
+      }
+    },
+    {
+      "runId": "3bc7dbdc-bde5-4bef-88f7-855eeb689afa",
+      "seq": 11,
+      "at": "2026-10-06T13:08:00.936Z",
+      "type": "step.started",
+      "scenarioId": "aa6abfc8-c947-41ae-9821-890f767587d8",
+      "stepId": "66ae99e8-9d56-4220-a151-1ddd0fc344ff"
+    },
+    {
+      "runId": "3bc7dbdc-bde5-4bef-88f7-855eeb689afa",
+      "seq": 12,
+      "at": "2026-10-06T13:08:01.255Z",
+      "type": "step.finished",
+      "result": {
+        "stepId": "66ae99e8-9d56-4220-a151-1ddd0fc344ff",
+        "scenarioId": "aa6abfc8-c947-41ae-9821-890f767587d8",
+        "status": "passed",
+        "durationMs": 239,
+        "url": "http://localhost:3000/demo-shop/stable",
+        "screenshot": true,
+        "error": null,
+        "healing": null
+      }
+    },
+    {
+      "runId": "3bc7dbdc-bde5-4bef-88f7-855eeb689afa",
+      "seq": 13,
+      "at": "2026-10-06T13:08:01.255Z",
+      "type": "step.started",
+      "scenarioId": "aa6abfc8-c947-41ae-9821-890f767587d8",
+      "stepId": "cd390571-bab5-4647-a2a9-859154602e4e"
+    },
+    {
+      "runId": "3bc7dbdc-bde5-4bef-88f7-855eeb689afa",
+      "seq": 14,
+      "at": "2026-10-06T13:08:01.384Z",
+      "type": "step.finished",
+      "result": {
+        "stepId": "cd390571-bab5-4647-a2a9-859154602e4e",
+        "scenarioId": "aa6abfc8-c947-41ae-9821-890f767587d8",
+        "status": "passed",
+        "durationMs": 75,
+        "url": "http://localhost:3000/demo-shop/stable",
+        "screenshot": true,
+        "error": null,
+        "healing": null
+      }
+    },
+    {
+      "runId": "3bc7dbdc-bde5-4bef-88f7-855eeb689afa",
+      "seq": 15,
+      "at": "2026-10-06T13:08:01.385Z",
+      "type": "step.started",
+      "scenarioId": "aa6abfc8-c947-41ae-9821-890f767587d8",
+      "stepId": "b272a21f-f8a6-4cc3-b73f-cb14a1c107e5"
+    },
+    {
+      "runId": "3bc7dbdc-bde5-4bef-88f7-855eeb689afa",
+      "seq": 16,
+      "at": "2026-10-06T13:08:01.644Z",
+      "type": "step.finished",
+      "result": {
+        "stepId": "b272a21f-f8a6-4cc3-b73f-cb14a1c107e5",
+        "scenarioId": "aa6abfc8-c947-41ae-9821-890f767587d8",
+        "status": "passed",
+        "durationMs": 91,
+        "url": "http://localhost:3000/demo-shop/stable",
+        "screenshot": true,
+        "error": null,
+        "healing": null
+      }
+    },
+    {
+      "runId": "3bc7dbdc-bde5-4bef-88f7-855eeb689afa",
+      "seq": 17,
+      "at": "2026-10-06T13:08:01.645Z",
+      "type": "step.started",
+      "scenarioId": "aa6abfc8-c947-41ae-9821-890f767587d8",
+      "stepId": "893017fc-a4b2-442a-8d98-61bcbf117a2d"
+    },
+    {
+      "runId": "3bc7dbdc-bde5-4bef-88f7-855eeb689afa",
+      "seq": 18,
+      "at": "2026-10-06T13:08:01.975Z",
+      "type": "step.finished",
+      "result": {
+        "stepId": "893017fc-a4b2-442a-8d98-61bcbf117a2d",
+        "scenarioId": "aa6abfc8-c947-41ae-9821-890f767587d8",
+        "status": "passed",
+        "durationMs": 186,
+        "url": "http://localhost:3000/demo-shop/stable/cart",
+        "screenshot": true,
+        "error": null,
+        "healing": null
+      }
+    },
+    {
+      "runId": "3bc7dbdc-bde5-4bef-88f7-855eeb689afa",
+      "seq": 19,
+      "at": "2026-10-06T13:08:01.975Z",
+      "type": "step.started",
+      "scenarioId": "aa6abfc8-c947-41ae-9821-890f767587d8",
+      "stepId": "908a3e51-3950-4b32-8b2a-fa17456f4d49"
+    },
+    {
+      "runId": "3bc7dbdc-bde5-4bef-88f7-855eeb689afa",
+      "seq": 20,
+      "at": "2026-10-06T13:08:02.224Z",
+      "type": "step.finished",
+      "result": {
+        "stepId": "908a3e51-3950-4b32-8b2a-fa17456f4d49",
+        "scenarioId": "aa6abfc8-c947-41ae-9821-890f767587d8",
+        "status": "passed",
+        "durationMs": 181,
+        "url": "http://localhost:3000/demo-shop/stable/checkout",
+        "screenshot": true,
+        "error": null,
+        "healing": null
+      }
+    },
+    {
+      "runId": "3bc7dbdc-bde5-4bef-88f7-855eeb689afa",
+      "seq": 21,
+      "at": "2026-10-06T13:08:02.224Z",
+      "type": "scenario.finished",
+      "scenarioId": "aa6abfc8-c947-41ae-9821-890f767587d8",
+      "status": "passed"
+    },
+    {
+      "runId": "3bc7dbdc-bde5-4bef-88f7-855eeb689afa",
+      "seq": 22,
+      "at": "2026-10-06T13:08:02.418Z",
+      "type": "scenario.started",
+      "scenarioId": "bc950f27-0c33-469c-92a3-5bf07839fc47"
+    },
+    {
+      "runId": "3bc7dbdc-bde5-4bef-88f7-855eeb689afa",
+      "seq": 23,
+      "at": "2026-10-06T13:08:02.418Z",
+      "type": "step.started",
+      "scenarioId": "bc950f27-0c33-469c-92a3-5bf07839fc47",
+      "stepId": "26685d50-9d66-4cf1-9818-8197310883bc"
+    },
+    {
+      "runId": "3bc7dbdc-bde5-4bef-88f7-855eeb689afa",
+      "seq": 24,
+      "at": "2026-10-06T13:08:05.021Z",
+      "type": "step.finished",
+      "result": {
+        "stepId": "26685d50-9d66-4cf1-9818-8197310883bc",
+        "scenarioId": "bc950f27-0c33-469c-92a3-5bf07839fc47",
+        "status": "passed",
+        "durationMs": 2462,
+        "url": "http://localhost:3000/demo-shop/stable",
+        "screenshot": true,
+        "error": null,
+        "healing": null
+      }
+    },
+    {
+      "runId": "3bc7dbdc-bde5-4bef-88f7-855eeb689afa",
+      "seq": 25,
+      "at": "2026-10-06T13:08:05.021Z",
+      "type": "step.started",
+      "scenarioId": "bc950f27-0c33-469c-92a3-5bf07839fc47",
+      "stepId": "87ca4d98-d324-4dbd-b396-0f1df7069aac"
+    },
+    {
+      "runId": "3bc7dbdc-bde5-4bef-88f7-855eeb689afa",
+      "seq": 26,
+      "at": "2026-10-06T13:08:05.256Z",
+      "type": "step.finished",
+      "result": {
+        "stepId": "87ca4d98-d324-4dbd-b396-0f1df7069aac",
+        "scenarioId": "bc950f27-0c33-469c-92a3-5bf07839fc47",
+        "status": "passed",
+        "durationMs": 169,
+        "url": "http://localhost:3000/demo-shop/stable",
+        "screenshot": true,
+        "error": null,
+        "healing": null
+      }
+    },
+    {
+      "runId": "3bc7dbdc-bde5-4bef-88f7-855eeb689afa",
+      "seq": 27,
+      "at": "2026-10-06T13:08:05.257Z",
+      "type": "step.started",
+      "scenarioId": "bc950f27-0c33-469c-92a3-5bf07839fc47",
+      "stepId": "f6c2bd30-a2d3-483e-a000-e93aef5c79a6"
+    },
+    {
+      "runId": "3bc7dbdc-bde5-4bef-88f7-855eeb689afa",
+      "seq": 28,
+      "at": "2026-10-06T13:08:05.449Z",
+      "type": "step.finished",
+      "result": {
+        "stepId": "f6c2bd30-a2d3-483e-a000-e93aef5c79a6",
+        "scenarioId": "bc950f27-0c33-469c-92a3-5bf07839fc47",
+        "status": "passed",
+        "durationMs": 81,
+        "url": "http://localhost:3000/demo-shop/stable",
+        "screenshot": true,
+        "error": null,
+        "healing": null
+      }
+    },
+    {
+      "runId": "3bc7dbdc-bde5-4bef-88f7-855eeb689afa",
+      "seq": 29,
+      "at": "2026-10-06T13:08:05.449Z",
+      "type": "step.started",
+      "scenarioId": "bc950f27-0c33-469c-92a3-5bf07839fc47",
+      "stepId": "35afe90c-f6b8-462b-b390-70ab4f547830"
+    },
+    {
+      "runId": "3bc7dbdc-bde5-4bef-88f7-855eeb689afa",
+      "seq": 30,
+      "at": "2026-10-06T13:08:05.789Z",
+      "type": "step.finished",
+      "result": {
+        "stepId": "35afe90c-f6b8-462b-b390-70ab4f547830",
+        "scenarioId": "bc950f27-0c33-469c-92a3-5bf07839fc47",
+        "status": "passed",
+        "durationMs": 196,
+        "url": "http://localhost:3000/demo-shop/stable/cart",
+        "screenshot": true,
+        "error": null,
+        "healing": null
+      }
+    },
+    {
+      "runId": "3bc7dbdc-bde5-4bef-88f7-855eeb689afa",
+      "seq": 31,
+      "at": "2026-10-06T13:08:05.789Z",
+      "type": "step.started",
+      "scenarioId": "bc950f27-0c33-469c-92a3-5bf07839fc47",
+      "stepId": "70fb91c4-e102-4ec3-b72e-0a5c09ce590a"
+    },
+    {
+      "runId": "3bc7dbdc-bde5-4bef-88f7-855eeb689afa",
+      "seq": 32,
+      "at": "2026-10-06T13:08:06.024Z",
+      "type": "step.finished",
+      "result": {
+        "stepId": "70fb91c4-e102-4ec3-b72e-0a5c09ce590a",
+        "scenarioId": "bc950f27-0c33-469c-92a3-5bf07839fc47",
+        "status": "passed",
+        "durationMs": 164,
+        "url": "http://localhost:3000/demo-shop/stable/checkout",
+        "screenshot": true,
+        "error": null,
+        "healing": null
+      }
+    },
+    {
+      "runId": "3bc7dbdc-bde5-4bef-88f7-855eeb689afa",
+      "seq": 33,
+      "at": "2026-10-06T13:08:06.025Z",
+      "type": "step.started",
+      "scenarioId": "bc950f27-0c33-469c-92a3-5bf07839fc47",
+      "stepId": "1feb722a-5091-4ceb-aa4e-b0d6940db572"
+    },
+    {
+      "runId": "3bc7dbdc-bde5-4bef-88f7-855eeb689afa",
+      "seq": 34,
+      "at": "2026-10-06T13:08:06.112Z",
+      "type": "step.finished",
+      "result": {
+        "stepId": "1feb722a-5091-4ceb-aa4e-b0d6940db572",
+        "scenarioId": "bc950f27-0c33-469c-92a3-5bf07839fc47",
+        "status": "passed",
+        "durationMs": 31,
+        "url": "http://localhost:3000/demo-shop/stable/checkout",
+        "screenshot": true,
+        "error": null,
+        "healing": null
+      }
+    },
+    {
+      "runId": "3bc7dbdc-bde5-4bef-88f7-855eeb689afa",
+      "seq": 35,
+      "at": "2026-10-06T13:08:06.112Z",
+      "type": "step.started",
+      "scenarioId": "bc950f27-0c33-469c-92a3-5bf07839fc47",
+      "stepId": "fb986ed9-8c10-4890-bfd2-e373830ab564"
+    },
+    {
+      "runId": "3bc7dbdc-bde5-4bef-88f7-855eeb689afa",
+      "seq": 36,
+      "at": "2026-10-06T13:08:06.208Z",
+      "type": "step.finished",
+      "result": {
+        "stepId": "fb986ed9-8c10-4890-bfd2-e373830ab564",
+        "scenarioId": "bc950f27-0c33-469c-92a3-5bf07839fc47",
+        "status": "passed",
+        "durationMs": 29,
+        "url": "http://localhost:3000/demo-shop/stable/checkout",
+        "screenshot": true,
+        "error": null,
+        "healing": null
+      }
+    },
+    {
+      "runId": "3bc7dbdc-bde5-4bef-88f7-855eeb689afa",
+      "seq": 37,
+      "at": "2026-10-06T13:08:06.208Z",
+      "type": "step.started",
+      "scenarioId": "bc950f27-0c33-469c-92a3-5bf07839fc47",
+      "stepId": "27a9d2e7-03da-4b37-83fe-16a59aae9bcb"
+    },
+    {
+      "runId": "3bc7dbdc-bde5-4bef-88f7-855eeb689afa",
+      "seq": 38,
+      "at": "2026-10-06T13:08:06.312Z",
+      "type": "step.finished",
+      "result": {
+        "stepId": "27a9d2e7-03da-4b37-83fe-16a59aae9bcb",
+        "scenarioId": "bc950f27-0c33-469c-92a3-5bf07839fc47",
+        "status": "passed",
+        "durationMs": 28,
+        "url": "http://localhost:3000/demo-shop/stable/checkout",
+        "screenshot": true,
+        "error": null,
+        "healing": null
+      }
+    },
+    {
+      "runId": "3bc7dbdc-bde5-4bef-88f7-855eeb689afa",
+      "seq": 39,
+      "at": "2026-10-06T13:08:06.313Z",
+      "type": "step.started",
+      "scenarioId": "bc950f27-0c33-469c-92a3-5bf07839fc47",
+      "stepId": "eb3ba9ce-8d66-45b4-93fd-b9c35e2c03b8"
+    },
+    {
+      "runId": "3bc7dbdc-bde5-4bef-88f7-855eeb689afa",
+      "seq": 40,
+      "at": "2026-10-06T13:08:06.415Z",
+      "type": "step.finished",
+      "result": {
+        "stepId": "eb3ba9ce-8d66-45b4-93fd-b9c35e2c03b8",
+        "scenarioId": "bc950f27-0c33-469c-92a3-5bf07839fc47",
+        "status": "passed",
+        "durationMs": 30,
+        "url": "http://localhost:3000/demo-shop/stable/checkout",
+        "screenshot": true,
+        "error": null,
+        "healing": null
+      }
+    },
+    {
+      "runId": "3bc7dbdc-bde5-4bef-88f7-855eeb689afa",
+      "seq": 41,
+      "at": "2026-10-06T13:08:06.415Z",
+      "type": "step.started",
+      "scenarioId": "bc950f27-0c33-469c-92a3-5bf07839fc47",
+      "stepId": "2bad4c7a-eab7-41e0-8e56-3a290f99c69d"
+    },
+    {
+      "runId": "3bc7dbdc-bde5-4bef-88f7-855eeb689afa",
+      "seq": 42,
+      "at": "2026-10-06T13:08:06.719Z",
+      "type": "step.finished",
+      "result": {
+        "stepId": "2bad4c7a-eab7-41e0-8e56-3a290f99c69d",
+        "scenarioId": "bc950f27-0c33-469c-92a3-5bf07839fc47",
+        "status": "passed",
+        "durationMs": 111,
+        "url": "http://localhost:3000/demo-shop/stable/checkout",
+        "screenshot": true,
+        "error": null,
+        "healing": null
+      }
+    },
+    {
+      "runId": "3bc7dbdc-bde5-4bef-88f7-855eeb689afa",
+      "seq": 43,
+      "at": "2026-10-06T13:08:06.719Z",
+      "type": "step.started",
+      "scenarioId": "bc950f27-0c33-469c-92a3-5bf07839fc47",
+      "stepId": "a258f9fc-e80f-4e54-b708-d598173e707f"
+    },
+    {
+      "runId": "3bc7dbdc-bde5-4bef-88f7-855eeb689afa",
+      "seq": 44,
+      "at": "2026-10-06T13:08:06.942Z",
+      "type": "step.finished",
+      "result": {
+        "stepId": "a258f9fc-e80f-4e54-b708-d598173e707f",
+        "scenarioId": "bc950f27-0c33-469c-92a3-5bf07839fc47",
+        "status": "passed",
+        "durationMs": 144,
+        "url": "http://localhost:3000/demo-shop/stable/confirmation",
+        "screenshot": true,
+        "error": null,
+        "healing": null
+      }
+    },
+    {
+      "runId": "3bc7dbdc-bde5-4bef-88f7-855eeb689afa",
+      "seq": 45,
+      "at": "2026-10-06T13:08:06.942Z",
+      "type": "scenario.finished",
+      "scenarioId": "bc950f27-0c33-469c-92a3-5bf07839fc47",
+      "status": "passed"
+    },
+    {
+      "runId": "3bc7dbdc-bde5-4bef-88f7-855eeb689afa",
+      "seq": 46,
+      "at": "2026-10-06T13:08:06.996Z",
+      "type": "run.finished",
+      "status": "passed",
+      "durationMs": 22275
+    }
+  ],
+  "note": "Events exactly as recorded; only the run label was set to the name the dashboard uses."
+}
