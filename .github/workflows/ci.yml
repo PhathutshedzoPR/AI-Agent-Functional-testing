@@ -35,3 +35,26 @@ jobs:
         if: env.SONAR_TOKEN != '' # skipped until the repo owner adds the secret
         uses: SonarSource/sonarqube-scan-action@v8
       - run: npm audit --omit=dev --audit-level=high
+
+  # The agent end to end in real Chromium: scorecard, accessibility, security over HTTP and the
+  # exported Playwright tests. Replay mode, so it needs no API key.
+  integration:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      LLM_PROVIDER: replay
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - run: npm run test:integration
+      - name: Show the scorecard on the run page
+        if: always()
+        run: |
+          if [ -f .data/scorecard.md ]; then
+            { echo '## Agent scorecard'; echo; cat .data/scorecard.md; } >> "$GITHUB_STEP_SUMMARY"
+          fi
