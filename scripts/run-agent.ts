@@ -1,12 +1,15 @@
 /**
  * TestPilot without the web UI: the same container and agent, driven from a terminal or CI.
  *
- *   npm run agent -- --url <url> [--story "<text>"] [--device desktop|iphone|android] [--out reports]
+ *   npm run agent -- --url <url> [--story "<text>" | --story-file <path>] [--device desktop|iphone|android] [--out reports]
+ *
+ * Use --story-file for a story with acceptance criteria on several lines: npm on Windows cuts a
+ * command-line argument at its first line break.
  *
  * Prints the agent's narration as it runs, writes JUnit XML and a Markdown report, and exits 1
  * when a test fails (2 for bad arguments), so a pipeline can gate on it.
  */
-import { existsSync } from 'node:fs';
+import { existsSync, readFileSync } from 'node:fs';
 import { mkdir, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { parseArgs } from 'node:util';
@@ -25,7 +28,7 @@ import { createLogger } from '@/server/logger';
 
 const POLL_MS = 500;
 const USAGE =
-  'Usage: npm run agent -- --url <url> [--story "<text>"] [--device desktop|iphone|android] [--out reports]';
+  'Usage: npm run agent -- --url <url> [--story "<text>" | --story-file <path>] [--device desktop|iphone|android] [--out reports]';
 
 type Runs = ReturnType<typeof createContainer>['runs'];
 
@@ -38,6 +41,7 @@ function readOptions() {
     options: {
       url: { type: 'string' },
       story: { type: 'string' },
+      'story-file': { type: 'string' },
       device: { type: 'string', default: 'desktop' },
       out: { type: 'string', default: 'reports' },
     },
@@ -47,7 +51,9 @@ function readOptions() {
     process.stderr.write(`${USAGE}\n`);
     process.exit(2);
   }
-  return { url: values.url, story: values.story ?? null, device: device.data, out: values.out };
+  const storyFile = values['story-file'];
+  const story = storyFile ? readFileSync(storyFile, 'utf8').trim() : (values.story ?? null);
+  return { url: values.url, story, device: device.data, out: values.out };
 }
 
 /** Follows the run's events, narrating each one, until it finishes. */

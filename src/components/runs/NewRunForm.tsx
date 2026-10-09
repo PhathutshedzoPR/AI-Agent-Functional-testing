@@ -8,6 +8,8 @@ import type { Device } from '@/core/domain';
 import { ApiRequestError, sendJson } from '@/lib/sendJson';
 import { buttonStyles } from '../ui';
 import { DevicePicker } from './DevicePicker';
+import { SamplePicker } from './SamplePicker';
+import type { SampleSite } from './sampleSites';
 import { StoryComposer } from './StoryComposer';
 import { TargetPicker, type CustomHosts, type TargetChoice } from './TargetPicker';
 
@@ -42,6 +44,12 @@ export function NewRunForm({ appBaseUrl, customHosts }: Props) {
   const [error, setError] = useState<string | null>(null);
   const [starting, setStarting] = useState(false);
 
+  const pickSample = (site: SampleSite): void => {
+    setTarget('custom');
+    setCustomUrl(site.url);
+    setStory(site.story);
+  };
+
   const submit = async (event: SubmitEvent<HTMLFormElement>): Promise<void> => {
     event.preventDefault();
     setStarting(true);
@@ -65,6 +73,7 @@ export function NewRunForm({ appBaseUrl, customHosts }: Props) {
         onCustomUrlChange={setCustomUrl}
         customHosts={customHosts}
       />
+      <SamplePicker customHosts={customHosts} onPick={pickSample} />
       <DevicePicker value={device} onChange={setDevice} />
       <StoryComposer story={story} onChange={setStory} />
       {error && (
