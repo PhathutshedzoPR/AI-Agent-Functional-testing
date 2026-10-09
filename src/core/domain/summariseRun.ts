@@ -10,12 +10,16 @@ export type RunSummaryText = Readonly<{
   hint: string | null;
 }>;
 
+const NBSP = String.fromCharCode(0xa0);
+
 function took(ms: number | null): string {
   if (ms === null) return '';
   const seconds = Math.max(1, Math.round(ms / 1_000));
+  // A no-break space keeps a number and its unit on one line on a phone.
+  const unit = (value: number, name: string): string => `${value}${NBSP}${name}`;
   return seconds < 60
-    ? ` in ${seconds} s`
-    : ` in ${Math.floor(seconds / 60)} min ${seconds % 60} s`;
+    ? ` in ${unit(seconds, 's')}`
+    : ` in ${unit(Math.floor(seconds / 60), 'min')} ${unit(seconds % 60, 's')}`;
 }
 
 /** One plain sentence about a finished run, from its real numbers, and the next thing to try. */

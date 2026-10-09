@@ -24,10 +24,10 @@ describe('traceCriteria', () => {
     );
   });
 
-  it('matches the planner copy despite case and a trailing full stop', () => {
+  it('matches the planner copy despite case and stray punctuation at either end', () => {
     const rows = traceCriteria({
       criteria: [ORDER],
-      scenarios: [scenario('s1', `${ORDER.toUpperCase()}.`, 'passed')],
+      scenarios: [scenario('s1', `. ${ORDER.toUpperCase()}.`, 'passed')],
     });
 
     expect(rows).toHaveLength(1);

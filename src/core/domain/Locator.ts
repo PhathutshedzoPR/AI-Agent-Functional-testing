@@ -47,7 +47,10 @@ export const Locator = {
   /** Validates and normalises a locator. Throws DomainError when it can't be used. */
   create(input: unknown): Locator {
     const parsed = parseDomain(LocatorSchema, input, 'locator');
-    const value = parsed.value.trim();
+    // Some models name a control after its role (a button called "button"); they mean the
+    // nameless control of that role, usually inside a container.
+    const trimmed = parsed.value.trim();
+    const value = parsed.by === 'role' && trimmed.toLowerCase() === parsed.role ? '' : trimmed;
     // A control with no accessible name (a to-do's own checkbox, say) is found by role alone,
     // usually narrowed by its container; every other strategy needs text to match.
     const nameless = value.length === 0 && parsed.by === 'role';

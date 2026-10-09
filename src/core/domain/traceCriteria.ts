@@ -13,14 +13,19 @@ export type TraceRow = Readonly<{
 
 type TraceInput = Readonly<{ criteria: readonly string[]; scenarios: readonly ScenarioView[] }>;
 
-const TRAILING_PUNCTUATION = new Set(['.', ';', ':', '!']);
+const EDGE_PUNCTUATION = new Set(['.', ';', ':', '!', '-', '*']);
 
-// The planner copies criteria from the story, but may drop a full stop or change case.
+// The planner copies criteria from the story, but may change case, drop a full stop or keep a
+// bullet mark; punctuation at either end does not change which criterion it means.
 function key(criterion: string): string {
   const text = normaliseText(criterion);
+  let start = 0;
   let end = text.length;
-  while (end > 0 && TRAILING_PUNCTUATION.has(text.charAt(end - 1))) end -= 1;
-  return text.slice(0, end);
+  while (start < end && (EDGE_PUNCTUATION.has(text.charAt(start)) || text.charAt(start) === ' ')) {
+    start += 1;
+  }
+  while (end > start && EDGE_PUNCTUATION.has(text.charAt(end - 1))) end -= 1;
+  return text.slice(start, end);
 }
 
 function verdictOf(scenarios: readonly ScenarioView[]): CriterionVerdict {

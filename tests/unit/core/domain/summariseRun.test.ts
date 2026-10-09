@@ -2,6 +2,9 @@ import { describe, expect, it } from 'vitest';
 import { EMPTY_RUN_VIEW, summariseRun, type RunView } from '@/core/domain';
 import { aBug } from '../../../fakes/domainBuilders';
 
+// Numbers and units are joined with a no-break space; compare with plain spaces.
+const plain = (text: string | undefined): string | undefined => text?.replace(/ /g, ' ');
+
 const finished = (overrides: Partial<RunView>): RunView => ({
   ...EMPTY_RUN_VIEW,
   status: 'passed',
@@ -19,10 +22,8 @@ describe('summariseRun', () => {
       finished({ stats: { passed: 17, healed: 0, failed: 0, skipped: 0, bugs: 0 } }),
     );
 
-    expect(summary).toMatchObject({
-      state: 'passed',
-      headline: 'Every check passed: 17 steps in 14 s.',
-    });
+    expect(summary?.state).toBe('passed');
+    expect(plain(summary?.headline)).toBe('Every check passed: 17 steps in 14 s.');
   });
 
   it('flags a pass that needed repairs for review', () => {
@@ -31,7 +32,7 @@ describe('summariseRun', () => {
     );
 
     expect(summary?.state).toBe('healed');
-    expect(summary?.headline).toBe('Passed after 7 repairs: 17 steps in 14 s.');
+    expect(plain(summary?.headline)).toBe('Passed after 7 repairs: 17 steps in 14 s.');
     expect(summary?.hint).toContain('Needs review');
   });
 
@@ -45,7 +46,7 @@ describe('summariseRun', () => {
       }),
     );
 
-    expect(summary?.headline).toBe('1 bug found: 1 of 16 steps failed in 1 min 15 s.');
+    expect(plain(summary?.headline)).toBe('1 bug found: 1 of 16 steps failed in 1 min 15 s.');
     expect(summary?.hint).toContain('Is it the site or the test?');
   });
 

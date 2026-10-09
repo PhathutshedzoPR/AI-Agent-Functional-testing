@@ -43,6 +43,15 @@ describe('Locator.create', () => {
     expect(() => Locator.create(input)).toThrow(DomainError);
   });
 
+  it('reads a control named after its role as nameless, as the model meant', () => {
+    const named = Locator.create(
+      aRoleLocator('button', 'Button', { within: { role: 'article', hasText: 'Quarter Kota' } }),
+    );
+
+    expect(named.value).toBe('');
+    expect(Locator.create(aRoleLocator('button', 'Buttons')).value).toBe('Buttons');
+  });
+
   it('accepts a control with no name, found by role inside its container', () => {
     const toggle = Locator.create(
       aRoleLocator('checkbox', ' ', { within: { role: 'listitem', hasText: 'First task' } }),
