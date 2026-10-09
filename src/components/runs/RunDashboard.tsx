@@ -34,6 +34,13 @@ function latestCaptured(view: RunView): StepView | null {
   return captured.at(-1) ?? null;
 }
 
+/** Once a run has landed, the first failed step is the evidence worth seeing first. */
+function firstFailure(view: RunView): StepView | null {
+  if (!TestRun.isFinal(view.status)) return null;
+  const steps = view.scenarios.flatMap((s) => s.steps);
+  return steps.find((s) => s.state === 'failed' && s.result?.screenshot) ?? null;
+}
+
 const TILES = [
   { key: 'passed', label: 'Passed', className: 'bg-sky text-ink' },
   { key: 'healed', label: 'Healed', className: 'border border-divider bg-raised' },
@@ -48,7 +55,7 @@ export function RunDashboard({ runId, appBaseUrl }: Props) {
   const { view, stream } = useRunStream(runId);
   const [selected, setSelected] = useState<string | null>(null);
   const [tab, setTab] = useState('steps');
-  const shown = findStep(view, selected) ?? latestCaptured(view);
+  const shown = findStep(view, selected) ?? firstFailure(view) ?? latestCaptured(view);
   const finished = TestRun.isFinal(view.status);
   const healedCount = view.stats.healed;
   const showStep = (stepId: string): void => {
