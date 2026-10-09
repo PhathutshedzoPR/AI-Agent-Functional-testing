@@ -2,6 +2,7 @@ import { spawn, type ChildProcess } from 'node:child_process';
 import { createRequire } from 'node:module';
 import { createServer } from 'node:net';
 import type { TestProject } from 'vitest/node';
+import { INTEGRATION_DATA_DIR } from './testData';
 
 declare module 'vitest' {
   export interface ProvidedContext {
@@ -43,6 +44,7 @@ export default async function setup(project: TestProject): Promise<(() => void) 
       LLM_RECORD: 'false',
       // The suites start more runs a minute than a person would; the limiter has its own tests.
       RATE_LIMIT_RUNS_PER_MINUTE: '1000',
+      DATA_DIR: INTEGRATION_DATA_DIR,
     },
   });
   await waitForServer(baseUrl, server);

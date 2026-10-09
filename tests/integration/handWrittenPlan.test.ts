@@ -10,9 +10,10 @@ import { StepFactory, type RawPlanStep } from '@/core/agent/StepFactory';
 import type { Locator, PlanStep } from '@/core/domain';
 import { AssertionFailedError, BrowserError } from '@/core/errors';
 import type { IBrowser } from '@/core/ports';
+import { INTEGRATION_DATA_DIR } from './testData';
 
 const baseUrl = inject('baseUrl');
-const DATA_DIR = resolve('.data');
+const DATA_DIR = resolve(INTEGRATION_DATA_DIR);
 const ids = new CryptoIdGenerator();
 const registry = createDefaultActionRegistry();
 const steps = new StepFactory(registry, ids);

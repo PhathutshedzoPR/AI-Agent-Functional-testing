@@ -3,7 +3,7 @@ import { InMemoryEventBus } from '@/adapters/events';
 import { createDefaultExporters } from '@/adapters/exporters';
 import { createLanguageModel } from '@/adapters/llm';
 import { TargetUrlGuard, resolveHostWithDns } from '@/adapters/security';
-import { FileArtifactStore, InMemoryRunRepository } from '@/adapters/storage';
+import { FileArtifactStore, FileRunRepository } from '@/adapters/storage';
 import { CryptoIdGenerator, SystemClock } from '@/adapters/system';
 import {
   BugReporter,
@@ -60,7 +60,7 @@ export function createContainer(
   const logError = (message: string, error: unknown): void => logger.error(message, { error });
   const runs = new RunService({
     ...shared,
-    repository: new InMemoryRunRepository(),
+    repository: new FileRunRepository(env.DATA_DIR),
     bus: new InMemoryEventBus(),
     queue: new RunQueue((error) => logError('A queued run failed outside its own handling', error)),
     agent: buildAgent(env, policy, shared),
@@ -69,6 +69,7 @@ export function createContainer(
     exporters: createDefaultExporters(),
     runTimeoutMs: env.AGENT_RUN_TIMEOUT_MS,
     logError,
+    logWarn: (message, fields) => logger.warn(message, fields),
   });
   return {
     env,

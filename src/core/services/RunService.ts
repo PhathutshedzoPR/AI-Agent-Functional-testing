@@ -48,6 +48,8 @@ export type RunServiceDependencies = Readonly<{
   exporters: readonly IReportExporter[];
   runTimeoutMs: number;
   logError: (message: string, error: unknown) => void;
+  /** Expected failures (a provider outage, a blocked page): code and cause, never request data. */
+  logWarn: (message: string, fields: Readonly<Record<string, unknown>>) => void;
 }>;
 
 const INTERNAL_ERROR = {
@@ -167,7 +169,11 @@ export class RunService {
       await this.transition(runId, 'cancelled');
       return;
     }
-    if (!(error instanceof AppError)) this.deps.logError(`Run ${runId} failed unexpectedly`, error);
+    if (error instanceof AppError) {
+      this.deps.logWarn(`Run ${runId} stopped`, { code: error.code, cause: causeOf(error) });
+    } else {
+      this.deps.logError(`Run ${runId} failed unexpectedly`, error);
+    }
     const safe =
       error instanceof AppError ? { code: error.code, message: error.message } : INTERNAL_ERROR;
     await emitter.emit({ type: 'run.failed', error: safe });
@@ -200,4 +206,9 @@ export class RunService {
     if (!run) throw new NotFoundError('Run');
     return run;
   }
+}
+
+// The provider's own words (say, "quota exceeded") explain an outage; capped, and only the message.
+function causeOf(error: AppError): string | null {
+  return error.cause instanceof Error ? error.cause.message.slice(0, 300) : null;
 }

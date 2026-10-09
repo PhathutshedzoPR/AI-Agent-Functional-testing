@@ -4,6 +4,7 @@ import { createDefaultExporters } from '@/adapters/exporters';
 import { InMemoryRunRepository } from '@/adapters/storage';
 import { TestRun, projectRun, type RunEvent } from '@/core/domain';
 import {
+  LlmError,
   NotFoundError,
   RunCancelledError,
   TargetBlockedError,
@@ -38,6 +39,7 @@ function service(
   const repository = new InMemoryRunRepository();
   const bus = new InMemoryEventBus();
   const logError = vi.fn();
+  const logWarn = vi.fn();
   const queue = new RunQueue((error) => {
     logError('queue', error);
   });
@@ -54,8 +56,9 @@ function service(
     ids: uuids,
     runTimeoutMs: overrides.runTimeoutMs ?? 60_000,
     logError,
+    logWarn,
   });
-  return { runs, repository, bus, queue, logError, harness };
+  return { runs, repository, bus, queue, logError, logWarn, harness };
 }
 
 const START = { targetUrl: 'http://localhost:3000/demo-shop/stable', story: 'Order a kota' };
@@ -125,7 +128,7 @@ describe('RunService', () => {
   });
 
   it('records a safe error when the language model fails', async () => {
-    const { runs, logError } = service({ llm: new FakeLanguageModel() });
+    const { runs, logError, logWarn } = service({ llm: new FakeLanguageModel() });
 
     const run = await runs.start(START);
 
@@ -133,6 +136,28 @@ describe('RunService', () => {
     const view = projectRun((await runs.get(run.id)).events);
     expect(view.error).toEqual({ code: 'LLM_FAILED', message: 'No fake answer for plan' });
     expect(logError).not.toHaveBeenCalled();
+    // The server log says why, so an outage on stage can be told apart from a bug.
+    expect(logWarn).toHaveBeenCalledWith(`Run ${run.id} stopped`, {
+      code: 'LLM_FAILED',
+      cause: null,
+    });
+  });
+
+  it("logs the provider's own reason when the model is down", async () => {
+    const llm = new FakeLanguageModel().answer('plan', () => {
+      throw new LlmError('The language model provider kept failing, even after a retry.', {
+        cause: new Error('You exceeded your current quota'),
+      });
+    });
+    const { runs, logWarn } = service({ llm });
+
+    const run = await runs.start(START);
+    await finished(runs, run.id);
+
+    expect(logWarn).toHaveBeenCalledWith(`Run ${run.id} stopped`, {
+      code: 'LLM_FAILED',
+      cause: 'You exceeded your current quota',
+    });
   });
 
   it('hides unexpected errors from the client and logs them', async () => {

@@ -10,6 +10,7 @@ import { parseEnv } from '@/server/env';
 import { createLogger } from '@/server/logger';
 import { FakeLanguageModel } from '../fakes/FakeLanguageModel';
 import { runToEnd } from './runToEnd';
+import { INTEGRATION_DATA_DIR } from './testData';
 
 const baseUrl = inject('baseUrl');
 const require = createRequire(import.meta.url);
@@ -115,6 +116,7 @@ function app() {
     APP_BASE_URL: baseUrl,
     TARGET_ALLOWLIST: host,
     LLM_PROVIDER: 'replay',
+    DATA_DIR: INTEGRATION_DATA_DIR,
     AGENT_MAX_SCENARIOS: '2',
     AGENT_MAX_STEPS: '14',
     AGENT_STEP_TIMEOUT_MS: '5000',
@@ -169,7 +171,9 @@ describe('the agent end to end: real app, real Chromium, scripted plan', () => {
     ]);
     expect(view.stats).toMatchObject({ passed: 13, failed: 0, bugs: 0 });
     const lastStep = view.scenarios[0]?.steps.at(-1);
-    const jpeg = await readFile(join('.data', 'artifacts', run.id, `${lastStep?.id}.jpg`));
+    const jpeg = await readFile(
+      join(INTEGRATION_DATA_DIR, 'artifacts', run.id, `${lastStep?.id}.jpg`),
+    );
     expect([jpeg[0], jpeg[1]]).toEqual([0xff, 0xd8]);
   });
 
@@ -236,7 +240,9 @@ describe('the agent end to end: real app, real Chromium, scripted plan', () => {
     });
     const view = await runToEnd(runs, phone.id);
     const firstStep = view.scenarios[0]?.steps[0];
-    const jpeg = await readFile(join('.data', 'artifacts', phone.id, `${firstStep?.id}.jpg`));
+    const jpeg = await readFile(
+      join(INTEGRATION_DATA_DIR, 'artifacts', phone.id, `${firstStep?.id}.jpg`),
+    );
 
     expect(view).toMatchObject({ device: 'android', status: 'passed' });
     expect(view.stats.failed).toBe(0);

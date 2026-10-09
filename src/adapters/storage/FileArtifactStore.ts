@@ -1,9 +1,7 @@
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
-import { join, resolve, sep } from 'node:path';
-import { ValidationError } from '@/core/errors';
+import { join, resolve } from 'node:path';
 import type { IArtifactStore } from '@/core/ports';
-
-const UUID = /^[\da-f]{8}-[\da-f]{4}-[\da-f]{4}-[\da-f]{4}-[\da-f]{12}$/i;
+import { idPath, isMissingFile } from './fileSafety';
 
 /**
  * Screenshots on disk at `<dataDir>/artifacts/<runId>/<stepId>.jpg` (CLAUDE.md section 4,
@@ -32,18 +30,6 @@ export class FileArtifactStore implements IArtifactStore {
   }
 
   private screenshotPath(runId: string, stepId: string): string {
-    if (!UUID.test(runId) || !UUID.test(stepId)) {
-      throw new ValidationError('Artifact ids must be UUIDs.');
-    }
-    const path = resolve(this.root, runId, `${stepId}.jpg`);
-    // Defence in depth: the checks above already make traversal impossible.
-    if (!path.startsWith(this.root + sep)) {
-      throw new ValidationError('Artifact path escaped the artifact folder.');
-    }
-    return path;
+    return idPath(this.root, [runId, stepId], (stepFile) => `${stepFile}.jpg`);
   }
-}
-
-function isMissingFile(error: unknown): boolean {
-  return error instanceof Error && 'code' in error && error.code === 'ENOENT';
 }
