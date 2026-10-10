@@ -23,7 +23,8 @@ TestPilot is an AI agent that tests a website the way a QA analyst would. You gi
 2. **A user story becomes tests that run.** The acceptance criteria in a plain story become happy-path, negative and edge-case scenarios that run in the browser, and a traceability table shows which criterion passed or failed.
 3. **Proven on bugs we planted.** A scorecard runs each suggested story on three releases of our demo shop (stable, a redesign with renamed buttons, and a release with seeded bugs) and checks each seeded bug is caught. To prove a failure comes from the bug and not a bad plan, the buggy release's plan is re-run on stable, where it passes.
 4. **Tests you keep.** Each run exports a Playwright spec built from the same locators the agent used. Our integration tests run that exported file with `npx playwright test`, on a desktop and on a phone screen, and it passes.
-5. **A flight recorder you can follow.** Each run is drawn as a flight path: scenarios are routes, steps are waypoints, repairs are detours and failures break the line.
+5. **Functional, performance and security in one run.** Every page the agent reads is measured in the browser against Google's "good" budgets (time to first byte, Largest Contentful Paint, full load) and its response is checked for HTTPS, Content Security Policy, clickjacking and MIME-sniffing protection, Referrer Policy, HSTS and Secure cookies. Passive only: no attack traffic.
+6. **A flight recorder you can follow.** Each run is drawn as a flight path: scenarios are routes, steps are waypoints, repairs are detours and failures break the line.
 
 When a button is renamed, TestPilot repairs the step (rules first, the model second, confirmed in the browser) but never hides it: repaired steps are listed under "Needs review", because a repair can mask a real regression.
 
@@ -38,7 +39,7 @@ Every buggy run also reports the Specials link returning 404.
 
 ## Built to last
 
-Next.js 16 and TypeScript (strict), ports-and-adapters architecture with the agent core free of framework code, Playwright, the Vercel AI SDK with Gemini, Zod validation on every input and every model response, 372 unit tests and 31 real-browser integration tests, SonarQube Cloud quality gate passing, and CI on every push. The agent never leaves the target's site, treats page content as data rather than instructions, and checks every browser request, redirects included, against its target policy.
+Next.js 16 and TypeScript (strict), ports-and-adapters architecture with the agent core free of framework code, Playwright, the Vercel AI SDK with Gemini, Zod validation on every input and every model response, 385 unit tests and 31 real-browser integration tests, SonarQube Cloud quality gate passing, and CI on every push. The agent never leaves the target's site, treats page content as data rather than instructions, and checks every browser request, redirects included, against its target policy.
 
 ## What's next
 

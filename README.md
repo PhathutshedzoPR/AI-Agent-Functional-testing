@@ -1,6 +1,6 @@
 # TestPilot
 
-Write a user story. TestPilot turns it into tests, runs them in a real browser, tells you what broke with screenshots and steps to reproduce, and hands you a Playwright test file your team keeps.
+Write a user story. TestPilot turns it into tests, runs them in a real browser, tells you what broke with screenshots and steps to reproduce, and hands you a Playwright test file your team keeps. On every page it reads, it also measures load times against budgets and checks the security headers.
 
 We're building it for the [Sebaka Testing AI Hackathon 2026](https://sebakasouthafrica.co.za/ai-agent-challenge.html), functional testing track. The idea on one page: [docs/IDEA.md](docs/IDEA.md). The demo script and presenter notes: [docs/DEMO.md](docs/DEMO.md).
 
@@ -15,6 +15,7 @@ We're building it for the [Sebaka Testing AI Hackathon 2026](https://sebakasouth
 2. **A user story becomes tests that run.** TestPilot reads the acceptance criteria in your story, plans happy-path, negative and edge-case scenarios for each one, runs them, and shows which criterion passed or failed in a traceability table.
 3. **Proven on bugs we planted.** A scorecard runs every suggested story on three releases of our demo shop and checks that each seeded bug is caught. To prove a failure comes from the bug and not from a bad plan, the buggy release's plan is run again on the stable release, where it must pass. [The numbers](#what-happened-when-we-ran-it).
 4. **Tests you keep.** Every run exports a Playwright test built from the exact locators the agent used. Our integration tests run that file with `npx playwright test`, on a desktop and on a phone screen, and it passes.
+5. **Functional, performance and security in one run.** While it reads the site, TestPilot measures each page in the browser (time to first byte, Largest Contentful Paint, full load) against Google's "good" budgets, and checks the page's own response for HTTPS, Content Security Policy, clickjacking protection, MIME-sniffing protection, Referrer Policy, HSTS and Secure cookies. The security checks are passive: no attack traffic, so it is safe to point at any allowed site.
 
 It also repairs tests when a button is renamed, but it never hides it: each repair is checked in the browser and listed under **Needs review**, because a repair can mask a real regression.
 
@@ -29,9 +30,9 @@ Teams that do automate find their tests breaking every time a button is renamed 
 | Stage | What happens |
 |---|---|
 | **Receives** | A URL, and optionally a user story with acceptance criteria. |
-| **Decides** | Reads each page's accessibility tree, then plans happy-path, negative and edge-case scenarios. |
+| **Decides** | Reads each page's accessibility tree and measures its performance and security, then plans happy-path, negative and edge-case scenarios. |
 | **Executes** | Runs every step in headless Chromium with Playwright, on a desktop screen or an iPhone or Android phone screen, and takes a screenshot after each one. When a button has been renamed, it finds it again and marks the step as healed so a person can check it. |
-| **Delivers** | A live dashboard, bug reports with expected and actual results, a traceability table (each acceptance criterion, the scenarios that test it and their result), JUnit XML for CI, a Markdown report and a Playwright test file your team can keep. |
+| **Delivers** | A live dashboard, bug reports with expected and actual results, a traceability table (each acceptance criterion, the scenarios that test it and their result), a performance and security table for every page, JUnit XML for CI (with a test case per check), a Markdown report and a Playwright test file your team can keep. |
 
 ## Try it
 
@@ -79,7 +80,7 @@ The host sets `PORT` and `next start` listens on it. Replay mode needs no API ke
 
 1. **Stable:** pick Kota Express (stable) and "Order two kotas and check out". Every step passes.
 2. **Redesign:** when the stable run finishes, click **Run this plan on Redesign**. The same plan meets renamed buttons; the flight path shows each healed step as a detour, and **Needs review** lists what changed.
-3. **Buggy:** start a fresh run on Kota Express (buggy) with the same story. TestPilot reports the cart-total bug with steps to reproduce, expected against actual, and the screenshot, and flags the Specials link that returns 404. Download the JUnit XML or the Playwright test from **Export**.
+3. **Buggy:** start a fresh run on Kota Express (buggy) with the same story. TestPilot reports the cart-total bug with steps to reproduce, expected against actual, and the screenshot, and flags the Specials link that returns 404. Open **Performance & security**: the checkout answers in about 1.5 s against an 800 ms budget, and every shop page can be framed by another site. Download the JUnit XML or the Playwright test from **Export**.
 
 Optional, if there is time: on any finished run, **Or on another screen: iPhone** re-runs the same plan on an iPhone screen (touch, user agent and all), and its exported Playwright test runs on that screen too.
 
@@ -89,7 +90,7 @@ Testing a tester needs a site where you already know the right answers. Kota Exp
 
 - **stable** works.
 - **redesign** behaves the same, but the buttons are renamed and the layout has moved. Hand-written test scripts break here. TestPilot heals and flags what changed.
-- **buggy** has four seeded bugs, including a cart total that ignores quantity and a cellphone field that accepts letters.
+- **buggy** has six seeded bugs: a cart total that ignores quantity, a cellphone field that accepts letters, the wrong delivery fee on the confirmation, a Specials link that returns 404, a checkout page that answers slowly (performance) and no clickjacking protection (security).
 
 ### What happened when we ran it
 
@@ -175,7 +176,7 @@ An agent that opens whatever URL you give it, on a server, needs guard rails:
 |---|---|
 | `npm run dev` | Development server on port 3000 |
 | `npm run build`, then `npm start` | Production build and server (use this for the demo) |
-| `npm run check` | Lint, typecheck and unit tests (372 tests) |
+| `npm run check` | Lint, typecheck and unit tests (385 tests) |
 | `npm run test:coverage` | Unit tests with coverage for SonarQube Cloud |
 | `npm run test:integration` | Builds the app, starts it on a spare port and runs the agent against Kota Express in real Chromium, including the scorecard (every suggestion story on every release, replayed; the table lands in `.data/scorecard.md`) and an accessibility check of every page with axe-core (WCAG 2.1 AA) on a laptop and a phone |
 | `npm run agent -- --url <url> [--story "<text>"] [--device desktop|iphone|android]` | The agent from the terminal: narrates the run, writes JUnit XML and Markdown to `./reports`, exits 1 on failures |

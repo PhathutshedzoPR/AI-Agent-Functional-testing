@@ -311,7 +311,7 @@ Releases come from typed config in `_config/releases.ts`. They share the same co
 |---|---|---|
 | `stable` | Everything works. | All scenarios pass, no healing. |
 | `redesign` | Same behaviour; controls renamed ("Add to order" becomes "Add to bag", "Checkout" becomes "Proceed to payment", "Place order" becomes "Confirm order") and layout changed. Outcome text stays the same. | Passes with healed steps in "Needs review". |
-| `buggy` | Seeded bugs, each behind a named flag: cart total ignores quantity; cellphone field accepts letters; confirmation shows the wrong delivery fee; "Specials" nav link returns 404. | Every seeded bug reported, no false failures. |
+| `buggy` | Seeded bugs, each behind a named flag: cart total ignores quantity; cellphone field accepts letters; confirmation shows the wrong delivery fee; "Specials" nav link returns 404; checkout answers 1.5 s late (`slowCheckout`); pages send no clickjacking protection (`framingAllowed`). | Every seeded bug reported (the last two as failed performance and security checks), no false failures. |
 
 The bugs are wrong business logic written as clean code: no code smells and no security flaws, so SonarQube Cloud stays clean.
 

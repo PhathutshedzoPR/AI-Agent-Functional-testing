@@ -296,6 +296,7 @@ Done when: a full run looks right on a projector-sized screen and on a phone.
 ## Phase 6: Demo readiness (Fri 9 Oct, afternoon)
 
 - [ ] Feature freeze at 16:00. Only bug fixes after that.
+- [x] Performance and security checks (10 Oct, demo morning; Sebaka's deck names functional, performance and security testing). The explorer measures every page it reads in the browser (time to first byte, LCP, full load against Google's "good" budgets) and checks the page's own response (HTTPS, CSP, clickjacking, nosniff, Referrer Policy, HSTS, Secure cookies). Passive only. Shown in a "Performance & security" tab, the Markdown report and a JUnit suite. Buggy gained two seeded bugs to catch: `slowCheckout` and `framingAllowed`.
 - [x] Demo settings: `AGENT_MAX_SCENARIOS=3`, every run under about 40 seconds. Do a warm-up run before going on stage.
   - Do not change AGENT_MAX_SCENARIOS or the other AGENT_* limits: they are part of every planning prompt, so replay would no longer find the recordings. Runs already take 4 to 30 s each in replay (see the scorecard).
   - Keep the recorded limits (see the note above). Warm-up run: part of the laptop checklist on the day.
