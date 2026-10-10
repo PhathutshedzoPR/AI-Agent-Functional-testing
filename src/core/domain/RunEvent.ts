@@ -46,6 +46,8 @@ export const RunEventSchema = z.discriminatedUnion('type', [
     title: z.string(),
     // Runs recorded before performance and security checks have none.
     audit: PageAuditSchema.nullable().default(null),
+    // A quick scan keeps one screenshot of each page it reads; other runs screenshot their steps.
+    screenshotId: z.string().nullable().default(null),
   }),
   eventSchema('plan.ready', {
     plan: TestPlanSchema,

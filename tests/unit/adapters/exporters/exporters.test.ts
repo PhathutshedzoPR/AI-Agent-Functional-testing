@@ -121,10 +121,16 @@ describe('performance and security checks in the exports', () => {
   const audited: RunView = {
     ...view,
     pages: [
-      { url: 'http://localhost:3000/demo-shop/buggy', title: 'Menu', audit: null },
+      {
+        url: 'http://localhost:3000/demo-shop/buggy',
+        title: 'Menu',
+        audit: null,
+        screenshotId: null,
+      },
       {
         url: checkout,
         title: 'Checkout',
+        screenshotId: null,
         audit: {
           url: checkout,
           checks: [

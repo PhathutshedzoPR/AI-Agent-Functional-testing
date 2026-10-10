@@ -68,6 +68,7 @@ export function agentHarness(pageText = 'Total R 35,00', plan: PlanOutput = ORDE
   const steps = new StepFactory(createDefaultActionRegistry(), ids);
   const agent = new TestAgent({
     browsers,
+    artifacts,
     explorer: new SiteExplorer({ maxPages: SETTINGS.maxPages, snapshotMaxChars: 2_000 }),
     planner: new TestPlanner(steps, ids, SETTINGS),
     executor: new ScenarioExecutor({

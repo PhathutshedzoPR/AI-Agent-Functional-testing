@@ -50,7 +50,10 @@ const HANDLERS: { [T in RunEventType]: Handler<T> } = {
   }),
   'explore.page': (view, e) => ({
     ...view,
-    pages: [...view.pages, { url: e.url, title: e.title, audit: e.audit }],
+    pages: [
+      ...view.pages,
+      { url: e.url, title: e.title, audit: e.audit, screenshotId: e.screenshotId },
+    ],
   }),
   'plan.ready': (view, e) => ({
     ...view,

@@ -95,6 +95,7 @@ function buildAgent(env: Env, policy: ITargetPolicy, { clock, ids, artifacts }: 
   const registry = createDefaultActionRegistry();
   return new TestAgent({
     browsers: new PlaywrightBrowserFactory(policy),
+    artifacts,
     explorer: new SiteExplorer({
       maxPages: env.AGENT_MAX_PAGES,
       snapshotMaxChars: env.AGENT_SNAPSHOT_MAX_CHARS,

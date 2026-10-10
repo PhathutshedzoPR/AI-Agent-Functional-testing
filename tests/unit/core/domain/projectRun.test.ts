@@ -55,6 +55,7 @@ const fullRun: RunEventPayload[] = [
     url: 'http://localhost:3000/demo-shop/buggy/cart',
     title: 'Cart',
     audit: null,
+    screenshotId: null,
   },
   { type: 'llm.called', purpose: 'plan', used: 1, max: 12 },
   {
@@ -172,7 +173,12 @@ describe('projectRun', () => {
   it('counts results, bugs, pages and findings', () => {
     expect(view.stats).toEqual({ passed: 1, healed: 1, failed: 1, skipped: 1, bugs: 1 });
     expect(view.pages).toEqual([
-      { url: 'http://localhost:3000/demo-shop/buggy/cart', title: 'Cart', audit: null },
+      {
+        url: 'http://localhost:3000/demo-shop/buggy/cart',
+        title: 'Cart',
+        audit: null,
+        screenshotId: null,
+      },
     ]);
     expect(view.findings).toHaveLength(1);
     expect(view.bugs[0]?.title).toBe('Cart total ignores quantity');
@@ -236,7 +242,9 @@ describe('projectRun', () => {
     expect(unknownScenario && narrateEvent(unknownScenario, EMPTY_RUN_VIEW)?.text).toBe(
       'Flying "a scenario".',
     );
-    const [oddPage] = stamp([{ type: 'explore.page', url: 'not a url', title: '', audit: null }]);
+    const [oddPage] = stamp([
+      { type: 'explore.page', url: 'not a url', title: '', audit: null, screenshotId: null },
+    ]);
     expect(oddPage && narrateEvent(oddPage, EMPTY_RUN_VIEW)?.text).toBe('Read not a url.');
     const failedCheck = {
       category: 'performance',
@@ -251,6 +259,7 @@ describe('projectRun', () => {
         url: 'http://localhost:3000/demo-shop/buggy/checkout',
         title: 'Checkout',
         audit: { url: 'http://localhost:3000/demo-shop/buggy/checkout', checks: [failedCheck] },
+        screenshotId: null,
       },
     ]);
     expect(slowPage && narrateEvent(slowPage, EMPTY_RUN_VIEW)).toEqual({

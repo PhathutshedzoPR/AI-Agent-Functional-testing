@@ -72,6 +72,7 @@ describe('summariseRun', () => {
       url,
       title: '',
       audit: { url, checks: statuses.map(check) },
+      screenshotId: null,
     });
     const clean = finished({
       scan: true,

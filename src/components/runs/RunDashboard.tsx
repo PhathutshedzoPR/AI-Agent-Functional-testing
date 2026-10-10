@@ -15,6 +15,7 @@ import { ReviewList } from './ReviewList';
 import { RunHeader } from './RunHeader';
 import { RunSummary } from './RunSummary';
 import { RunTabs } from './RunTabs';
+import { ScanScreens } from './ScanScreens';
 import { StepList } from './StepList';
 import { TraceabilityTable } from './TraceabilityTable';
 
@@ -161,7 +162,11 @@ export function RunDashboard({ runId, appBaseUrl }: Props) {
       </section>
       <div className="grid gap-5 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
         <section aria-label="Live browser" className={cn(panel, 'print:hidden')}>
-          <LiveBrowser runId={runId} step={shown} device={view.device} />
+          {view.scan ? (
+            <ScanScreens runId={runId} pages={view.pages} />
+          ) : (
+            <LiveBrowser runId={runId} step={shown} device={view.device} />
+          )}
         </section>
         <div className="space-y-5">
           <dl className="grid grid-cols-2 gap-3">

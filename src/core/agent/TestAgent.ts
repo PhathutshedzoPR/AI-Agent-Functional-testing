@@ -6,7 +6,16 @@ import {
   type RunLimits,
   type TestPlan,
 } from '../domain';
-import type { IBrowser, IBrowserFactory, IClock, IIdGenerator, ILanguageModel } from '../ports';
+import { AppError } from '../errors';
+import type {
+  IArtifactStore,
+  IBrowser,
+  IBrowserFactory,
+  IBrowserSession,
+  IClock,
+  IIdGenerator,
+  ILanguageModel,
+} from '../ports';
 import { BudgetedLanguageModel } from './BudgetedLanguageModel';
 import type { BugReporter } from './BugReporter';
 import type { BugWordsmith } from './BugWordsmith';
@@ -33,6 +42,7 @@ type Explored = Awaited<ReturnType<SiteExplorer['explore']>>;
 
 export type AgentDependencies = Readonly<{
   browsers: IBrowserFactory;
+  artifacts: IArtifactStore;
   explorer: SiteExplorer;
   planner: TestPlanner;
   executor: ScenarioExecutor;
@@ -114,7 +124,7 @@ export class TestAgent {
 
   /** Every verdict in a scan is a measured check or a page that would not load. */
   private async scan(browser: IBrowser, context: RunContext): Promise<'passed' | 'failed'> {
-    const { audits, findings } = await this.explore(browser, context);
+    const { audits, findings } = await this.explore(browser, context, true);
     const broken = findings.some((finding) => finding.kind === 'broken-link');
     return broken || PageAudit.failed(audits) > 0 ? 'failed' : 'passed';
   }
@@ -156,11 +166,26 @@ export class TestAgent {
     return plan;
   }
 
-  private async explore(browser: IBrowser, context: RunContext): Promise<Explored> {
+  private async explore(
+    browser: IBrowser,
+    context: RunContext,
+    capture = false,
+  ): Promise<Explored> {
     const session = await browser.newSession();
     try {
-      const explored = await this.deps.explorer.explore(session, context.start, (page, audit) =>
-        context.emit({ type: 'explore.page', url: page.url, title: page.title, audit }),
+      const explored = await this.deps.explorer.explore(
+        session,
+        context.start,
+        async (page, audit) => {
+          const screenshotId = capture ? await this.capturePage(session, context.runId) : null;
+          await context.emit({
+            type: 'explore.page',
+            url: page.url,
+            title: page.title,
+            audit,
+            screenshotId,
+          });
+        },
       );
       for (const raw of explored.findings) {
         const finding = Finding.create({
@@ -174,6 +199,19 @@ export class TestAgent {
       return explored;
     } finally {
       await session.close();
+    }
+  }
+
+  /** A scan has no steps to screenshot, so it keeps one picture of each page it reads. */
+  private async capturePage(session: IBrowserSession, runId: string): Promise<string | null> {
+    const id = this.deps.ids.next();
+    try {
+      await this.deps.artifacts.saveScreenshot(runId, id, await session.screenshot());
+      return id;
+    } catch (error) {
+      // A page that cannot be captured is still measured and checked.
+      if (error instanceof AppError) return null;
+      throw error;
     }
   }
 

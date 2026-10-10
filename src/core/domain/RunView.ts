@@ -41,7 +41,12 @@ export type RunView = Readonly<{
   finishedAt: string | null;
   durationMs: number | null;
   limits: RunLimits | null;
-  pages: readonly Readonly<{ url: string; title: string; audit: PageAudit | null }>[];
+  pages: readonly Readonly<{
+    url: string;
+    title: string;
+    audit: PageAudit | null;
+    screenshotId: string | null;
+  }>[];
   summary: string | null;
   warnings: readonly string[];
   criteria: readonly string[];

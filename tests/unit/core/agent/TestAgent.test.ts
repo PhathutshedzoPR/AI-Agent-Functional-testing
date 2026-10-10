@@ -45,12 +45,16 @@ describe('TestAgent', () => {
   });
 
   it('scans without a plan or the model: explore, measure, finish', async () => {
-    const { agent, llm } = agentHarness();
+    const { agent, llm, artifacts } = agentHarness();
     const context = recordingContext();
 
     const status = await agent.run({ ...request, scan: true }, llm, context);
 
     expect(status).toBe('passed');
+    const page = context.events.find((event) => event.type === 'explore.page');
+    const shot = page?.type === 'explore.page' ? page.screenshotId : null;
+    expect(shot).not.toBeNull();
+    expect([...artifacts.saved.keys()].some((key) => key.endsWith(`/${String(shot)}`))).toBe(true);
     expect(context.events[0]).toMatchObject({ type: 'run.started', scan: true, replayed: false });
     const types = context.events.map((event) => event.type);
     expect(types).toContain('explore.page');
