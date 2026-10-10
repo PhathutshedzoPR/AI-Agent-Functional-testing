@@ -331,7 +331,10 @@ describe('RunService.export', () => {
 
     const report = await runs.export(run.id, 'junit');
 
-    expect(report.body).toContain('<testsuites name="TestPilot" tests="1" failures="0"');
+    // One scenario, plus ten page checks on the one page explored (the HTTPS-only three skipped).
+    expect(report.body).toContain(
+      '<testsuites name="TestPilot" tests="11" failures="0" errors="0" skipped="3"',
+    );
     await expect(runs.export(run.id, 'pdf' as never)).rejects.toBeInstanceOf(NotFoundError);
   });
 });

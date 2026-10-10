@@ -1,5 +1,6 @@
 import { Locator, describeStep, type RunView, type ScenarioView } from '@/core/domain';
 import type { ExportedReport, IReportExporter } from '@/core/ports';
+import { auditEntries, type AuditEntry } from './auditEntries';
 import { reportFileName } from './reportFileName';
 
 const XML_ESCAPES: Readonly<Record<string, string>> = {
@@ -52,6 +53,44 @@ function testcase(scenario: ScenarioView): string {
   return lines.join('\n');
 }
 
+function auditTestcase({ page, check }: AuditEntry): string {
+  const name = xmlEscape(`${page}: ${check.name}`);
+  const open = `    <testcase classname="${check.category}" name="${name}" time="0">`;
+  if (check.status === 'passed') return `${open}</testcase>`;
+  const detail = `Measured ${check.actual}, expected ${check.expected}`;
+  const result =
+    check.status === 'failed'
+      ? `<failure message="${xmlEscape(detail)}" type="${check.category}"/>`
+      : `<skipped message="${xmlEscape(check.actual)}"/>`;
+  return `${open}
+      ${result}
+    </testcase>`;
+}
+
+/** The performance and security checks as their own suite, or nothing for older runs. */
+function auditSuite(view: RunView): {
+  xml: string[];
+  tests: number;
+  failures: number;
+  skipped: number;
+} {
+  const entries = auditEntries(view);
+  const failures = entries.filter(({ check }) => check.status === 'failed').length;
+  const skipped = entries.filter(({ check }) => check.status === 'skipped').length;
+  if (entries.length === 0) return { xml: [], tests: 0, failures: 0, skipped: 0 };
+  const counts = `tests="${entries.length}" failures="${failures}" errors="0" skipped="${skipped}" time="0"`;
+  return {
+    xml: [
+      `  <testsuite name="Performance and security" ${counts}>`,
+      ...entries.map((entry) => auditTestcase(entry)),
+      '  </testsuite>',
+    ],
+    tests: entries.length,
+    failures,
+    skipped,
+  };
+}
+
 /** JUnit XML for CI: one test case per scenario, failures carry the steps to reproduce. */
 export class JUnitExporter implements IReportExporter {
   readonly format = 'junit';
@@ -65,6 +104,8 @@ export class JUnitExporter implements IReportExporter {
     const time = seconds(view.durationMs ?? view.scenarios.reduce((t, s) => t + scenarioMs(s), 0));
     const name = xmlEscape(view.targetLabel ?? 'TestPilot run');
     const counts = `tests="${tests}" failures="${failures}" errors="0" skipped="${skipped}" time="${time}"`;
+    const audits = auditSuite(view);
+    const totals = `tests="${tests + audits.tests}" failures="${failures + audits.failures}" errors="0" skipped="${skipped + audits.skipped}" time="${time}"`;
     const properties = [
       ['targetUrl', view.targetUrl ?? ''],
       ['plan', view.replayed ? 'replayed' : 'live'],
@@ -76,11 +117,12 @@ export class JUnitExporter implements IReportExporter {
       .join('\n');
     const body = [
       '<?xml version="1.0" encoding="UTF-8"?>',
-      `<testsuites name="TestPilot" ${counts}>`,
+      `<testsuites name="TestPilot" ${totals}>`,
       `  <testsuite name="${name}" ${counts} timestamp="${xmlEscape(view.startedAt ?? '')}">`,
       `    <properties>\n${properties}\n    </properties>`,
       ...view.scenarios.map((scenario) => testcase(scenario)),
       '  </testsuite>',
+      ...audits.xml,
       '</testsuites>',
       '',
     ].join('\n');

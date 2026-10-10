@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { TestRun, type RunView, type StepView } from '@/core/domain';
+import { PageAudit, TestRun, type RunView, type StepView } from '@/core/domain';
 import { useRunStream } from '@/hooks/useRunStream';
 import { cn } from '@/lib/cn';
 import { Mascot } from '../brand/Mascot';
@@ -10,6 +10,7 @@ import { BugCard } from './BugCard';
 import { ExportMenu } from './ExportMenu';
 import { FlightPath } from './FlightPath';
 import { LiveBrowser } from './LiveBrowser';
+import { PageChecks } from './PageChecks';
 import { ReviewList } from './ReviewList';
 import { RunHeader } from './RunHeader';
 import { RunSummary } from './RunSummary';
@@ -18,6 +19,14 @@ import { StepList } from './StepList';
 import { TraceabilityTable } from './TraceabilityTable';
 
 type Props = Readonly<{ runId: string; appBaseUrl: string }>;
+
+// The tab says how many checks failed, or that none did once pages have been checked.
+function checksLabel(view: RunView): string {
+  const audits = view.pages.flatMap((page) => (page.audit ? [page.audit] : []));
+  const failed = PageAudit.failed(audits);
+  if (failed > 0) return `${failed} failed`;
+  return audits.length > 0 ? 'passed' : '0';
+}
 
 function findStep(view: RunView, stepId: string | null): StepView | null {
   if (!stepId) return null;
@@ -108,6 +117,11 @@ export function RunDashboard({ runId, appBaseUrl }: Props) {
           onSelect={showStep}
         />
       ),
+    },
+    {
+      id: 'checks',
+      label: `Performance & security (${checksLabel(view)})`,
+      content: <PageChecks pages={view.pages} />,
     },
     {
       id: 'export',

@@ -135,8 +135,10 @@ export class TestAgent {
   private async explore(browser: IBrowser, context: RunContext): Promise<readonly PageSnapshot[]> {
     const session = await browser.newSession();
     try {
-      const { pages, findings } = await this.deps.explorer.explore(session, context.start, (page) =>
-        context.emit({ type: 'explore.page', url: page.url, title: page.title }),
+      const { pages, findings } = await this.deps.explorer.explore(
+        session,
+        context.start,
+        (page, audit) => context.emit({ type: 'explore.page', url: page.url, title: page.title, audit }),
       );
       for (const raw of findings) {
         const finding = Finding.create({

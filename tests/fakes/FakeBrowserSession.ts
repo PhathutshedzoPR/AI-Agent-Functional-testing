@@ -1,6 +1,12 @@
 import { Locator } from '@/core/domain';
 import { BrowserError, type BrowserFailure } from '@/core/errors';
-import type { IBrowserSession, PageSnapshot, PollResult, RawFinding } from '@/core/ports';
+import type {
+  IBrowserSession,
+  PageMeasurement,
+  PageSnapshot,
+  PollResult,
+  RawFinding,
+} from '@/core/ports';
 
 /** Smallest valid-looking JPEG header; enough for code that only stores the bytes. */
 export const FAKE_JPEG = new Uint8Array([0xff, 0xd8, 0xff, 0xe0, 0x00, 0x10]);
@@ -59,6 +65,18 @@ export class FakeBrowserSession implements IBrowserSession {
   readonly linksByUrl = new Map<string, string[]>();
   /** Snapshot text per URL; falls back to `aria`. */
   readonly ariaByUrl = new Map<string, string>();
+  /** What measurePage reports, apart from the URL: a fast page with the usual headers. */
+  measurement: Omit<PageMeasurement, 'url'> = {
+    ttfbMs: 120,
+    loadMs: 900,
+    lcpMs: 700,
+    headers: {
+      'content-security-policy': "default-src 'self'; frame-ancestors 'none'",
+      'x-content-type-options': 'nosniff',
+      'referrer-policy': 'strict-origin-when-cross-origin',
+    },
+    cookies: [],
+  };
 
   goto(url: string): Promise<number | null> {
     this.calls.push(`goto ${url}`);
@@ -76,6 +94,11 @@ export class FakeBrowserSession implements IBrowserSession {
 
   pageStatus(): Promise<number | null> {
     return Promise.resolve(this.statuses.get(this.url) ?? 200);
+  }
+
+  measurePage(): Promise<PageMeasurement> {
+    this.calls.push(`measure ${this.url}`);
+    return Promise.resolve({ url: this.url, ...this.measurement });
   }
 
   snapshot(maxChars: number): Promise<PageSnapshot> {

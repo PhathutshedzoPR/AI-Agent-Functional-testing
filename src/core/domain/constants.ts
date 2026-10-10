@@ -139,6 +139,16 @@ export const FINDING_KINDS = [
   'blocked-request',
 ] as const;
 
+/** Performance and security checks on every page the explorer reads. */
+export const AUDIT_CATEGORIES = ['performance', 'security'] as const;
+export const AUDIT_STATUSES = ['passed', 'failed', 'skipped'] as const;
+export const AUDIT_CATEGORY_LABELS = { performance: 'Performance', security: 'Security' } as const;
+/**
+ * Page budgets in milliseconds: Google's "good" thresholds for time to first byte and Largest
+ * Contentful Paint, and a three-second full load.
+ */
+export const PERFORMANCE_BUDGETS = { ttfbMs: 800, lcpMs: 2_500, loadMs: 3_000 } as const;
+
 /** Severity when a scenario of this kind fails (CLAUDE.md section 6, bug reports). */
 export const DEFAULT_SEVERITY = { happy: 'high', negative: 'medium', edge: 'low' } as const;
 

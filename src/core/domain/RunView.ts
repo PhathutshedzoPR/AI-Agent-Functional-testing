@@ -1,5 +1,6 @@
 import type { BugReport } from './BugReport';
 import type { Finding } from './Finding';
+import type { PageAudit } from './PageAudit';
 import type { PlanStep } from './PlanStep';
 import type { RunLimits, SafeError } from './RunEvent';
 import type { Scenario, ScenarioStatus } from './Scenario';
@@ -39,7 +40,7 @@ export type RunView = Readonly<{
   finishedAt: string | null;
   durationMs: number | null;
   limits: RunLimits | null;
-  pages: readonly Readonly<{ url: string; title: string }>[];
+  pages: readonly Readonly<{ url: string; title: string; audit: PageAudit | null }>[];
   summary: string | null;
   warnings: readonly string[];
   criteria: readonly string[];

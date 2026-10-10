@@ -12,7 +12,7 @@ import {
   textPattern,
   xmlEscape,
 } from '@/adapters/exporters';
-import { EMPTY_RUN_VIEW } from '@/core/domain';
+import { EMPTY_RUN_VIEW, type RunView } from '@/core/domain';
 import { aRoleLocator } from '../../../fakes/domainBuilders';
 import { sampleRunView } from '../../../fakes/sampleRun';
 
@@ -113,6 +113,71 @@ describe('MarkdownExporter', () => {
       '\\[click\\]\\(javascript:alert\\(1\\)\\) \\| \\!\\[x\\]\\(y\\) next',
     );
     expect(new MarkdownExporter().export(EMPTY_RUN_VIEW).body).toContain('No bugs found.');
+  });
+});
+
+describe('performance and security checks in the exports', () => {
+  const checkout = 'http://localhost:3000/demo-shop/buggy/checkout';
+  const audited: RunView = {
+    ...view,
+    pages: [
+      { url: 'http://localhost:3000/demo-shop/buggy', title: 'Menu', audit: null },
+      {
+        url: checkout,
+        title: 'Checkout',
+        audit: {
+          url: checkout,
+          checks: [
+            {
+              category: 'performance',
+              name: 'Server answers quickly (time to first byte)',
+              status: 'failed',
+              actual: '1530 ms',
+              expected: 'at most 800 ms',
+            },
+            {
+              category: 'security',
+              name: 'Served over HTTPS',
+              status: 'skipped',
+              actual: 'http on a local address',
+              expected: 'https',
+            },
+            {
+              category: 'security',
+              name: 'Referrer Policy is set',
+              status: 'passed',
+              actual: 'no-referrer',
+              expected: 'a referrer-policy header',
+            },
+          ],
+        },
+      },
+    ],
+  };
+
+  it('adds a JUnit suite with one case per check, counted in the totals', () => {
+    const xml = new JUnitExporter().export(audited).body;
+
+    expect(xml).toContain('tests="5" failures="2" errors="0" skipped="2"');
+    expect(xml).toContain(
+      '<testsuite name="Performance and security" tests="3" failures="1" errors="0" skipped="1" time="0">',
+    );
+    expect(xml).toContain(
+      '<failure message="Measured 1530 ms, expected at most 800 ms" type="performance"/>',
+    );
+    expect(xml).toContain('<skipped message="http on a local address"/>');
+    expect(xml).not.toContain('Performance and security" tests="0"');
+    expect(new JUnitExporter().export(view).body).not.toContain('Performance and security');
+  });
+
+  it('adds a Markdown table of every check with what was measured', () => {
+    const md = new MarkdownExporter().export(audited).body;
+
+    expect(md).toContain('## Performance and security');
+    expect(md).toContain('1 of 3 checks failed.');
+    expect(md).toContain(
+      '| /demo-shop/buggy/checkout | Server answers quickly \\(time to first byte\\) | failed | 1530 ms | at most 800 ms |',
+    );
   });
 });
 

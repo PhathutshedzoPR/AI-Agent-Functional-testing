@@ -109,4 +109,15 @@ describe('SiteExplorer', () => {
     expect(findings[0]?.message).toContain('could not be opened');
     await expect(explore(broken)).rejects.toBeInstanceOf(TypeError);
   });
+
+  it('measures every page it reads, but not pages that failed to load', async () => {
+    const session = shop();
+    session.measurement = { ...session.measurement, ttfbMs: 3_400 };
+
+    const { pages, audits } = await explore(session);
+
+    expect(audits.map((audit) => audit.url)).toEqual(pages.map((page) => page.url));
+    expect(audits.every((audit) => audit.checks[0]?.status === 'failed')).toBe(true);
+    expect(session.calls).not.toContain(`measure ${at('/demo-shop/buggy/specials')}`);
+  });
 });

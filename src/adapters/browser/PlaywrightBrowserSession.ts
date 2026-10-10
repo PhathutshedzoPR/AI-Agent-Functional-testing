@@ -1,7 +1,14 @@
 import type { BrowserContext, Page, Locator as PlaywrightLocator } from 'playwright';
 import { Locator } from '@/core/domain';
 import { BrowserError } from '@/core/errors';
-import type { IBrowserSession, PageSnapshot, PollResult, RawFinding } from '@/core/ports';
+import type {
+  IBrowserSession,
+  PageMeasurement,
+  PageSnapshot,
+  PollResult,
+  RawFinding,
+} from '@/core/ports';
+import { readPageTimings } from './readPageTimings';
 import type { LocatorResolver } from './LocatorResolver';
 import type { PageFindingRecorder } from './PageFindingRecorder';
 import { pollUntil } from './pollUntil';
@@ -16,6 +23,9 @@ const SCREENSHOT_SETTLE_MS = 1_500;
 
 /** One scenario's browser context and page (Adapter over Playwright). */
 export class PlaywrightBrowserSession implements IBrowserSession {
+  /** Headers of the main response from the last goto, for the page's security checks. */
+  private lastHeaders: Readonly<Record<string, string>> = {};
+
   constructor(
     private readonly context: BrowserContext,
     private readonly page: Page,
@@ -30,6 +40,7 @@ export class PlaywrightBrowserSession implements IBrowserSession {
         waitUntil: 'load',
         timeout: this.timing.navigationTimeoutMs,
       });
+      this.lastHeaders = response ? await response.allHeaders() : {};
       return response?.status() ?? null;
     } catch (error) {
       throw toBrowserError(error, `Opening ${url}`);
@@ -53,6 +64,21 @@ export class PlaywrightBrowserSession implements IBrowserSession {
     } catch {
       // The page's own policy refused the request, or it navigated away: the status is unknown.
       return null;
+    }
+  }
+
+  async measurePage(): Promise<PageMeasurement> {
+    try {
+      const timings = await readPageTimings(this.page);
+      const cookies = await this.context.cookies(this.page.url());
+      return {
+        url: this.page.url(),
+        ...timings,
+        headers: this.lastHeaders,
+        cookies: cookies.map((cookie) => ({ name: cookie.name, secure: cookie.secure })),
+      };
+    } catch (error) {
+      throw toBrowserError(error, 'Measuring the page');
     }
   }
 

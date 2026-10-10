@@ -35,6 +35,7 @@ export default defineConfig({
         'src/server/container.ts',
         'src/server/api.ts',
         'src/adapters/browser/Playwright*.ts',
+        'src/adapters/browser/readPageTimings.ts',
       ],
       thresholds: Object.fromEntries(COVERED_FOLDERS.map((folder) => [`${folder}/**`, GATE])),
     },

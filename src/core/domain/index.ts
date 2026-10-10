@@ -3,6 +3,14 @@ export { BugReport, BugReportSchema, SeveritySchema, type Severity } from './Bug
 export { Finding, FindingKindSchema, FindingSchema, type FindingKind } from './Finding';
 export { Healing, HealingSchema } from './Healing';
 export {
+  AuditCheckSchema,
+  PageAudit,
+  PageAuditSchema,
+  type AuditCategory,
+  type AuditCheck,
+  type AuditStatus,
+} from './PageAudit';
+export {
   AriaRoleSchema,
   Locator,
   LocatorSchema,

@@ -1,16 +1,22 @@
+import type { PageAudit } from '../domain';
 import { BrowserError } from '../errors';
 import type { IBrowserSession, PageSnapshot, RawFinding } from '../ports';
+import { auditPage } from './audit';
 
 export type ExploreOptions = Readonly<{ maxPages: number; snapshotMaxChars: number }>;
 
 export type ExploreResult = Readonly<{
   pages: readonly PageSnapshot[];
+  audits: readonly PageAudit[];
   findings: readonly RawFinding[];
 }>;
+
+type VisitedPage = Readonly<{ snapshot: PageSnapshot; audit: PageAudit }>;
 
 /**
  * Breadth-first crawl of the target, reading each page's accessibility tree. It stays on the start
  * URL's origin and under its path, and records links that fail to load as broken-link findings.
+ * Each page it reads also gets its performance and security checks.
  */
 export class SiteExplorer {
   constructor(private readonly options: ExploreOptions) {}
@@ -18,12 +24,13 @@ export class SiteExplorer {
   async explore(
     session: IBrowserSession,
     start: URL,
-    onPage: (page: PageSnapshot) => Promise<void>,
+    onPage: (page: PageSnapshot, audit: PageAudit) => Promise<void>,
   ): Promise<ExploreResult> {
     const startUrl = withoutHash(start);
     const queue = [startUrl];
     const seen = new Set(queue);
     const pages: PageSnapshot[] = [];
+    const audits: PageAudit[] = [];
     const findings: RawFinding[] = [];
 
     for (
@@ -31,7 +38,7 @@ export class SiteExplorer {
       url && pages.length < this.options.maxPages;
       url = queue.shift()
     ) {
-      const page = await this.visit(session, url, findings);
+      const visited = await this.visit(session, url, findings);
       // The page's own failed response duplicates the broken-link finding just recorded.
       const reported = new Set(findings.map((finding) => finding.url));
       findings.push(
@@ -39,9 +46,10 @@ export class SiteExplorer {
           .drainFindings()
           .filter((finding) => !(finding.kind === 'http-error' && reported.has(finding.url))),
       );
-      if (!page) continue;
-      pages.push(page);
-      await onPage(page);
+      if (!visited) continue;
+      pages.push(visited.snapshot);
+      audits.push(visited.audit);
+      await onPage(visited.snapshot, visited.audit);
       for (const link of await session.links()) {
         const next = this.inScope(link, start);
         if (next && !seen.has(next)) {
@@ -50,14 +58,14 @@ export class SiteExplorer {
         }
       }
     }
-    return { pages, findings };
+    return { pages, audits, findings };
   }
 
   private async visit(
     session: IBrowserSession,
     url: string,
     findings: RawFinding[],
-  ): Promise<PageSnapshot | null> {
+  ): Promise<VisitedPage | null> {
     let status: number | null;
     try {
       status = await session.goto(url);
@@ -75,7 +83,8 @@ export class SiteExplorer {
       findings.push({ kind: 'broken-link', message: `${url} returned ${status}`, url, status });
       return null;
     }
-    return session.snapshot(this.options.snapshotMaxChars);
+    const snapshot = await session.snapshot(this.options.snapshotMaxChars);
+    return { snapshot, audit: auditPage(await session.measurePage()) };
   }
 
   /** The link without its fragment when it is on the same origin and under the start path. */

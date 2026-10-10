@@ -1,6 +1,7 @@
 import { Locator } from './Locator';
+import { PageAudit } from './PageAudit';
 import { plural } from './plural';
-import type { RunEvent } from './RunEvent';
+import type { RunEvent, RunEventOf } from './RunEvent';
 import type { FeedTone, RunView } from './RunView';
 
 type Line = Readonly<{ text: string; tone: FeedTone }> | null;
@@ -14,6 +15,15 @@ const pathOf = (url: string): string => {
   }
 };
 
+/** Reading a page includes its performance and security checks, so a failed one is said here. */
+function readPage(event: RunEventOf<'explore.page'>): Line {
+  const read = `Read ${pathOf(event.url)}`;
+  const failed = event.audit ? PageAudit.failed([event.audit]) : 0;
+  return failed > 0
+    ? { text: `${read}: ${plural(failed, 'performance or security check')} failed.`, tone: 'warn' }
+    : { text: `${read}.`, tone: 'info' };
+}
+
 /**
  * The agent's own voice in the feed: one short line for the events worth narrating. Every
  * number in it comes from the event itself.
@@ -23,7 +33,7 @@ export function narrateEvent(event: RunEvent, view: RunView): Line {
     case 'run.started':
       return { text: `Heading to ${event.targetLabel}.`, tone: 'info' };
     case 'explore.page':
-      return { text: `Read ${pathOf(event.url)}.`, tone: 'info' };
+      return readPage(event);
     case 'plan.ready': {
       const planned = `Planned ${plural(event.plan.scenarios.length, 'scenario')}`;
       const dropped = event.warnings.length > 0 ? ' with warnings to read' : '';

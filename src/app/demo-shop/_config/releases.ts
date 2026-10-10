@@ -15,6 +15,10 @@ export type BugFlags = Readonly<{
   confirmationShowsExpressFee: boolean;
   /** The Specials page is missing, so its navigation link returns 404. */
   specialsPageMissing: boolean;
+  /** The checkout page waits on a slow stock check before the server answers. */
+  slowCheckout: boolean;
+  /** Pages send no clickjacking protection, so any site can show them in a frame. */
+  framingAllowed: boolean;
 }>;
 
 export type ReleaseLabels = Readonly<{
@@ -37,6 +41,8 @@ const NO_BUGS: BugFlags = {
   cellphoneAcceptsLetters: false,
   confirmationShowsExpressFee: false,
   specialsPageMissing: false,
+  slowCheckout: false,
+  framingAllowed: false,
 };
 
 const CLASSIC_LABELS: ReleaseLabels = {
@@ -69,7 +75,7 @@ export const RELEASES: Readonly<Record<ReleaseId, ReleaseConfig>> = {
   buggy: {
     id: 'buggy',
     name: 'Buggy',
-    summary: 'Four seeded bugs.',
+    summary: 'Six seeded bugs, including a slow checkout and a security misconfiguration.',
     layout: 'list',
     labels: CLASSIC_LABELS,
     bugs: {
@@ -77,6 +83,8 @@ export const RELEASES: Readonly<Record<ReleaseId, ReleaseConfig>> = {
       cellphoneAcceptsLetters: true,
       confirmationShowsExpressFee: true,
       specialsPageMissing: true,
+      slowCheckout: true,
+      framingAllowed: true,
     },
   },
 };

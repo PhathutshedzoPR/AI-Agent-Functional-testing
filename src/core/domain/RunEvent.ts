@@ -1,6 +1,7 @@
 import { z } from 'zod';
 import { BugReportSchema } from './BugReport';
 import { FindingSchema } from './Finding';
+import { PageAuditSchema } from './PageAudit';
 import { ScenarioStatusSchema } from './Scenario';
 import { StepResultSchema } from './StepResult';
 import { TestPlanSchema } from './TestPlan';
@@ -38,7 +39,12 @@ export const RunEventSchema = z.discriminatedUnion('type', [
     device: DeviceSchema.default('desktop'),
     limits: RunLimitsSchema,
   }),
-  eventSchema('explore.page', { url: z.string(), title: z.string() }),
+  eventSchema('explore.page', {
+    url: z.string(),
+    title: z.string(),
+    // Runs recorded before performance and security checks have none.
+    audit: PageAuditSchema.nullable().default(null),
+  }),
   eventSchema('plan.ready', {
     plan: TestPlanSchema,
     warnings: z.array(z.string()),

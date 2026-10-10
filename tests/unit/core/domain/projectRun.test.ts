@@ -49,7 +49,12 @@ const started: RunEventPayload = {
 
 const fullRun: RunEventPayload[] = [
   started,
-  { type: 'explore.page', url: 'http://localhost:3000/demo-shop/buggy/cart', title: 'Cart' },
+  {
+    type: 'explore.page',
+    url: 'http://localhost:3000/demo-shop/buggy/cart',
+    title: 'Cart',
+    audit: null,
+  },
   { type: 'llm.called', purpose: 'plan', used: 1, max: 12 },
   {
     type: 'plan.ready',
@@ -166,7 +171,7 @@ describe('projectRun', () => {
   it('counts results, bugs, pages and findings', () => {
     expect(view.stats).toEqual({ passed: 1, healed: 1, failed: 1, skipped: 1, bugs: 1 });
     expect(view.pages).toEqual([
-      { url: 'http://localhost:3000/demo-shop/buggy/cart', title: 'Cart' },
+      { url: 'http://localhost:3000/demo-shop/buggy/cart', title: 'Cart', audit: null },
     ]);
     expect(view.findings).toHaveLength(1);
     expect(view.bugs[0]?.title).toBe('Cart total ignores quantity');
@@ -230,8 +235,27 @@ describe('projectRun', () => {
     expect(unknownScenario && narrateEvent(unknownScenario, EMPTY_RUN_VIEW)?.text).toBe(
       'Flying "a scenario".',
     );
-    const [oddPage] = stamp([{ type: 'explore.page', url: 'not a url', title: '' }]);
+    const [oddPage] = stamp([{ type: 'explore.page', url: 'not a url', title: '', audit: null }]);
     expect(oddPage && narrateEvent(oddPage, EMPTY_RUN_VIEW)?.text).toBe('Read not a url.');
+    const failedCheck = {
+      category: 'performance',
+      name: 'Page finishes loading',
+      status: 'failed',
+      actual: '3600 ms',
+      expected: 'at most 3000 ms',
+    } as const;
+    const [slowPage] = stamp([
+      {
+        type: 'explore.page',
+        url: 'http://localhost:3000/demo-shop/buggy/checkout',
+        title: 'Checkout',
+        audit: { url: 'http://localhost:3000/demo-shop/buggy/checkout', checks: [failedCheck] },
+      },
+    ]);
+    expect(slowPage && narrateEvent(slowPage, EMPTY_RUN_VIEW)).toEqual({
+      text: 'Read /demo-shop/buggy/checkout: 1 performance or security check failed.',
+      tone: 'warn',
+    });
     const [silentFailure] = stamp([
       { type: 'step.finished', result: aStepResult({ status: 'failed', error: 'x' }) },
     ]);

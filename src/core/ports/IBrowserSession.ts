@@ -15,6 +15,20 @@ export type RawFinding = Readonly<{
   status: number | null;
 }>;
 
+/**
+ * What the browser measured for the page it last opened with goto: timings in milliseconds from
+ * the start of navigation (null when the browser did not report one), the main response's
+ * headers with lower-case names, and the cookies the page can see.
+ */
+export type PageMeasurement = Readonly<{
+  url: string;
+  ttfbMs: number | null;
+  loadMs: number | null;
+  lcpMs: number | null;
+  headers: Readonly<Record<string, string>>;
+  cookies: readonly Readonly<{ name: string; secure: boolean }>[];
+}>;
+
 export type PollResult = Readonly<{ matched: boolean; actual: string }>;
 
 /**
@@ -32,6 +46,8 @@ export interface IBrowserSession {
    */
   pageStatus(): Promise<number | null>;
   snapshot(maxChars: number): Promise<PageSnapshot>;
+  /** Timings, headers and cookies of the page last opened with goto. */
+  measurePage(): Promise<PageMeasurement>;
   /** Absolute URLs of the visible links on the page, in document order. */
   links(): Promise<string[]>;
 

@@ -11,6 +11,7 @@ import {
 } from '@/core/domain';
 import type { ExportedReport, IReportExporter } from '@/core/ports';
 import { DEVICE_PROFILE_NAMES, deviceContextOptions } from '../browser/deviceProfiles';
+import { auditEntries } from './auditEntries';
 import { reportFileName } from './reportFileName';
 
 /** The screen the run used, with its size, so a reader can reproduce it exactly. */
@@ -119,6 +120,25 @@ function needsReview(view: RunView): string[] {
   ];
 }
 
+function pageChecks(view: RunView): string[] {
+  const entries = auditEntries(view);
+  if (entries.length === 0) return [];
+  const failed = entries.filter(({ check }) => check.status === 'failed').length;
+  return [
+    '## Performance and security',
+    '',
+    `${failed} of ${entries.length} checks failed. Timings were measured in the browser on each page the agent read; security checks are passive and read only the page's own response.`,
+    '',
+    '| Page | Check | Result | Measured | Expected |',
+    '|---|---|---|---|---|',
+    ...entries.map(
+      ({ page, check }) =>
+        `| ${mdEscape(page)} | ${mdEscape(check.name)} | ${check.status} | ${mdEscape(check.actual)} | ${mdEscape(check.expected)} |`,
+    ),
+    '',
+  ];
+}
+
 /** A readable report with one GitHub-issue-ready section per bug. */
 export class MarkdownExporter implements IReportExporter {
   readonly format = 'markdown';
@@ -143,6 +163,7 @@ export class MarkdownExporter implements IReportExporter {
       ...traceability(view),
       ...bugs,
       ...needsReview(view),
+      ...pageChecks(view),
       ...findings,
     ].join('\n');
     return {

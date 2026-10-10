@@ -1,4 +1,5 @@
 export * from './actions';
+export * from './audit';
 export { BudgetedLanguageModel } from './BudgetedLanguageModel';
 export { BugReporter } from './BugReporter';
 export { BugWordsmith } from './BugWordsmith';
