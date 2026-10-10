@@ -190,7 +190,12 @@ export function RunDashboard({ runId, appBaseUrl }: Props) {
         </details>
       )}
       <section aria-label="Run details" className={panel}>
-        <RunTabs tabs={tabs} active={tab} onChange={setTab} />
+        <RunTabs
+          tabs={tabs}
+          // A scan has no steps, so it opens on what it measured.
+          active={view.scan && tab === 'steps' ? 'checks' : tab}
+          onChange={setTab}
+        />
       </section>
     </div>
   );

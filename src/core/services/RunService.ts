@@ -33,6 +33,8 @@ export type StartRunInput = Readonly<{
   device?: Device;
   /** Re-run the plan of this earlier run instead of planning afresh. */
   reusePlanFrom?: string | null;
+  /** Explore and measure the pages only: no story, plan or model. */
+  scan?: boolean;
 }>;
 
 export type RunServiceDependencies = Readonly<{
@@ -80,7 +82,8 @@ export class RunService {
     await this.deps.repository.save(run);
     this.deps.queue.enqueue({
       runId: run.id,
-      execute: (signal) => this.execute(run, start, savedPlan, signal),
+      execute: (signal) =>
+        this.execute(run, start, { savedPlan, scan: input.scan === true }, signal),
     });
     return run;
   }
@@ -136,7 +139,7 @@ export class RunService {
   private async execute(
     run: TestRun,
     start: URL,
-    savedPlan: TestPlan | null,
+    how: Readonly<{ savedPlan: TestPlan | null; scan: boolean }>,
     cancel: AbortSignal,
   ): Promise<void> {
     const timeout = new AbortController();
@@ -152,7 +155,8 @@ export class RunService {
         targetLabel: run.targetLabel,
         story: run.story,
         device: run.device,
-        savedPlan,
+        savedPlan: how.savedPlan,
+        scan: how.scan,
       };
       const context = { runId: run.id, start, emit: emitter.emit, signal };
       await this.transition(run.id, await this.deps.agent.run(request, this.deps.llm, context));

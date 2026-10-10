@@ -14,6 +14,7 @@ const request = {
   story: 'Order a kota',
   device: 'desktop' as const,
   savedPlan: null,
+  scan: false,
 };
 
 describe('TestAgent', () => {
@@ -41,6 +42,21 @@ describe('TestAgent', () => {
     expect(browsers.launches).toEqual([{ ...SETTINGS, device: 'desktop' }]);
     expect(browsers.sessions.every((session) => session.closed)).toBe(true);
     expect(browsers.closed).toBeGreaterThanOrEqual(1);
+  });
+
+  it('scans without a plan or the model: explore, measure, finish', async () => {
+    const { agent, llm } = agentHarness();
+    const context = recordingContext();
+
+    const status = await agent.run({ ...request, scan: true }, llm, context);
+
+    expect(status).toBe('passed');
+    expect(context.events[0]).toMatchObject({ type: 'run.started', scan: true, replayed: false });
+    const types = context.events.map((event) => event.type);
+    expect(types).toContain('explore.page');
+    expect(types).not.toContain('llm.called');
+    expect(types).not.toContain('plan.ready');
+    expect(types.at(-1)).toBe('run.finished');
   });
 
   it('reports a bug and finishes failed when a check fails', async () => {

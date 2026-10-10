@@ -62,6 +62,8 @@ Free tiers get busy (Gemini's allows 20 requests per model per day and sometimes
 LLM_FALLBACKS=nvidia:moonshotai/kimi-k3,openrouter:nvidia/nemotron-3-super-120b-a12b:free
 ```
 
+**Quick scan** (next to **Start run**) needs no story and no model: it reads every page it can reach and reports the performance and security checks, links that do not load and console errors. With `TARGET_MODE=public` it works on any public site; public mode refuses local and private addresses, so keep `allowlist` to test Kota Express on `localhost`.
+
 No key? Set `LLM_PROVIDER=replay`. TestPilot then serves plans recorded in `fixtures/llm-replays` and the browser still runs every step for real. A replay only matches the exact story text and page content it was recorded with; record more with `npm run replays:record` (needs a live provider key in `.env.local`).
 
 ### Hosting it

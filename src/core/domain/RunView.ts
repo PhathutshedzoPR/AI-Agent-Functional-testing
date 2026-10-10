@@ -36,6 +36,7 @@ export type RunView = Readonly<{
   story: string | null;
   replayed: boolean;
   device: Device;
+  scan: boolean;
   startedAt: string | null;
   finishedAt: string | null;
   durationMs: number | null;
@@ -66,6 +67,7 @@ export const EMPTY_RUN_VIEW: RunView = {
   story: null,
   replayed: false,
   device: 'desktop',
+  scan: false,
   startedAt: null,
   finishedAt: null,
   durationMs: null,

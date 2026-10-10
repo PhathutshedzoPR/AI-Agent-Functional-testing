@@ -37,6 +37,8 @@ export const RunEventSchema = z.discriminatedUnion('type', [
     replayed: z.boolean(),
     // Runs recorded before phones were supported ran on a desktop screen.
     device: DeviceSchema.default('desktop'),
+    // A quick scan explores and measures pages only; older runs were all full tests.
+    scan: z.boolean().default(false),
     limits: RunLimitsSchema,
   }),
   eventSchema('explore.page', {

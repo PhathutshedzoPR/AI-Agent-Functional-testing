@@ -23,15 +23,17 @@ type Choices = Readonly<{
   device: Device;
 }>;
 
-function requestFor(choices: Choices, appBaseUrl: string): StartRunRequest {
+function requestFor(choices: Choices, appBaseUrl: string, scan: boolean): StartRunRequest {
   const { target, device } = choices;
-  const story = choices.story.trim() || null;
-  if (target === 'custom') return { targetUrl: choices.customUrl.trim(), story, device };
+  // A scan plans nothing, so the story is left out.
+  const story = scan ? null : choices.story.trim() || null;
+  if (target === 'custom') return { targetUrl: choices.customUrl.trim(), story, device, scan };
   return {
     targetUrl: new URL(shopPath(target), appBaseUrl).href,
     targetLabel: `Kota Express (${RELEASES[target].name.toLowerCase()})`,
     story,
     device,
+    scan,
   };
 }
 
@@ -51,12 +53,11 @@ export function NewRunForm({ appBaseUrl, customHosts }: Props) {
     setStory(site.story);
   };
 
-  const submit = async (event: SubmitEvent<HTMLFormElement>): Promise<void> => {
-    event.preventDefault();
+  const start = async (scan: boolean): Promise<void> => {
     setStarting(true);
     setError(null);
     try {
-      const body = requestFor({ target, customUrl, story, device }, appBaseUrl);
+      const body = requestFor({ target, customUrl, story, device }, appBaseUrl, scan);
       const { run } = await sendJson(runApiPaths.runs, body, RunResponseSchema);
       router.push(`/runs/${run.id}`);
     } catch (caught) {
@@ -66,7 +67,13 @@ export function NewRunForm({ appBaseUrl, customHosts }: Props) {
   };
 
   return (
-    <form onSubmit={(event) => void submit(event)} className="space-y-8">
+    <form
+      onSubmit={(event: SubmitEvent<HTMLFormElement>) => {
+        event.preventDefault();
+        void start(false); // errors are shown in the form by start itself
+      }}
+      className="space-y-8"
+    >
       <OtherAddressNotice appBaseUrl={appBaseUrl} path="/runs/new" />
       <TargetPicker
         value={target}
@@ -83,9 +90,23 @@ export function NewRunForm({ appBaseUrl, customHosts }: Props) {
           {error}
         </p>
       )}
-      <button type="submit" disabled={starting} className={buttonStyles()}>
-        {starting ? 'Starting run...' : 'Start run'}
-      </button>
+      <div className="flex flex-wrap items-center gap-3">
+        <button type="submit" disabled={starting} className={buttonStyles()}>
+          {starting ? 'Starting run...' : 'Start run'}
+        </button>
+        <button
+          type="button"
+          disabled={starting}
+          onClick={() => void start(true)}
+          className={buttonStyles({ tone: 'outline' })}
+        >
+          Quick scan
+        </button>
+      </div>
+      <p className="max-w-[75ch] text-sm text-muted">
+        Quick scan needs no story and no AI: it reads every page it can reach and checks
+        performance, security and links that do not load. Works on any site this server allows.
+      </p>
     </form>
   );
 }

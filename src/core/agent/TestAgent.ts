@@ -1,12 +1,12 @@
-import { Finding, type BugReport, type Device, type RunLimits, type TestPlan } from '../domain';
-import type {
-  IBrowser,
-  IBrowserFactory,
-  IClock,
-  IIdGenerator,
-  ILanguageModel,
-  PageSnapshot,
-} from '../ports';
+import {
+  Finding,
+  PageAudit,
+  type BugReport,
+  type Device,
+  type RunLimits,
+  type TestPlan,
+} from '../domain';
+import type { IBrowser, IBrowserFactory, IClock, IIdGenerator, ILanguageModel } from '../ports';
 import { BudgetedLanguageModel } from './BudgetedLanguageModel';
 import type { BugReporter } from './BugReporter';
 import type { BugWordsmith } from './BugWordsmith';
@@ -25,7 +25,11 @@ export type AgentRequest = Readonly<{
   device: Device;
   /** A saved plan to run instead of exploring and planning (already rebased onto `start`). */
   savedPlan: TestPlan | null;
+  /** Quick scan: explore and measure every page, with no plan and no model. */
+  scan: boolean;
 }>;
+
+type Explored = Awaited<ReturnType<SiteExplorer['explore']>>;
 
 export type AgentDependencies = Readonly<{
   browsers: IBrowserFactory;
@@ -58,8 +62,10 @@ export class TestAgent {
       targetUrl: context.start.href,
       targetLabel: request.targetLabel,
       story: request.story,
-      replayed: llm.replayed,
+      // A scan asks no model, so nothing in it is replayed.
+      replayed: !request.scan && llm.replayed,
       device: request.device,
+      scan: request.scan,
       limits: {
         maxPages: settings.maxPages,
         maxScenarios: settings.maxScenarios,
@@ -75,17 +81,9 @@ export class TestAgent {
     };
     context.signal.addEventListener('abort', stop, { once: true });
     try {
-      const { plan, explored } = request.savedPlan
-        ? { plan: await this.announce(request.savedPlan, context), explored: new Set<string>() }
-        : await this.planFresh(browser, budgeted, request, context);
-      const outcomes = await this.execute(browser, plan, {
-        ...context,
-        llm: budgeted,
-        explored,
-        renames: new Map(),
-      });
-      await this.report(outcomes, plan, budgeted, context);
-      const status = outcomes.some((outcome) => outcome.status === 'failed') ? 'failed' : 'passed';
+      const status = request.scan
+        ? await this.scan(browser, context)
+        : await this.test(browser, budgeted, request, context);
       const durationMs = Math.round(this.deps.clock.monotonicMs() - started);
       await context.emit({ type: 'run.finished', status, durationMs });
       return status;
@@ -95,13 +93,39 @@ export class TestAgent {
     }
   }
 
+  private async test(
+    browser: IBrowser,
+    llm: ILanguageModel,
+    request: AgentRequest,
+    context: RunContext,
+  ): Promise<'passed' | 'failed'> {
+    const { plan, explored } = request.savedPlan
+      ? { plan: await this.announce(request.savedPlan, context), explored: new Set<string>() }
+      : await this.planFresh(browser, llm, request, context);
+    const outcomes = await this.execute(browser, plan, {
+      ...context,
+      llm,
+      explored,
+      renames: new Map(),
+    });
+    await this.report(outcomes, plan, llm, context);
+    return outcomes.some((outcome) => outcome.status === 'failed') ? 'failed' : 'passed';
+  }
+
+  /** Every verdict in a scan is a measured check or a page that would not load. */
+  private async scan(browser: IBrowser, context: RunContext): Promise<'passed' | 'failed'> {
+    const { audits, findings } = await this.explore(browser, context);
+    const broken = findings.some((finding) => finding.kind === 'broken-link');
+    return broken || PageAudit.failed(audits) > 0 ? 'failed' : 'passed';
+  }
+
   private async planFresh(
     browser: IBrowser,
     llm: ILanguageModel,
     request: AgentRequest,
     context: RunContext,
   ): Promise<{ plan: TestPlan; explored: ReadonlySet<string> }> {
-    const pages = await this.explore(browser, context);
+    const { pages } = await this.explore(browser, context);
     const planned = await this.deps.planner.plan(llm, {
       start: context.start,
       story: request.story,
@@ -132,15 +156,13 @@ export class TestAgent {
     return plan;
   }
 
-  private async explore(browser: IBrowser, context: RunContext): Promise<readonly PageSnapshot[]> {
+  private async explore(browser: IBrowser, context: RunContext): Promise<Explored> {
     const session = await browser.newSession();
     try {
-      const { pages, findings } = await this.deps.explorer.explore(
-        session,
-        context.start,
-        (page, audit) => context.emit({ type: 'explore.page', url: page.url, title: page.title, audit }),
+      const explored = await this.deps.explorer.explore(session, context.start, (page, audit) =>
+        context.emit({ type: 'explore.page', url: page.url, title: page.title, audit }),
       );
-      for (const raw of findings) {
+      for (const raw of explored.findings) {
         const finding = Finding.create({
           ...raw,
           id: this.deps.ids.next(),
@@ -149,7 +171,7 @@ export class TestAgent {
         });
         await context.emit({ type: 'finding', finding });
       }
-      return pages;
+      return explored;
     } finally {
       await session.close();
     }

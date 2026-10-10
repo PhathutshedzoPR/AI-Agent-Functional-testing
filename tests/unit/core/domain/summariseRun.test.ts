@@ -58,4 +58,51 @@ describe('summariseRun', () => {
       hint: null,
     });
   });
+
+  it('sums up a quick scan by its checks and the links that did not load', () => {
+    const check = (status: 'passed' | 'failed') =>
+      ({
+        category: 'security',
+        name: `check ${status}`,
+        status,
+        actual: '',
+        expected: '',
+      }) as const;
+    const page = (url: string, statuses: ('passed' | 'failed')[]) => ({
+      url,
+      title: '',
+      audit: { url, checks: statuses.map(check) },
+    });
+    const clean = finished({
+      scan: true,
+      pages: [page('https://a.example/', ['passed', 'passed'])],
+    });
+    const broken = finished({
+      scan: true,
+      status: 'failed',
+      pages: [
+        page('https://a.example/', ['passed', 'failed']),
+        page('https://a.example/b', ['failed']),
+      ],
+      findings: [
+        {
+          id: 'f1',
+          kind: 'broken-link',
+          message: 'gone',
+          url: 'https://a.example/c',
+          status: 404,
+          scenarioId: null,
+          stepId: null,
+        },
+      ],
+    });
+
+    expect(plain(summariseRun(clean)?.headline)).toBe(
+      'Scanned 1 page: every check passed in 14 s.',
+    );
+    expect(summariseRun(broken)).toMatchObject({ state: 'failed' });
+    expect(plain(summariseRun(broken)?.headline)).toBe(
+      'Scanned 2 pages: 2 of 3 checks failed, and 1 link did not load in 14 s.',
+    );
+  });
 });

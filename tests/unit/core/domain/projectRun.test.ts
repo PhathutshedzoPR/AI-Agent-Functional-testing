@@ -42,6 +42,7 @@ const started: RunEventPayload = {
   targetUrl: 'http://localhost:3000/demo-shop/buggy',
   targetLabel: 'Kota Express (buggy)',
   device: 'desktop',
+  scan: false,
   story: 'Order two kotas',
   replayed: true,
   limits: { maxPages: 5, maxScenarios: 4, maxSteps: 12, maxLlmCalls: 12 },

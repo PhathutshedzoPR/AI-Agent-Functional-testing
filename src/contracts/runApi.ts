@@ -15,6 +15,8 @@ export const StartRunRequestSchema = z.object({
   story: z.string().trim().max(INPUT_LIMITS.storyMaxChars).nullable().optional(),
   reusePlanFrom: z.uuid().nullable().optional(),
   device: DeviceSchema.optional(),
+  /** Quick scan: explore and measure every page, with no story, plan or model. */
+  scan: z.boolean().optional(),
 });
 export type StartRunRequest = z.infer<typeof StartRunRequestSchema>;
 

@@ -44,6 +44,7 @@ const HANDLERS: { [T in RunEventType]: Handler<T> } = {
     story: e.story,
     replayed: e.replayed,
     device: e.device,
+    scan: e.scan,
     startedAt: e.at,
     limits: e.limits,
   }),
